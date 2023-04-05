@@ -1,0 +1,21 @@
+subcell\_analysis.bin package
+=============================
+
+Submodules
+----------
+
+subcell\_analysis.bin.str\_len module
+-------------------------------------
+
+.. automodule:: subcell_analysis.bin.str_len
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: subcell_analysis.bin
+   :members:
+   :undoc-members:
+   :show-inheritance:

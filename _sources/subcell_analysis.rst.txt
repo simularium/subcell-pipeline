@@ -1,0 +1,30 @@
+subcell\_analysis package
+=========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   subcell_analysis.bin
+   subcell_analysis.postprocessing
+
+Submodules
+----------
+
+subcell\_analysis.example module
+--------------------------------
+
+.. automodule:: subcell_analysis.example
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: subcell_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
