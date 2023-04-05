@@ -1,0 +1,10 @@
+default_context:
+    author_name: "Blair Lyons"
+    author_email: "blair208@gmail.com"
+    hosting_github_username_or_org: "Simularium"
+    project_name: "subcell-analysis"
+    project_slug: "subcell-analysis"
+    python_slug: "subcell_analysis"
+    project_short_description: "Analysis functionality for subcellular models"
+    hosting_pypi_username: "aicspypi"
+    license: "Apache Software License 2.0"
