@@ -12,6 +12,15 @@ Analysis functionality for subcellular models
 **Stable Release:** `pip install subcell-analysis`<br>
 **Development Head:** `pip install git+https://github.com/Simularium/subcell-analysis.git`
 
+### Prerequisite 
+
+1. Install Conda: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+### Setup 
+1. create a virtual env: `conda create -n subcell_analysis`
+2. `conda activate subcell_analysis`
+3. `python -m pip install -e .[dev]`
+
 ## Quickstart
 
 ```python

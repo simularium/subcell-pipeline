@@ -95,6 +95,7 @@ dask-worker-space
 .venv
 venv/
 ENV/
+.conda
 
 # Spyder project settings
 .spyderproject
