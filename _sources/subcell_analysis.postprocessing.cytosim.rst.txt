@@ -1,6 +1,17 @@
 subcell\_analysis.postprocessing.cytosim package
 ================================================
 
+Submodules
+----------
+
+subcell\_analysis.postprocessing.cytosim.post\_process\_cytosim module
+----------------------------------------------------------------------
+
+.. automodule:: subcell_analysis.postprocessing.cytosim.post_process_cytosim
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

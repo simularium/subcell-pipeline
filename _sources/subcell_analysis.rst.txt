@@ -13,10 +13,10 @@ Subpackages
 Submodules
 ----------
 
-subcell\_analysis.example module
---------------------------------
+subcell\_analysis.compression\_analysis module
+----------------------------------------------
 
-.. automodule:: subcell_analysis.example
+.. automodule:: subcell_analysis.compression_analysis
    :members:
    :undoc-members:
    :show-inheritance:
