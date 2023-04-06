@@ -2,6 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+
 try:
     __version__ = version("subcell-analysis")
 except PackageNotFoundError:
@@ -9,3 +10,5 @@ except PackageNotFoundError:
 
 __author__ = "Blair Lyons"
 __email__ = "blair208@gmail.com"
+
+
