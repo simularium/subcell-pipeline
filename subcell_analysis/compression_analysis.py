@@ -55,6 +55,27 @@ def get_axis_distances_and_projections(fiber_points):
     return perp_distances, scaled_projections, projection_positions
 
 
+def get_average_distance_from_axis(fiber_points):
+    """
+    Returns the average perpendicular distance of fiber points from the axis
+    
+    Parameters
+    ----------
+    fiber_points: [n x 3] numpy array
+        array containing the x,y,z positions of fiber points
+        at a given time
+    
+    Returns
+    ----------
+    avg_perp_distance: float
+        average perpendicular distance of fiber points from the axis
+    """
+    perp_distances, _, _ = get_axis_distances_and_projections(fiber_points=fiber_points)
+    avg_perp_distance = np.nanmean(perp_distances)
+
+    return avg_perp_distance
+
+
 def get_asymmetry_of_peak(fiber_points):
     """
     returns the scaled distance of the projection of the peak from the axis midpoint
