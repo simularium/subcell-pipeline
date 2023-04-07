@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" />
 
     <!-- Generated with Sphinx 6.1.3 and Furo 2023.03.27 -->
-        <title>subcell-analysis 0.1.dev1+g4ee9e3f documentation</title>
+        <title>subcell-analysis 0.1.dev1+g71d7e7e documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">subcell-analysis 0.1.dev1+g4ee9e3f documentation</div></a>
+      <a href="#"><div class="brand">subcell-analysis 0.1.dev1+g71d7e7e documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ee9e3f documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g71d7e7e documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -238,9 +238,27 @@
 </section>
 <section id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">subcell_analysis</span> <span class="kn">import</span> <span class="n">example</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">subcell_analysis.compression_analysis</span> <span class="kn">import</span> <span class="n">get_end_to_end_axis_distances_and_projections</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">example</span><span class="o">.</span><span class="n">str_len</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">))</span>  <span class="c1"># prints 5</span>
+<span class="n">test_polymer_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+<span class="p">])</span>
+
+<span class="c1"># prints the following:</span>
+<span class="c1"># distance of polymer trace points from the end-to-end axis:</span>
+<span class="c1"># (array([0., 1., 1., 0.])</span>
+<span class="c1"># scaled distances of projection points along the end-to-end-axis:</span>
+<span class="c1"># array([0., 0.33, 0.67, 1.]),</span>
+<span class="c1"># positions of projection points on the end-to-end axis:</span>
+<span class="c1"># array([[2., 0., 0.],</span>
+<span class="c1">#        [4., 0., 0.],</span>
+<span class="c1">#        [6., 0., 0.],</span>
+<span class="c1">#        [8., 0., 0.]]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">get_end_to_end_axis_distances_and_projections</span><span class="p">(</span><span class="n">test_polymer_trace</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
@@ -251,6 +269,22 @@
 <section id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this heading">#</a></h2>
 <p>See <a class="reference external" href="CONTRIBUTING.md">CONTRIBUTING.md</a> for information related to developing the code.</p>
+</section>
+<section id="glossary-of-terms">
+<h2>Glossary of terms<a class="headerlink" href="#glossary-of-terms" title="Permalink to this heading">#</a></h2>
+<p>Definitions of some terms used in these analyses</p>
+<ul>
+<li><p><em>polymer trace</em>:</p>
+<blockquote>
+<div><p>refers to the line traced by a polymer backbone in three dimensions. For cytosim, this corresponds to the positions of the control points. For ReaDDy, this corresponds to a derived metric that traces the polymer backbone</p>
+</div></blockquote>
+</li>
+<li><p><em>end-to-end axis</em>:</p>
+<blockquote>
+<div><p>refers to the line connecting the first and last points of a polymer trace</p>
+</div></blockquote>
+</li>
+</ul>
 <p><strong>Apache Software License 2.0</strong></p>
 </section>
 </section>
