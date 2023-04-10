@@ -67,6 +67,7 @@ dev = [
   "numpy",
   "pandas",
   "ipykernel",
+  "matplotlib",
 ]
 
 # entry points

@@ -24,9 +24,27 @@ Analysis functionality for subcellular models
 ## Quickstart
 
 ```python
-from subcell_analysis import example
+import numpy as np
+from subcell_analysis.compression_analysis import get_end_to_end_axis_distances_and_projections
 
-print(example.str_len("hello"))  # prints 5
+test_polymer_trace = np.array([
+    [2,0,0],
+    [4,1,0],
+    [6,0,-1],
+    [8,0,0],
+])
+
+# prints the following:
+# distance of polymer trace points from the end-to-end axis:
+# (array([0., 1., 1., 0.])
+# scaled distances of projection points along the end-to-end-axis:
+# array([0., 0.33, 0.67, 1.]),
+# positions of projection points on the end-to-end axis:
+# array([[2., 0., 0.],
+#        [4., 0., 0.],
+#        [6., 0., 0.],
+#        [8., 0., 0.]]))
+print(get_end_to_end_axis_distances_and_projections(test_polymer_trace))
 ```
 
 ## Documentation
@@ -36,5 +54,15 @@ For full package documentation please visit [Simularium.github.io/subcell-analys
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to developing the code.
+
+## Glossary of terms
+Definitions of some terms used in these analyses
+* *polymer trace*:
+
+    refers to the line traced by a polymer backbone in three dimensions. For cytosim, this corresponds to the positions of the control points. For ReaDDy, this corresponds to a derived metric that traces the polymer backbone
+
+* *end-to-end axis*:
+
+    refers to the line connecting the first and last points of a polymer trace
 
 **Apache Software License 2.0**
