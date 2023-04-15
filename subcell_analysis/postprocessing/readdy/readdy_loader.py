@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Any, List, Tuple
+from typing import Any, List, Dict
 
 import tqdm
 import pandas as pd
@@ -33,6 +33,7 @@ class ReaddyLoader:
         """
         self._readdy_trajectory = None
         self._trajectory = None
+        self.edges = None
         self.h5_file_path = h5_file_path
         self.min_time_ix = min_time_ix
         self.max_time_ix = max_time_ix
@@ -54,10 +55,10 @@ class ReaddyLoader:
         return self._readdy_trajectory
 
     @staticmethod
-    def _edges(time_ix: int, topology_records: Any) -> List[Tuple[int,int]]:
+    def _frame_edges(time_ix: int, topology_records: Any) -> List[List[int]]:
         """
         After a simulation has finished, get all the edges 
-        at the given time index as (particle1 id, particle2 id).
+        at the given time index as [particle1 id, particle2 id].
         
         topology_records from
         readdy.Trajectory(h5_file_path).read_observable_topologies()
@@ -68,7 +69,7 @@ class ReaddyLoader:
                 if e1 <= e2:
                     ix1 = top.particles[e1]
                     ix2 = top.particles[e2]
-                    result.append((ix1, ix2))
+                    result.append([ix1, ix2])
         return result
 
     def _shape_trajectory_data(self) -> List[FrameData]:
@@ -86,7 +87,7 @@ class ReaddyLoader:
             ):
                 continue
             frame = FrameData(time=self.timestep * time_ix)
-            edges = ReaddyLoader._edges(time_ix, topology_records)
+            edge_ids = ReaddyLoader._frame_edges(time_ix, topology_records)
             for index, top in enumerate(topology_records[time_ix]):
                 frame.topologies[index] = TopologyData(
                     uid=index,
@@ -97,7 +98,7 @@ class ReaddyLoader:
                 p_id = ids[time_ix][p]
                 position = positions[time_ix][p]
                 neighbor_ids = []
-                for edge in edges:
+                for edge in edge_ids:
                     if p_id == edge[0]:
                         neighbor_ids.append(edge[1])
                     elif p_id == edge[1]:
@@ -108,6 +109,11 @@ class ReaddyLoader:
                     position=np.array([position[0], position[1], position[2]]),
                     neighbor_ids=neighbor_ids,
                 )
+            for edge in edge_ids:
+                frame.edges.append(np.array([
+                    frame.particles[edge[0]].position,
+                    frame.particles[edge[1]].position,
+                ]))
             result.append(frame)
         return result
 
@@ -117,7 +123,7 @@ class ReaddyLoader:
         
         Returns
         ----------
-        trajectory:  -> List[FrameData]
+        trajectory: List[FrameData]
             The trajectory of data shaped for analysis.
         """
         if self._trajectory is not None:
