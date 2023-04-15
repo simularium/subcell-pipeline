@@ -40,12 +40,14 @@ class FrameData:
     time: float
     topologies: Dict[int, TopologyData]
     particles: Dict[int, ParticleData]
+    edges: List[np.ndarray]
     
     def __init__(
         self, 
         time: float, 
         topologies: Dict[int, TopologyData] = None, 
-        particles: Dict[int, ParticleData] = None
+        particles: Dict[int, ParticleData] = None,
+        edges: List[np.ndarray] = None,
     ):
         """
         Data class representing one ReaDDy timestep.
@@ -53,3 +55,4 @@ class FrameData:
         self.time = time
         self.topologies = topologies if topologies is not None else {}
         self.particles = particles if particles is not None else {}
+        self.edges = edges if edges is not None else []
