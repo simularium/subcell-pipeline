@@ -1,2 +1,1 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""readdy package for subcell_analysis."""
