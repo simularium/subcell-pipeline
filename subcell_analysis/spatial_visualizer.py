@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-from typing import Any, List, Tuple, Union, Dict
+from typing import List
 
-import tqdm
-import pandas as pd
 import numpy as np
-import readdy
 
 from simulariumio import (
     TrajectoryData,
