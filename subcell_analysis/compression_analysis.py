@@ -1,17 +1,19 @@
 #!/usr/bin/env python
-from typing import Tuple
-import numpy as np
+from typing import Any, Tuple
+
 import matplotlib as plt
+import numpy as np
 
 # TODO: consider creating a fiber class?
 
 
-def asymmetry(fibers_df):
+# TODO add actual types
+def asymmetry(fibers_df: Any, timepoints: Any, fiber_at_time: Any) -> Any:
     last_timepoint = fibers_df.loc[timepoints[-1]]
     last_timepoint_tension = last_timepoint["segment_energy"]
     diff = np.zeros(len(last_timepoint_tension))
-    for index, timepoint in enumerate(last_timepoint_tension):
-        middle_index = np.round(fiber_at_time.shape[0] / 2).astype(int)
+    for index, _timepoint in enumerate(last_timepoint_tension):
+        np.round(fiber_at_time.shape[0] / 2).astype(int)
         diff[index] = np.abs(
             last_timepoint_tension[index] - last_timepoint_tension[-1 - index]
         )
@@ -39,7 +41,7 @@ def get_end_to_end_axis_distances_and_projections(
         at a given time
 
     Returns
-    ----------
+    -------
     perp_distances: [n x 1] numpy array
         perpendicular distances of the polymer trace from the end-to-end axis
 
@@ -66,9 +68,7 @@ def get_end_to_end_axis_distances_and_projections(
         + projections[:, None] * end_to_end_axis / end_to_end_axis_length
     )
 
-    perp_distances = np.linalg.norm(
-        polymer_trace - projection_positions, axis=1
-    )
+    perp_distances = np.linalg.norm(polymer_trace - projection_positions, axis=1)
     scaled_projections = projections / end_to_end_axis_length
 
     return perp_distances, scaled_projections, projection_positions
@@ -79,7 +79,7 @@ def get_average_distance_from_end_to_end_axis(
 ) -> float:
     """
     Returns the average perpendicular distance of polymer trace points from
-    the end-to-end axis
+    the end-to-end axis.
 
     Parameters
     ----------
@@ -88,7 +88,7 @@ def get_average_distance_from_end_to_end_axis(
         at a given time
 
     Returns
-    ----------
+    -------
     avg_perp_distance: float
         average perpendicular distance of polymer trace points from the
         end-to-end axis
@@ -106,7 +106,7 @@ def get_asymmetry_of_peak(
 ) -> float:
     """
     returns the scaled distance of the projection of the peak from the
-    end-to-end axis midpoint
+    end-to-end axis midpoint.
 
     Parameters
     ----------
@@ -115,7 +115,7 @@ def get_asymmetry_of_peak(
         at a given time
 
     Returns
-    ----------
+    -------
     peak_asym: float
         scaled distance of the projection of the peak from the axis midpoint
     """
@@ -123,15 +123,9 @@ def get_asymmetry_of_peak(
         perp_distances,
         scaled_projections,
         _,
-    ) = get_end_to_end_axis_distances_and_projections(
-        polymer_trace=polymer_trace
-    )
-    projection_of_peak = scaled_projections[
-        perp_distances == np.max(perp_distances)
-    ]
-    peak_asym = np.max(
-        projection_of_peak - 0.5
-    )  # max kinda handles multiple peaks
+    ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
+    projection_of_peak = scaled_projections[perp_distances == np.max(perp_distances)]
+    peak_asym = np.max(projection_of_peak - 0.5)  # max kinda handles multiple peaks
 
     return peak_asym
 
@@ -141,7 +135,7 @@ def get_total_fiber_twist(
 ) -> float:
     """
     Returns the sum of angles between consecutive vectors from the
-    polymer trace points to the end-to-end axis
+    polymer trace points to the end-to-end axis.
 
     Parameters
     ----------
@@ -150,7 +144,7 @@ def get_total_fiber_twist(
         at a given time
 
     Returns
-    ----------
+    -------
     total_twist: float
         sum of angles between vectors from trace points to axis
     """

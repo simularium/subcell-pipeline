@@ -1,10 +1,10 @@
 # #!/usr/bin/env python
 
 # """
-# Configuration for tests! There are a whole list of hooks you can define in this file to
-# run before, after, or to mutate how tests run. Commonly for most of our work, we use
-# this file to define top level fixtures that may be needed for tests throughout multiple
-# test files.
+# Configuration for tests! There are a whole list of hooks you can define in this file
+# to run before, after, or to mutate how tests run. Commonly for most of our work, we
+# use this file to define top level fixtures that may be needed for tests throughout
+# multiple test files.
 
 # In this case, while we aren't using this fixture in our tests, the prime use case for
 # something like this would be when we want to preload a file to be used in multiple
