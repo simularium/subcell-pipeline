@@ -27,7 +27,12 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 dynamic = ["version"]
-dependencies = []
+dependencies = [
+  "numpy",
+  "pandas",
+  "matplotlib",
+  "tqdm",
+]
 
 [project.urls]
 Homepage = "https://github.com/Simularium/subcell-analysis"
@@ -64,10 +69,7 @@ docs = [
 ]
 dev = [
   "ipython>=8.4.0",
-  "numpy",
-  "pandas",
   "ipykernel",
-  "matplotlib",
 ]
 
 # entry points
