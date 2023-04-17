@@ -30,6 +30,23 @@ class ReaddyLoader:
         h5_file_path: str
             Path to the ReaDDy .h5 file. If a .dat pickle file exists 
             at this path, load from that instead.
+        min_time_ix: int = 0 (optional)
+            First time index to include.
+            Default: 0
+        max_time_ix: int = -1 (optional)
+            Last time index to include.
+            Default: -1 (include all timesteps after min_time_ix)
+        time_inc: int = 1 (optional)
+            Include every time_inc timestep.
+            Default: 1
+        timestep: float = 100. (optional)
+            How much time passes each timestep?
+            (In any time units, resulting time measurements 
+            will be in the same units.)
+            Default: 100.
+        save_pickle_file: bool = False (optional)
+            Save loaded data in a pickle file for easy reload?
+            Default: False
         """
         self._readdy_trajectory = None
         self._trajectory = None
