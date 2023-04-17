@@ -2,8 +2,6 @@
 
 import pytest
 
-from subcell_analysis import example
-
 
 @pytest.mark.parametrize(
     "string, count",
@@ -15,4 +13,4 @@ from subcell_analysis import example
     ],
 )
 def test_str_len(string: str, count: int) -> None:
-    assert example.str_len(string) == count
+    assert len(string) == count
