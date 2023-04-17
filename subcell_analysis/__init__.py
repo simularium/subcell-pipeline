@@ -11,4 +11,4 @@ __author__ = "Blair Lyons"
 __email__ = "blair208@gmail.com"
 
 
-from .spatial_visualizer import SpatialVisualizer
+from .spatial_annotator import SpatialAnnotator
