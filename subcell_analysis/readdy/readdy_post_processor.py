@@ -457,3 +457,18 @@ class ReaddyPostProcessor:
             energies,
             np.array(filament_positions),
         )
+
+    def edge_positions(self) -> List[List[np.ndarray]]:
+        """
+        Get the edges between particles as start and end positions.
+
+        Returns
+        ----------
+        particle_edges: List[List[np.ndarray]]
+            List of list of edges as position of each of the two particles 
+            connected by the edge for each edge at each time.
+        """
+        edges = []
+        for frame in self.trajectory:
+            edges.append(frame.edges)
+        return edges
