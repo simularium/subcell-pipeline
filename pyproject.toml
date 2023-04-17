@@ -137,6 +137,7 @@ ignore = [
   "Justfile",
   ".cookiecutter.yaml",
   "*docs/*",
+  "*.ipynb",
 ]
 
 [tool.mypy]

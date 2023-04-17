@@ -1,22 +1,18 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from typing import List
 
 import numpy as np
-
 from simulariumio import (
-    TrajectoryData,
+    DISPLAY_TYPE,
     DimensionData,
     DisplayData,
-    DISPLAY_TYPE,
+    TrajectoryData,
 )
 from simulariumio.constants import VIZ_TYPE
 
 
-
 class SpatialAnnotator:
-
     @staticmethod
     def _added_dimensions_for_fibers(
         traj_data: TrajectoryData,
@@ -25,7 +21,7 @@ class SpatialAnnotator:
         """
         Get a DimensionData with the deltas for each dimension
         of AgentData when adding the given fiber data.
-        
+
         Data shape = [timesteps, fibers, np.array(points, 3)]
         (assumed to be jagged)
         """
@@ -57,12 +53,15 @@ class SpatialAnnotator:
     ) -> TrajectoryData:
         """
         Add agent data for fibers.
-        
+
+
         Parameters
         ----------
-        fibers: List[List[np.ndarray (shape = n x 3)]]
-            List of lists of arrays containing 
-            the x,y,z positions of control points 
+        traj_data: TrajectoryData
+            Trajectory data to add the fibers to.
+        fiber_points: List[List[np.ndarray (shape = n x 3)]]
+            List of lists of arrays containing
+            the x,y,z positions of control points
             for each fiber at each time.
         type_name: str (optional)
             Agent type name to use for the new fibers.
@@ -76,7 +75,7 @@ class SpatialAnnotator:
         """
         total_steps = len(fiber_points)
         new_agent_data = traj_data.agent_data.get_copy_with_increased_buffer_size(
-            SpatialAnnotator._added_dimensions_for_fibers(fiber_points)
+            SpatialAnnotator._added_dimensions_for_fibers(traj_data, fiber_points)
         )
         max_used_uid = max(list(np.unique(traj_data.agent_data.unique_ids)))
         for time_ix in range(total_steps):
@@ -88,12 +87,16 @@ class SpatialAnnotator:
                 new_agent_data.unique_ids[time_ix][agent_ix] = (
                     max_used_uid + fiber_ix + 1
                 )
-                new_agent_data.n_subpoints[time_ix][agent_ix] = 3 * len(fiber_points[fiber_ix])
-                new_agent_data.subpoints[time_ix][agent_ix] = fiber_points[fiber_ix].flatten()
+                new_agent_data.n_subpoints[time_ix][agent_ix] = 3 * len(
+                    fiber_points[time_ix][fiber_ix]
+                )
+                new_agent_data.subpoints[time_ix][agent_ix] = fiber_points[time_ix][
+                    fiber_ix
+                ].flatten()
             new_agent_data.n_agents[time_ix] += n_fibers
-            new_agent_data.viz_types[time_ix][start_ix:end_ix] = (
-                n_fibers * [VIZ_TYPE.FIBER]
-            )
+            new_agent_data.viz_types[time_ix][start_ix:end_ix] = n_fibers * [
+                VIZ_TYPE.FIBER
+            ]
             new_agent_data.types[time_ix] += n_fibers * [type_name]
             new_agent_data.radii[time_ix][start_ix:end_ix] = n_fibers * [fiber_width]
         new_agent_data.display_data[type_name] = DisplayData(
@@ -111,7 +114,7 @@ class SpatialAnnotator:
         """
         Get a DimensionData with the deltas for each dimension
         of AgentData when adding the given sphere data.
-        
+
         Data shape = [timesteps, np.array(spheres, 3)]
         (assumed to be jagged)
         """
@@ -131,16 +134,19 @@ class SpatialAnnotator:
         traj_data: TrajectoryData,
         sphere_positions: List[np.ndarray],
         type_name: str = "sphere",
-        radius: float = 1.,
+        radius: float = 1.0,
         color: str = "#eaeaea",
-    ):
+    ) -> TrajectoryData:
         """
         Add agent data for fibers.
-        
+
+
         Parameters
         ----------
+        traj_data: TrajectoryData
+            Trajectory data to add the spheres to.
         sphere_positions: List[np.ndarray (shape = n x 3)]
-            List of x,y,z positions of spheres to visualize 
+            List of x,y,z positions of spheres to visualize
             at each time.
         type_name: str (optional)
             Agent type name to use for the new spheres.
@@ -162,13 +168,12 @@ class SpatialAnnotator:
             n_spheres = len(sphere_positions[time_ix])
             end_ix = start_ix + n_spheres
             new_agent_data.unique_ids[time_ix][start_ix:end_ix] = np.arange(
-                max_used_uid + 1, 
-                max_used_uid + 1 + n_spheres
+                max_used_uid + 1, max_used_uid + 1 + n_spheres
             )
             new_agent_data.n_agents[time_ix] += n_spheres
-            new_agent_data.viz_types[time_ix][start_ix:end_ix] = (
-                n_spheres * [VIZ_TYPE.DEFAULT]
-            )
+            new_agent_data.viz_types[time_ix][start_ix:end_ix] = n_spheres * [
+                VIZ_TYPE.DEFAULT
+            ]
             new_agent_data.types[time_ix] += n_spheres * [type_name]
             new_agent_data.radii[time_ix][start_ix:end_ix] = n_spheres * [radius]
         new_agent_data.display_data[type_name] = DisplayData(
@@ -177,3 +182,4 @@ class SpatialAnnotator:
             color=color,
         )
         traj_data.agent_data = new_agent_data
+        return traj_data
