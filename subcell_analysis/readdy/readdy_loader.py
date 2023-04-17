@@ -47,7 +47,7 @@ class ReaddyLoader:
             Save loaded data in a pickle file for easy reload?
             Default: False
         """
-        self._readdy_trajectory: Optional[readdy.Trajectory] = None
+        self._readdy_trajectory: readdy.Trajectory = None
         self._trajectory: Optional[List[FrameData]] = None
         self.h5_file_path = h5_file_path
         self.min_time_ix = min_time_ix
@@ -145,7 +145,7 @@ class ReaddyLoader:
             result.append(frame)
         return result
 
-    def trajectory(self) -> Optional[List[FrameData]]:
+    def trajectory(self) -> List[FrameData]:
         """
         Lazy load the shaped trajectory.
 
