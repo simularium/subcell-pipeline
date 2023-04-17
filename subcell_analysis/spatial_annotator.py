@@ -15,7 +15,7 @@ from simulariumio.constants import VIZ_TYPE
 
 
 
-class SpatialVisualizer:
+class SpatialAnnotator:
 
     @staticmethod
     def _added_dimensions_for_fibers(
@@ -76,7 +76,7 @@ class SpatialVisualizer:
         """
         total_steps = len(fiber_points)
         new_agent_data = traj_data.agent_data.get_copy_with_increased_buffer_size(
-            SpatialVisualizer._added_dimensions_for_fibers(fiber_points)
+            SpatialAnnotator._added_dimensions_for_fibers(fiber_points)
         )
         max_used_uid = max(list(np.unique(traj_data.agent_data.unique_ids)))
         for time_ix in range(total_steps):
@@ -154,7 +154,7 @@ class SpatialVisualizer:
         """
         total_steps = len(sphere_positions)
         new_agent_data = traj_data.agent_data.get_copy_with_increased_buffer_size(
-            SpatialVisualizer._added_dimensions_for_spheres(sphere_positions)
+            SpatialAnnotator._added_dimensions_for_spheres(sphere_positions)
         )
         max_used_uid = max(list(np.unique(traj_data.agent_data.unique_ids)))
         for time_ix in range(total_steps):
