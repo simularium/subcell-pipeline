@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import argparse
+
 import numpy as np
 
 from subcell_analysis.postprocessing.readdy import (
-    ReaddyLoader, 
+    ReaddyLoader,
     ReaddyPostProcessor,
 )
 
@@ -28,11 +29,12 @@ class Args(argparse.Namespace):
         )
         p.parse_args(namespace=self)
 
+
 def main() -> None:
     args = Args()
     fiber_points = ReaddyPostProcessor(
-        ReaddyLoader(args.h5_file_path).trajectory(), 
-        box_size=600. * np.ones(3),
+        ReaddyLoader(args.h5_file_path).trajectory(),
+        box_size=600.0 * np.ones(3),
     ).linear_fiber_points(
         start_particle_phrases=["pointed"],
         other_particle_types=[
@@ -50,17 +52,20 @@ def main() -> None:
             "actin#fixed_barbed_ATP_",
         ],
         polymer_number_range=5,
-        ideal_positions=np.array([
-            [24.738, 20.881, 26.671],
-            [27.609, 24.061, 27.598],
-            [30.382, 21.190, 25.725],
-        ]),
+        ideal_positions=np.array(
+            [
+                [24.738, 20.881, 26.671],
+                [27.609, 24.061, 27.598],
+                [30.382, 21.190, 25.725],
+            ]
+        ),
         ideal_vector_to_axis=np.array(
             [-0.01056751, -1.47785105, -0.65833209],
         ),
-        segment_length=10.,
+        segment_length=10.0,
     )
     print(fiber_points)
+
 
 if __name__ == "__main__":
     main()

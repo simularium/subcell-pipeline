@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from typing import Dict, List
 
@@ -10,11 +9,12 @@ class TopologyData:
     uid: int
     type_name: str
     particle_ids: List[int]
-    
+
     def __init__(self, uid: int, type_name: str, particle_ids: List[int]):
         """
         Data class representing a ReaDDy topology of connected particles.
-        
+
+
         Parameters
         ----------
         uid: int
@@ -34,11 +34,14 @@ class ParticleData:
     type_name: str
     position: np.ndarray
     neighbor_ids: List[int]
-    
-    def __init__(self, uid: int, type_name: str, position: np.ndarray, neighbor_ids: List[int]):
+
+    def __init__(
+        self, uid: int, type_name: str, position: np.ndarray, neighbor_ids: List[int]
+    ):
         """
         Data class representing a ReaDDy particle.
-        
+
+
         Parameters
         ----------
         uid: int
@@ -48,7 +51,7 @@ class ParticleData:
         position: np.ndarray
             XYZ position of the particle.
         neighbor_ids: List[int]
-            List of unique IDs of each neighbor particle 
+            List of unique IDs of each neighbor particle
             connected by an edge.
         """
         self.uid = uid
@@ -62,17 +65,18 @@ class FrameData:
     topologies: Dict[int, TopologyData]
     particles: Dict[int, ParticleData]
     edges: List[np.ndarray]
-    
+
     def __init__(
-        self, 
-        time: float, 
-        topologies: Dict[int, TopologyData] = None, 
+        self,
+        time: float,
+        topologies: Dict[int, TopologyData] = None,
         particles: Dict[int, ParticleData] = None,
         edges: List[np.ndarray] = None,
     ):
         """
         Data class representing one ReaDDy timestep.
-        
+
+
         Parameters
         ----------
         time: float
@@ -84,7 +88,7 @@ class FrameData:
             Mapping of particle ID to a ParticleData for each particle.
             Default: {} (added by ReaddyLoader._shape_trajectory_data())
         edges: List[np.ndarray (shape = 2 x 3)] (optional)
-            List of edges as position of each of the two particles 
+            List of edges as position of each of the two particles
             connected by the edge.
             Default: [] (added by ReaddyLoader._shape_trajectory_data())
         """

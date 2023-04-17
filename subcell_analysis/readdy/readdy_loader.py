@@ -1,34 +1,33 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
-from typing import Any, List, Dict
+from typing import Any, List, Optional
 
-import tqdm
-import pandas as pd
 import numpy as np
 import readdy
+import tqdm
 
-from .readdy_data import FrameData, TopologyData, ParticleData
+from .readdy_data import FrameData, ParticleData, TopologyData
 
 
 class ReaddyLoader:
     def __init__(
-        self, 
+        self,
         h5_file_path: str,
         min_time_ix: int = 0,
         max_time_ix: int = -1,
         time_inc: int = 1,
-        timestep: float = 100.,
+        timestep: float = 100.0,
         save_pickle_file: bool = False,
     ):
         """
         Load and shape data from a ReaDDy trajectory.
-        
+
+
         Parameters
         ----------
         h5_file_path: str
-            Path to the ReaDDy .h5 file. If a .dat pickle file exists 
+            Path to the ReaDDy .h5 file. If a .dat pickle file exists
             at this path, load from that instead.
         min_time_ix: int = 0 (optional)
             First time index to include.
@@ -41,16 +40,15 @@ class ReaddyLoader:
             Default: 1
         timestep: float = 100. (optional)
             How much time passes each timestep?
-            (In any time units, resulting time measurements 
+            (In any time units, resulting time measurements
             will be in the same units.)
             Default: 100.
         save_pickle_file: bool = False (optional)
             Save loaded data in a pickle file for easy reload?
             Default: False
         """
-        self._readdy_trajectory = None
-        self._trajectory = None
-        self.edges = None
+        self._readdy_trajectory: Optional[readdy.Trajectory] = None
+        self._trajectory: Optional[List[FrameData]] = None
         self.h5_file_path = h5_file_path
         self.min_time_ix = min_time_ix
         self.max_time_ix = max_time_ix
@@ -61,9 +59,10 @@ class ReaddyLoader:
     def readdy_trajectory(self) -> readdy.Trajectory:
         """
         Lazy load the ReaDDy trajectory object.
-        
+
+
         Returns
-        ----------
+        -------
         readdy_trajectory: readdy.Trajectory
             The ReaDDy trajectory object.
         """
@@ -74,9 +73,9 @@ class ReaddyLoader:
     @staticmethod
     def _frame_edges(time_ix: int, topology_records: Any) -> List[List[int]]:
         """
-        After a simulation has finished, get all the edges 
+        After a simulation has finished, get all the edges
         at the given time index as [particle1 id, particle2 id].
-        
+
         topology_records from
         readdy.Trajectory(h5_file_path).read_observable_topologies()
         """
@@ -90,17 +89,23 @@ class ReaddyLoader:
         return result
 
     def _shape_trajectory_data(self) -> List[FrameData]:
-        """
-        Shape data from a ReaDDy trajectory for analysis.
-        """
-        _, topology_records = self.readdy_trajectory.read_observable_topologies()
-        times, types, ids, positions = self.readdy_trajectory.read_observable_particles()
+        """Shape data from a ReaDDy trajectory for analysis."""
+        (
+            _,
+            topology_records,
+        ) = self.readdy_trajectory.read_observable_topologies()  # type: ignore
+        (
+            times,
+            types,
+            ids,
+            positions,
+        ) = self.readdy_trajectory.read_observable_particles()  # type: ignore
         result = []
         for time_ix in tqdm(range(len(times))):
             if (
-                time_ix < self.min_time_ix or 
-                (self.max_time_ix >= 0 and time_ix > self.max_time_ix) or 
-                time_ix % self.time_inc != 0
+                time_ix < self.min_time_ix
+                or (self.max_time_ix >= 0 and time_ix > self.max_time_ix)
+                or time_ix % self.time_inc != 0
             ):
                 continue
             frame = FrameData(time=self.timestep * time_ix)
@@ -122,24 +127,31 @@ class ReaddyLoader:
                         neighbor_ids.append(edge[0])
                 frame.particles[ids[time_ix][p]] = ParticleData(
                     uid=ids[time_ix][p],
-                    type_name=self.readdy_trajectory.species_name(types[time_ix][p]),
+                    type_name=self.readdy_trajectory.species_name(  # type: ignore
+                        types[time_ix][p]
+                    ),
                     position=np.array([position[0], position[1], position[2]]),
                     neighbor_ids=neighbor_ids,
                 )
             for edge in edge_ids:
-                frame.edges.append(np.array([
-                    frame.particles[edge[0]].position,
-                    frame.particles[edge[1]].position,
-                ]))
+                frame.edges.append(
+                    np.array(
+                        [
+                            frame.particles[edge[0]].position,
+                            frame.particles[edge[1]].position,
+                        ]
+                    )
+                )
             result.append(frame)
         return result
 
-    def trajectory(self) -> List[FrameData]:
+    def trajectory(self) -> Optional[List[FrameData]]:
         """
         Lazy load the shaped trajectory.
-        
+
+
         Returns
-        ----------
+        -------
         trajectory: List[FrameData]
             The trajectory of data shaped for analysis.
         """
@@ -149,6 +161,7 @@ class ReaddyLoader:
         if os.path.isfile(pickle_file_path):
             print("Loading pickle file for ReaDDy data")
             import pickle
+
             data = []
             with open(pickle_file_path, "rb") as f:
                 while True:
@@ -159,9 +172,10 @@ class ReaddyLoader:
             self._trajectory = data[0]
         else:
             print("Loading ReaDDy data from h5 file...")
-            self._trajectory = ReaddyLoader._shape_trajectory_data()
+            self._trajectory = self._shape_trajectory_data()
             if self.save_pickle_file:
                 import pickle
+
                 with open(pickle_file_path, "wb") as file:
                     pickle.dump(self._trajectory, file)
         return self._trajectory
