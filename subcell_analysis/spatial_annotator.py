@@ -175,6 +175,9 @@ class SpatialAnnotator:
                 VIZ_TYPE.DEFAULT
             ]
             new_agent_data.types[time_ix] += n_spheres * [type_name]
+            new_agent_data.positions[time_ix][start_ix:end_ix] = sphere_positions[
+                time_ix
+            ][:n_spheres]
             new_agent_data.radii[time_ix][start_ix:end_ix] = n_spheres * [radius]
         new_agent_data.display_data[type_name] = DisplayData(
             name=type_name,

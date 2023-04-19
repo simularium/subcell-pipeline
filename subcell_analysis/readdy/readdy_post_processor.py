@@ -80,10 +80,10 @@ class ReaddyPostProcessor:
         neighbor_id = self._id_for_neighbor_of_types(
             time_ix=time_ix,
             particle_id=start_particle_id,
-            neighbor_types=chain_particle_types[current_polymer_number + 1],
+            neighbor_types=chain_particle_types[current_polymer_number],
             exclude_ids=[last_particle_id] if last_particle_id is not None else [],
         )
-        if neighbor_id is None:
+        if neighbor_id < 0:
             return result
         result.append(neighbor_id)
         return self._ids_for_chain_of_types(
@@ -379,19 +379,21 @@ class ReaddyPostProcessor:
             result.append([])
             for positions in axis_positions[time_ix]:
                 control_points = [positions[0]]
-                current_length = 0
+                current_position = np.copy(positions[0])
+                leftover_length = 0
                 for axis_ix in range(1, len(positions)):
-                    prev_pos = positions[axis_ix - 1]
-                    v_segment = positions[axis_ix] - prev_pos
-                    distance = np.linalg.norm(v_segment)
-                    if current_length + distance > segment_length:
-                        remaining_length = segment_length - current_length
-                        direction = ReaddyPostProcessor._normalize(v_segment)
-                        new_point = prev_pos + remaining_length * direction
-                        control_points.append(new_point)
-                        current_length = distance - remaining_length
-                    else:
-                        current_length += distance
+                    v_segment = positions[axis_ix] - positions[axis_ix - 1]
+                    direction = ReaddyPostProcessor._normalize(v_segment)
+                    remaining_length = np.linalg.norm(v_segment) + leftover_length
+                    while remaining_length >= segment_length:
+                        current_position += (
+                            segment_length - leftover_length
+                        ) * direction
+                        control_points.append(np.copy(current_position))
+                        leftover_length = 0
+                        remaining_length -= segment_length
+                    current_position += (remaining_length - leftover_length) * direction
+                    leftover_length = remaining_length
                 result[time_ix].append(np.array(control_points))
         return result
 

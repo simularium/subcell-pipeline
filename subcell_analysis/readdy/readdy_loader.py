@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 
 import numpy as np
 import readdy
-import tqdm
+from tqdm import tqdm
 
 from .readdy_data import FrameData, ParticleData, TopologyData
 
@@ -93,13 +93,13 @@ class ReaddyLoader:
         (
             _,
             topology_records,
-        ) = self.readdy_trajectory.read_observable_topologies()  # type: ignore
+        ) = self.readdy_trajectory().read_observable_topologies()  # type: ignore
         (
             times,
             types,
             ids,
             positions,
-        ) = self.readdy_trajectory.read_observable_particles()  # type: ignore
+        ) = self.readdy_trajectory().read_observable_particles()  # type: ignore
         result = []
         for time_ix in tqdm(range(len(times))):
             if (
@@ -127,7 +127,7 @@ class ReaddyLoader:
                         neighbor_ids.append(edge[0])
                 frame.particles[ids[time_ix][p]] = ParticleData(
                     uid=ids[time_ix][p],
-                    type_name=self.readdy_trajectory.species_name(  # type: ignore
+                    type_name=self.readdy_trajectory().species_name(  # type: ignore
                         types[time_ix][p]
                     ),
                     position=np.array([position[0], position[1], position[2]]),
