@@ -1,29 +1,12 @@
 #!/usr/bin/env python
 from typing import Any, Tuple
-
+from sklearn.decomposition import PCA
 import matplotlib as plt
 import numpy as np
+import pandas as pd
+
 
 # TODO: consider creating a fiber class?
-
-
-# TODO add actual types
-def asymmetry(fibers_df: Any, timepoints: Any, fiber_at_time: Any) -> Any:
-    last_timepoint = fibers_df.loc[timepoints[-1]]
-    last_timepoint_tension = last_timepoint["segment_energy"]
-    diff = np.zeros(len(last_timepoint_tension))
-    for index, _timepoint in enumerate(last_timepoint_tension):
-        np.round(fiber_at_time.shape[0] / 2).astype(int)
-        diff[index] = np.abs(
-            last_timepoint_tension[index] - last_timepoint_tension[-1 - index]
-        )
-    xs = np.linspace(0, 1, len(last_timepoint_tension))
-    plt.scatter(xs, diff)
-    plt.xlabel("Position along filament")
-    plt.ylabel("Level of Asymmetry")
-    # print(diff[index])
-    print(len(diff))
-    # write
 
 
 def get_end_to_end_axis_distances_and_projections(
@@ -159,3 +142,175 @@ def get_total_fiber_twist(
     total_twist = np.nansum(consecutive_angles)
 
     return total_twist
+
+
+def get_third_component_variance(
+    polymer_trace: np.ndarray,
+) -> float:
+    """
+    Returns the third PCA component given the x,y,z positions of a fiber at
+    a given time. This component reflects non-coplanarity/out of planeness
+
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+        at a given time
+
+    Returns
+    -------
+    third_component_variance: float
+        noncoplanarity of fiber
+    """
+    pca = PCA(n_components=3)
+    pca.fit(polymer_trace)
+    return pca.explained_variance_ratio_[2]
+
+
+def run_metric_calculation(
+    all_points: pd.core.frame.DataFrame, metric: str
+) -> pd.core.frame.DataFrame:
+    """
+    Given cytosim output, run_metric_calculation calculates a chosen metric over all points in a fiber.
+
+    Parameters
+    ----------
+    all_points: [(num_timepoints * num_points) x n columns] pandas dataframe
+        all_points is a dataframe of cytosim outputs that is generated after some post-processing.
+        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce, segment_curvature, force_magnitude, segment_energy] columns and any metric columns
+    metric: metric name as a string
+
+    Returns
+    -------
+    all_points dataframe with calculated metric appended
+    """
+    all_points[metric] = np.nan
+    for ct, (time, fiber_at_time) in enumerate(all_points.groupby("time")):
+        if metric == "peak_asymmetry":
+            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[fiber_at_time.index, metric] = get_asymmetry_of_peak(
+                fiber_values
+            )
+
+        if metric == "sum_bending_energy":
+            fiber_values = fiber_at_time[
+                ["xpos", "ypos", "zpos", "segment_energy"]
+            ].values
+            all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy(
+                fiber_values
+            )
+
+        if metric == "non_coplanarity":
+            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[fiber_at_time.index, metric] = get_third_component_variance(
+                fiber_values
+            )
+
+        if metric == "average_perp_distance":
+            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[
+                fiber_at_time.index, metric
+            ] = get_average_distance_from_end_to_end_axis(fiber_values)
+
+        if metric == "total_fiber_twist":
+            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[fiber_at_time.index, metric] = get_total_fiber_twist(
+                fiber_values
+            )
+
+        if metric == "energy_asymmetry":
+            fiber_values = fiber_at_time[
+                ["xpos", "ypos", "zpos", "segment_energy"]
+            ].values
+            all_points.loc[fiber_at_time.index, metric] = get_energy_asymmetry(
+                fiber_values
+            )
+    return all_points
+
+
+def run_compression_workflow(
+    all_points: pd.core.frame.DataFrame, metrics_to_calculate: list
+) -> pd.core.frame.DataFrame:
+    """
+    Calculates chosen metrics from cytosim output of fiber positions and properties across timesteps
+
+    Parameters
+    ----------
+    all_points: [(num_timepoints * num_points) x n columns] pandas dataframe
+        all_points is a dataframe of cytosim outputs that is generated after some post-processing.
+        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce, segment_curvature, force_magnitude, segment_energy] columns and any metric columns
+    metrics: [n] list of metrics to calculate with metrics passed in as strings
+
+    Returns
+    -------
+    all_points dataframe with chosen metrics appended as columns
+
+    """
+    for metric in metrics_to_calculate:
+        all_points = run_metric_calculation(all_points, metric)
+    return all_points
+
+
+def get_sum_bending_energy(
+    fiber_energy: np.ndarray,
+) -> float:
+    """
+    Returns the sum bending energy given a single fiber x,y,z positions and segment energy values
+
+    Parameters
+    ----------
+    fiber_energy: [n x 4] numpy array
+        array containing the x,y,z positions of the polymer trace and segment energy
+        at a given time
+
+    Returns
+    -------
+    total_energy: float
+        energy of a vector at a given time
+    """
+    return np.sum(fiber_energy[3])
+
+
+def get_energy_asymmetry(
+    fiber_energy: np.ndarray,
+) -> float:
+    """
+    Returns the sum bending energy given a single fiber x,y,z positions and segment energy values
+
+    Parameters
+    ----------
+    fiber_energy: [n x 4] numpy array
+        array containing the x,y,z positions of the polymer trace and segment energy
+        at a given time
+
+    Returns
+    -------
+    total_energy: float
+        energy of a vector at a given time
+    """
+
+    middle_index = np.round(len(fiber_energy) / 2).astype(int)
+    diff = np.zeros(len(fiber_energy))
+    for index, point in enumerate(fiber_energy):
+        diff[index] = np.abs(fiber_energy[index] - fiber_energy[-1 - index])
+        if index == middle_index:
+            break
+    return np.sum(diff)
+
+
+def plot_metric(all_points, metric):
+    """
+    Plots and saves metric values over time
+
+    Parameters
+    ----------
+    all_points: [(num_timepoints * num_points) x n columns] pandas dataframe
+        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce, segment_curvature, force_magnitude, segment_energy] columns and any metric columns
+    metric: metric name as a string
+    """
+    metric_by_time = all_points.groupby(level=["time"])[metric].mean()
+    plt.plot(metric_by_time)
+    plt.xlabel("Time")
+    plt.ylabel(metric)
+    plt.savefig(metric + "-time.pdf")
+    plt.savefig(metric + "-time.png")
