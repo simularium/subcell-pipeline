@@ -28,6 +28,16 @@ class TopologyData:
         self.type_name = type_name
         self.particle_ids = particle_ids
 
+    def __str__(self) -> str:
+        """String with all data."""
+        return (
+            "Topology(\n"
+            f"  id = {self.uid}\n"
+            f"  type_name = {self.type_name}\n"
+            f"  particles = {self.particle_ids}\n"
+            ")"
+        )
+
 
 class ParticleData:
     uid: int
@@ -58,6 +68,17 @@ class ParticleData:
         self.type_name = type_name
         self.position = position
         self.neighbor_ids = neighbor_ids
+
+    def __str__(self) -> str:
+        """String with all data."""
+        return (
+            f"Particle(\n"
+            f"  id = {self.uid}\n"
+            f"  type_name = {self.type_name}\n"
+            f"  position = {self.position}\n"
+            f"  neighbors = {self.neighbor_ids}\n"
+            ")"
+        )
 
 
 class FrameData:
@@ -96,3 +117,19 @@ class FrameData:
         self.topologies = topologies if topologies is not None else {}
         self.particles = particles if particles is not None else {}
         self.edges = edges if edges is not None else []
+
+    def __str__(self) -> str:
+        """String with topology and particle data."""
+        top_str = "\n"
+        for top_id in self.topologies:
+            top_str += f"{top_id} : \n{self.topologies[top_id]}\n"
+        p_str = "\n"
+        for p_id in self.particles:
+            p_str += f"{p_id} : \n{self.particles[p_id]}\n"
+        return (
+            f"Frame(\n"
+            f"  time={self.time}\n"
+            f"  topologies=\n{top_str}\n\n"
+            f"  particles=\n{p_str}\n\n"
+            ")"
+        )
