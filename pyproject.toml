@@ -32,6 +32,7 @@ dependencies = [
   "pandas",
   "matplotlib",
   "tqdm",
+  "simulariumio",
 ]
 
 [project.urls]
