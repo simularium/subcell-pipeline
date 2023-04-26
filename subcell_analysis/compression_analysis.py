@@ -168,14 +168,17 @@ def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    polymer_trace: [t x n x 3] numpy array
+    polymer_trace: [k x t x n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
-        at each time point
+        at each time point. k = number of traces, t = number of time points,
+        n = number of points in each trace
+        If k = 1, then the embedding is of a single trace
 
     Returns
     -------
-    pacmap_embedding: [t x 2] numpy array
-        pacmap embedding of the polymer trace at each time point
+    pacmap_embedding: [k x 2] numpy array
+        pacmap embedding of each polymer trace
+        If k = 1, then the embedding is of a single trace with size [t x 2]
     """
     embedding = PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0)
 
