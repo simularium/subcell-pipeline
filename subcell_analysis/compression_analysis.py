@@ -193,12 +193,7 @@ def run_metric_calculation(
             )
 
         if metric == "sum_bending_energy":
-            fiber_values = fiber_at_time[
-                ["xpos", "ypos", "zpos", "segment_energy"]
-            ].values
-            all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy(
-                fiber_values
-            )
+            all_points.loc[fiber_at_time.index, metric] = fiber_at_time["segment_energy"].sum()
 
         if metric == "non_coplanarity":
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
@@ -219,11 +214,8 @@ def run_metric_calculation(
             )
 
         if metric == "energy_asymmetry":
-            fiber_values = fiber_at_time[
-                ["xpos", "ypos", "zpos", "segment_energy"]
-            ].values
             all_points.loc[fiber_at_time.index, metric] = get_energy_asymmetry(
-                fiber_values
+                fiber_at_time["segment_energy"].values
             )
     return all_points
 
@@ -251,24 +243,6 @@ def run_compression_workflow(
     return all_points
 
 
-def get_sum_bending_energy(
-    fiber_energy: np.ndarray,
-) -> float:
-    """
-    Returns the sum bending energy given a single fiber x,y,z positions and segment energy values
-
-    Parameters
-    ----------
-    fiber_energy: [n x 4] numpy array
-        array containing the x,y,z positions of the polymer trace and segment energy
-        at a given time
-
-    Returns
-    -------
-    total_energy: float
-        energy of a vector at a given time
-    """
-    return np.sum(fiber_energy[3])
 
 
 def get_energy_asymmetry(
