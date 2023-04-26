@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from typing import Any, Tuple
+from pacmap import PaCMAP
 
 import matplotlib as plt
 import numpy as np
@@ -159,3 +160,27 @@ def get_total_fiber_twist(
     total_twist = np.nansum(consecutive_angles)
 
     return total_twist
+
+
+def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
+    """
+    Returns the pacmap embedding of the polymer trace time series.
+
+    Parameters
+    ----------
+    polymer_trace: [t x n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+        at each time point
+
+    Returns
+    -------
+    pacmap_embedding: [t x 2] numpy array
+        pacmap embedding of the polymer trace at each time point
+    """
+    embedding = PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0)
+
+    reshaped_time_series = polymer_trace_time_series.reshape(
+        polymer_trace_time_series.shape[0], -1
+    )
+
+    return embedding.fit_transform(reshaped_time_series, init="pca")
