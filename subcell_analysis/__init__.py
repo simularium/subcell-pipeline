@@ -9,3 +9,5 @@ except PackageNotFoundError:
 
 __author__ = "Blair Lyons"
 __email__ = "blair208@gmail.com"
+
+from .compression_workflow_runner import run_workflow, plot_metric

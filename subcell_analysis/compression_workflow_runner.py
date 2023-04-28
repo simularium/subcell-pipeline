@@ -102,7 +102,7 @@ def run_workflow(
 def plot_metric(all_points: pd.core.frame.DataFrame, metric: COMPRESSIONMETRIC) -> None:
     """
     Plots and saves metric values over time.
-
+gi
     Parameters
     ----------
     all_points: [(num_timepoints * num_points) x n columns] pandas dataframe
