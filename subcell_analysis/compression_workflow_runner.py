@@ -102,7 +102,7 @@ def run_workflow(
 def plot_metric(all_points: pd.core.frame.DataFrame, metric: COMPRESSIONMETRIC) -> None:
     """
     Plots and saves metric values over time.
-gi
+    gi
     Parameters
     ----------
     all_points: [(num_timepoints * num_points) x n columns] pandas dataframe
@@ -110,7 +110,7 @@ gi
         segment_curvature,
         force_magnitude, segment_energy] columns and any metric columns
     metric: metric name to be plotted
-        chosen COMPRESSIONMETRIC
+        chosen COMPRESSIONMETRIC.
 
     """
     metric_by_time = all_points.groupby(level=["time"])[metric].mean()
