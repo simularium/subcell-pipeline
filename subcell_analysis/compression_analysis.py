@@ -175,8 +175,6 @@ def get_third_component_variance(
     return pca.explained_variance_ratio_[2]
 
 
-
-
 def get_energy_asymmetry(
     fiber_energy: np.ndarray,
 ) -> float:
