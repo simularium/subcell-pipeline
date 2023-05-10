@@ -11,3 +11,5 @@ __author__ = "Blair Lyons"
 __email__ = "blair208@gmail.com"
 
 from .compression_workflow_runner import run_workflow, plot_metric
+
+from .spatial_annotator import SpatialAnnotator  # noqa: F401
