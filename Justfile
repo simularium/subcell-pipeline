@@ -20,8 +20,9 @@ clean:
 	rm -fr .pytest_cache
 	rm -fr .mypy_cache
 
-# install with all deps
+# install with all deps (and setup conda env with readdy)
 install:
+	conda env update --file environment.yml
 	pip install -e '.[lint,test,docs,dev]'
 
 # lint, format, and check all files

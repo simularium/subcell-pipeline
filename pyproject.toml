@@ -32,6 +32,7 @@ dependencies = [
   "pandas",
   "matplotlib",
   "tqdm",
+  "simulariumio",
 ]
 
 [project.urls]
@@ -138,6 +139,9 @@ ignore = [
   ".cookiecutter.yaml",
   "*docs/*",
   "*.ipynb",
+  "*notebooks/*",
+  "*tests/**",
+  "environment.yml",
 ]
 
 [tool.mypy]
