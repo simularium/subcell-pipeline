@@ -1,6 +1,17 @@
 subcell\_analysis.bin package
 =============================
 
+Submodules
+----------
+
+subcell\_analysis.bin.readdy\_loading\_example module
+-----------------------------------------------------
+
+.. automodule:: subcell_analysis.bin.readdy_loading_example
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

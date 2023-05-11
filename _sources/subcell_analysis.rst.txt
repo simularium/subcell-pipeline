@@ -22,6 +22,22 @@ subcell\_analysis.compression\_analysis module
    :undoc-members:
    :show-inheritance:
 
+subcell\_analysis.compression\_workflow\_runner module
+------------------------------------------------------
+
+.. automodule:: subcell_analysis.compression_workflow_runner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+subcell\_analysis.spatial\_annotator module
+-------------------------------------------
+
+.. automodule:: subcell_analysis.spatial_annotator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
