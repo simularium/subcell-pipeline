@@ -19,33 +19,10 @@ Analysis functionality for subcellular models
 ### Setup 
 1. create a virtual env: `conda create -n subcell_analysis python=3.10`
 2. `conda activate subcell_analysis`
-3. `python -m pip install -e .[dev]`
+3. `conda install readdy==2.0.9`
+3. `pip install -e '.[lint,test,docs,dev]'`
 
-## Quickstart
-
-```python
-import numpy as np
-from subcell_analysis.compression_analysis import get_end_to_end_axis_distances_and_projections
-
-test_polymer_trace = np.array([
-    [2,0,0],
-    [4,1,0],
-    [6,0,-1],
-    [8,0,0],
-])
-
-# prints the following:
-# distance of polymer trace points from the end-to-end axis:
-# (array([0., 1., 1., 0.])
-# scaled distances of projection points along the end-to-end-axis:
-# array([0., 0.33, 0.67, 1.]),
-# positions of projection points on the end-to-end axis:
-# array([[2., 0., 0.],
-#        [4., 0., 0.],
-#        [6., 0., 0.],
-#        [8., 0., 0.]]))
-print(get_end_to_end_axis_distances_and_projections(test_polymer_trace))
-```
+**Note: `just install` will not install `readdy` correctly, which is needed for tests to pass.
 
 ## Documentation
 

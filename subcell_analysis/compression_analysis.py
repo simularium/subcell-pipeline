@@ -1,30 +1,20 @@
 #!/usr/bin/env python
-from typing import Any, Tuple
+from typing import Tuple
 from pacmap import PaCMAP
-
-import matplotlib as plt
+from enum import Enum
 import numpy as np
+from sklearn.decomposition import PCA
 
 # TODO: consider creating a fiber class?
 
 
-# TODO add actual types
-def asymmetry(fibers_df: Any, timepoints: Any, fiber_at_time: Any) -> Any:
-    last_timepoint = fibers_df.loc[timepoints[-1]]
-    last_timepoint_tension = last_timepoint["segment_energy"]
-    diff = np.zeros(len(last_timepoint_tension))
-    for index, _timepoint in enumerate(last_timepoint_tension):
-        np.round(fiber_at_time.shape[0] / 2).astype(int)
-        diff[index] = np.abs(
-            last_timepoint_tension[index] - last_timepoint_tension[-1 - index]
-        )
-    xs = np.linspace(0, 1, len(last_timepoint_tension))
-    plt.scatter(xs, diff)
-    plt.xlabel("Position along filament")
-    plt.ylabel("Level of Asymmetry")
-    # print(diff[index])
-    print(len(diff))
-    # write
+class COMPRESSIONMETRIC(Enum):
+    NON_COPLANARITY = "NON_COPLANARITY"
+    PEAK_ASYMMETRY = "PEAK_ASYMMETRY"
+    SUM_BENDING_ENERGY = "SUM_BENDING_ENERGY"
+    AVERAGE_PERP_DISTANCE = "AVERAGE_PERP_DISTANCE"
+    TOTAL_FIBER_TWIST = "TOTAL_FIBER_TWIST"
+    ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
 
 
 def get_end_to_end_axis_distances_and_projections(
@@ -187,3 +177,53 @@ def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
     )
 
     return embedding.fit_transform(reshaped_time_series, init="pca")
+
+
+def get_third_component_variance(
+    polymer_trace: np.ndarray,
+) -> float:
+    """
+    Returns the third PCA component given the x,y,z positions of a fiber at
+    a given time. This component reflects non-coplanarity/out of planeness.
+
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+        at a given time
+
+    Returns
+    -------
+    third_component_variance: float
+        noncoplanarity of fiber
+    """
+    pca = PCA(n_components=3)
+    pca.fit(polymer_trace)
+    return pca.explained_variance_ratio_[2]
+
+
+def get_energy_asymmetry(
+    fiber_energy: np.ndarray,
+) -> float:
+    """
+    Returns the sum bending energy given a single fiber x,y,z positions
+    and segment energy values.
+
+    Parameters
+    ----------
+    fiber_energy: [n x 4] numpy array
+        array containing the x,y,z positions of the polymer trace and segment energy
+        at a given time
+
+    Returns
+    -------
+    total_energy: float
+        energy of a vector at a given time
+    """
+    middle_index = np.round(len(fiber_energy) / 2).astype(int)
+    diff = np.zeros(len(fiber_energy))
+    for index, _point in enumerate(fiber_energy):
+        diff[index] = np.abs(fiber_energy[index] - fiber_energy[-1 - index])
+        if index == middle_index:
+            break
+    return np.sum(diff)
