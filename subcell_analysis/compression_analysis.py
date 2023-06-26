@@ -115,6 +115,7 @@ def get_asymmetry_of_peak(
         scaled_projections,
         _,
     ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
+
     projection_of_peak = scaled_projections[perp_distances == np.max(perp_distances)]
     peak_asym = np.max(projection_of_peak - 0.5)  # max kinda handles multiple peaks
 
@@ -172,6 +173,7 @@ def get_third_component_variance(
     """
     pca = PCA(n_components=3)
     pca.fit(polymer_trace)
+    print(pca.explained_variance_ratio_[2])
     return pca.explained_variance_ratio_[2]
 
 

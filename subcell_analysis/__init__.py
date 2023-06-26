@@ -10,4 +10,5 @@ except PackageNotFoundError:
 __author__ = "Blair Lyons"
 __email__ = "blair208@gmail.com"
 
+
 from .spatial_annotator import SpatialAnnotator  # noqa: F401

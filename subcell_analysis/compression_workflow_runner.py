@@ -43,6 +43,7 @@ def run_metric_calculation(
             )
 
         if metric == COMPRESSIONMETRIC.NON_COPLANARITY:
+            print("step 3")
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[fiber_at_time.index, metric] = get_third_component_variance(
                 fiber_values
@@ -67,6 +68,11 @@ def run_metric_calculation(
             all_points.loc[fiber_at_time.index, metric] = get_energy_asymmetry(
                 fiber_values
             )
+
+        if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
+            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy()
+
     return all_points
 
 
@@ -94,7 +100,9 @@ def run_workflow(
     all_points dataframe with chosen metrics appended as columns
 
     """
+    print("step 1")
     for metric in metrics_to_calculate:
+        print("step 2")
         all_points = run_metric_calculation(all_points, metric)
     return all_points
 
