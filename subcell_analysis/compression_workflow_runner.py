@@ -9,6 +9,7 @@ from .compression_analysis import (
     get_energy_asymmetry,
     get_third_component_variance,
     get_total_fiber_twist,
+    get_sum_bending_energy
 )
 
 
@@ -43,7 +44,6 @@ def run_metric_calculation(
             )
 
         if metric == COMPRESSIONMETRIC.NON_COPLANARITY:
-            print("step 3")
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[fiber_at_time.index, metric] = get_third_component_variance(
                 fiber_values
@@ -70,8 +70,8 @@ def run_metric_calculation(
             )
 
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
-            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy()
+            fiber_values = fiber_at_time[["xpos", "ypos", "zpos", "segment_energy"]].values
+            all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy(fiber_values)
 
     return all_points
 
@@ -100,9 +100,7 @@ def run_workflow(
     all_points dataframe with chosen metrics appended as columns
 
     """
-    print("step 1")
     for metric in metrics_to_calculate:
-        print("step 2")
         all_points = run_metric_calculation(all_points, metric)
     return all_points
 
@@ -121,12 +119,13 @@ def plot_metric(all_points: pd.core.frame.DataFrame, metric: COMPRESSIONMETRIC) 
         chosen COMPRESSIONMETRIC.
 
     """
-    metric_by_time = all_points.groupby(level=["time"])[metric].mean()
+    metric_by_time = all_points.groupby(["time"])[metric].mean()
     plt.plot(metric_by_time)
     plt.xlabel("Time")
     plt.ylabel(metric)
-    plt.savefig(str(metric) + "-time.pdf")
-    plt.savefig(str(metric) + "-time.png")
+    # Save files if needed.
+    # plt.savefig(str(metric) + "-time.pdf")
+    # plt.savefig(str(metric) + "-time.png")
 
 
 def plot_metric_list(all_points: pd.core.frame.DataFrame, metrics: list) -> None:

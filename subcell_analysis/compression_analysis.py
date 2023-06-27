@@ -173,7 +173,6 @@ def get_third_component_variance(
     """
     pca = PCA(n_components=3)
     pca.fit(polymer_trace)
-    print(pca.explained_variance_ratio_[2])
     return pca.explained_variance_ratio_[2]
 
 
@@ -202,3 +201,9 @@ def get_energy_asymmetry(
         if index == middle_index:
             break
     return np.sum(diff)
+
+
+def get_sum_bending_energy(
+    fiber_energy: np.ndarray,
+) -> float:
+    return fiber_energy[3].sum()
