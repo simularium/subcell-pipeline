@@ -112,3 +112,6 @@ ENV/
 
 # VSCode
 .vscode
+
+# data files
+*.csv

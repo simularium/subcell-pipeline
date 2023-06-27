@@ -72,7 +72,6 @@ def run_metric_calculation(
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos", "segment_energy"]].values
             all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy(fiber_values)
-
     return all_points
 
 

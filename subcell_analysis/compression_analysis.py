@@ -7,6 +7,8 @@ from sklearn.decomposition import PCA
 
 # TODO: consider creating a fiber class?
 
+ABS_TOL = 1e-16
+
 
 class COMPRESSIONMETRIC(Enum):
     NON_COPLANARITY = "NON_COPLANARITY"
@@ -117,9 +119,9 @@ def get_asymmetry_of_peak(
     ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
 
     # if all perpendicular distances are zero, return 0
-    if np.all(perp_distances == 0):
+    if np.all(perp_distances < ABS_TOL):
         return 0
-    
+
     projection_of_peak = scaled_projections[perp_distances == np.max(perp_distances)]
     peak_asym = np.max(projection_of_peak - 0.5)  # max kinda handles multiple peaks
 
@@ -144,16 +146,22 @@ def get_total_fiber_twist(
     total_twist: float
         sum of angles between vectors from trace points to axis
     """
-    _, _, projection_positions = get_end_to_end_axis_distances_and_projections(
-        polymer_trace=polymer_trace
-    )
-    perp_vectors = polymer_trace - projection_positions
-    perp_vectors = perp_vectors / np.linalg.norm(perp_vectors, axis=1)[:, None]
+    (
+        perp_distances,
+        _,
+        projection_positions,
+    ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
 
-    # if all perp vectors are the same, return 0
-    if np.all(perp_vectors == perp_vectors[0]):
+    # if all perpendicular distances are zero, return 0
+    if np.all(perp_distances < ABS_TOL):
         return 0
-    
+
+    perp_vectors = polymer_trace - projection_positions
+    perp_vec_lengths = np.linalg.norm(perp_vectors, axis=1)
+    perp_vec_lengths[perp_vec_lengths < ABS_TOL] = 1
+    perp_vectors = perp_vectors / perp_vec_lengths[:, None]
+    perp_vectors[perp_vec_lengths < ABS_TOL] = [np.nan, np.nan, np.nan]
+
     consecutive_angles = np.arccos(
         np.einsum("ij,ij->i", perp_vectors[1:], perp_vectors[:-1])
     )
