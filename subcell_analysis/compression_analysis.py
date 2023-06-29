@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from enum import Enum
 from typing import Tuple
-
+from pacmap import PaCMAP
+from enum import Enum
 import numpy as np
 from sklearn.decomposition import PCA
 
@@ -168,6 +168,33 @@ def get_total_fiber_twist(
     total_twist = np.nansum(consecutive_angles)
 
     return total_twist
+
+
+def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
+    """
+    Returns the pacmap embedding of the polymer trace time series.
+
+    Parameters
+    ----------
+    polymer_trace: [k x t x n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+        at each time point. k = number of traces, t = number of time points,
+        n = number of points in each trace
+        If k = 1, then the embedding is of a single trace
+
+    Returns
+    -------
+    pacmap_embedding: [k x 2] numpy array
+        pacmap embedding of each polymer trace
+        If k = 1, then the embedding is of a single trace with size [t x 2]
+    """
+    embedding = PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0)
+
+    reshaped_time_series = polymer_trace_time_series.reshape(
+        polymer_trace_time_series.shape[0], -1
+    )
+
+    return embedding.fit_transform(reshaped_time_series, init="pca")
 
 
 def get_third_component_variance(
