@@ -138,15 +138,15 @@ def create_dataframes_for_repeats(
             print(f"Processing config {config} and repeat {repeat}")
 
             segenergy[index, repeat] = read_cytosim_s3_file(
-                "cytosim-working-bucket",
+                bucket_name,
                 f"{config}/outputs/{repeat}/fiber_segment_curvature.txt",
             )
             fibenergylabels[index, repeat] = read_cytosim_s3_file(
-                "cytosim-working-bucket",
+                bucket_name,
                 f"{config}/outputs/{repeat}/fiber_energy_labels.txt",
             )
             fibenergy[index, repeat] = read_cytosim_s3_file(
-                "cytosim-working-bucket", f"{config}/outputs/{repeat}/fiber_energy.txt"
+                bucket_name, f"{config}/outputs/{repeat}/fiber_energy.txt"
             )
             convert_and_save_dataframe(
                 fibenergy[index][repeat],
