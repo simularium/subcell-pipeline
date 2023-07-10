@@ -6,7 +6,13 @@ import numpy as np
 import pandas as pd
 from IPython.display import Image
 from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
-from simulariumio import MetaData, DisplayData, DISPLAY_TYPE, ModelMetaData, InputFileData
+from simulariumio import (
+    MetaData,
+    DisplayData,
+    DISPLAY_TYPE,
+    ModelMetaData,
+    InputFileData,
+)
 
 
 def convert_and_save_dataframe(
@@ -86,7 +92,7 @@ def convert_and_save_dataframe(
     save_folder = Path("dataframes")
     save_folder.mkdir(exist_ok=True, parents=True)
 
-    file_name = "actin-forces"
+    file_name = "actin_forces"
 
     if suffix is not None:
         file_name += suffix
@@ -111,6 +117,7 @@ def read_cytosim_s3_file(bucket_name: str, file_name: str) -> list:
         print(f"An error occurred while reading the file: {e}")
         return []
 
+
 def get_s3_file(bucket_name: str, file_name: str) -> object:
     s3 = boto3.client("s3")
     response = s3.get_object(Bucket=bucket_name, Key=file_name)
@@ -128,7 +135,7 @@ def create_dataframes_for_repeats(
     fibenergylabels = np.empty((len(configs), num_repeats), dtype=object)
     for index, config in enumerate(configs):
         for repeat in range(num_repeats):
-            print(f"Processing index {index} and repeat {repeat}")
+            print(f"Processing config {config} and repeat {repeat}")
 
             segenergy[index, repeat] = read_cytosim_s3_file(
                 "cytosim-working-bucket",
@@ -144,23 +151,23 @@ def create_dataframes_for_repeats(
             convert_and_save_dataframe(
                 fibenergy[index][repeat],
                 segenergy[index][repeat],
-                suffix=f"{index}_{repeat}",
+                suffix=f"_{config}_{repeat}",
             )
 
-def cytosim_to_simularium(path):
-    box_size = 2.
+
+def cytosim_to_simularium(
+    path, box_size=2, scale_factor=10, color=None, actin_number=0
+):
     example_data = CytosimData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),
-            scale_factor=10.0,
+            scale_factor=scale_factor,
             trajectory_title="Some parameter set",
             model_meta_data=ModelMetaData(
                 title="Some agent-based model",
                 version="8.1",
                 authors="A Modeler",
-                description=(
-                    "An agent-based model run with some parameter set"
-                ),
+                description=("An agent-based model run with some parameter set"),
                 doi="10.1016/j.bpj.2016.02.002",
                 source_code_url="https://github.com/simularium/simulariumio",
                 source_code_license_url="https://github.com/simularium/simulariumio/blob/main/LICENSE",
@@ -169,19 +176,19 @@ def cytosim_to_simularium(path):
             ),
         ),
         object_info={
-            "fibers" : CytosimObjectInfo(
+            "fibers": CytosimObjectInfo(
                 cytosim_file=InputFileData(
                     file_path=path,
                 ),
                 display_data={
-                    1 : DisplayData(
-                        name="actin",
-                        radius=0.01, 
-                        display_type=DISPLAY_TYPE.FIBER
+                    1: DisplayData(
+                        name=f"actin#{actin_number}",
+                        radius=0.02,
+                        display_type=DISPLAY_TYPE.FIBER,
+                        color=color,
                     )
-                }
+                },
             ),
-
         },
     )
     return example_data
