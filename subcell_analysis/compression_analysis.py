@@ -145,6 +145,7 @@ def get_total_fiber_twist(
     -------
     total_twist: float
         sum of angles between vectors from trace points to axis
+        in number of rotations
     """
     (
         perp_distances,
@@ -165,7 +166,7 @@ def get_total_fiber_twist(
     consecutive_angles = np.arccos(
         np.einsum("ij,ij->i", perp_vectors[1:], perp_vectors[:-1])
     )
-    total_twist = np.nansum(consecutive_angles)
+    total_twist = np.nansum(consecutive_angles) / 2 / np.pi
 
     return total_twist
 
@@ -194,7 +195,7 @@ def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
         polymer_trace_time_series.shape[0], -1
     )
 
-    return embedding.fit_transform(reshaped_time_series, init="pca")
+    return embedding.fit_transform(reshaped_time_series)
 
 
 def get_third_component_variance(
