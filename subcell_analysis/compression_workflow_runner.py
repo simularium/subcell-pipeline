@@ -35,29 +35,29 @@ def run_metric_calculation(
     -------
     all_points dataframe with calculated metric appended
     """
-    all_points[metric] = np.nan
+    all_points[metric.value] = np.nan
     for _ct, (_time, fiber_at_time) in enumerate(all_points.groupby("time")):
         if metric == COMPRESSIONMETRIC.PEAK_ASYMMETRY:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[fiber_at_time.index, metric] = get_asymmetry_of_peak(
+            all_points.loc[fiber_at_time.index, metric.value] = get_asymmetry_of_peak(
                 fiber_values
             )
 
         if metric == COMPRESSIONMETRIC.NON_COPLANARITY:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[fiber_at_time.index, metric] = get_third_component_variance(
+            all_points.loc[fiber_at_time.index, metric.value] = get_third_component_variance(
                 fiber_values
             )
 
         if metric == COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[
-                fiber_at_time.index, metric
+                fiber_at_time.index, metric.value
             ] = get_average_distance_from_end_to_end_axis(fiber_values)
 
         if metric == COMPRESSIONMETRIC.TOTAL_FIBER_TWIST:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[fiber_at_time.index, metric] = get_total_fiber_twist(
+            all_points.loc[fiber_at_time.index, metric.value] = get_total_fiber_twist(
                 fiber_values
             )
 
@@ -65,13 +65,13 @@ def run_metric_calculation(
             fiber_values = fiber_at_time[
                 ["xpos", "ypos", "zpos", "segment_energy"]
             ].values
-            all_points.loc[fiber_at_time.index, metric] = get_energy_asymmetry(
+            all_points.loc[fiber_at_time.index, metric.value] = get_energy_asymmetry(
                 fiber_values
             )
 
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos", "segment_energy"]].values
-            all_points.loc[fiber_at_time.index, metric] = get_sum_bending_energy(fiber_values)
+            all_points.loc[fiber_at_time.index, metric.value] = get_sum_bending_energy(fiber_values)
     return all_points
 
 
