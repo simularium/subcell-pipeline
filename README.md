@@ -17,7 +17,7 @@ Analysis functionality for subcellular models
 1. Install Conda: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 ### Setup 
-1. create a virtual env: `conda create -n subcell_analysis python`
+1. create a virtual env: `conda create -n subcell_analysis python=3.10`
 2. `conda activate subcell_analysis`
 3. `conda install readdy==2.0.9`
 3. `pip install -e '.[lint,test,docs,dev]'`
