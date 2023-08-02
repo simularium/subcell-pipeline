@@ -35,7 +35,8 @@ dependencies = [
   "pacmap",
   "simulariumio",
   "container-collection",
-  "boto3"
+  "boto3",
+  "scikit-learn"
 ]
 
 [project.urls]
