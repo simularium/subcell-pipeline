@@ -9,7 +9,7 @@ from .compression_analysis import (
     get_energy_asymmetry,
     get_third_component_variance,
     get_total_fiber_twist,
-    get_sum_bending_energy
+    get_sum_bending_energy,
 )
 
 
@@ -45,9 +45,9 @@ def run_metric_calculation(
 
         if metric == COMPRESSIONMETRIC.NON_COPLANARITY:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[fiber_at_time.index, metric.value] = get_third_component_variance(
-                fiber_values
-            )
+            all_points.loc[
+                fiber_at_time.index, metric.value
+            ] = get_third_component_variance(fiber_values)
 
         if metric == COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE:
             fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
@@ -70,8 +70,12 @@ def run_metric_calculation(
             )
 
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
-            fiber_values = fiber_at_time[["xpos", "ypos", "zpos", "segment_energy"]].values
-            all_points.loc[fiber_at_time.index, metric.value] = get_sum_bending_energy(fiber_values)
+            fiber_values = fiber_at_time[
+                ["xpos", "ypos", "zpos", "segment_energy"]
+            ].values
+            all_points.loc[fiber_at_time.index, metric.value] = get_sum_bending_energy(
+                fiber_values
+            )
     return all_points
 
 
