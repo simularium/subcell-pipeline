@@ -44,7 +44,7 @@ def convert_and_save_dataframe(
             elif line.startswith("% end"):
                 df = pd.DataFrame.from_dict(singles, orient="index")
                 outputs.append(df)
-                #                     fiber_point=0
+                fiber_point=0
                 fid = 0
                 # print 'finished parsing ' + rundir + ' timepoint ' + str(time)
         elif len(line.split()) > 0:
