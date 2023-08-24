@@ -75,7 +75,7 @@ def run_metric_calculation(
     return all_points
 
 
-def run_workflow(
+def compression_metrics_workflow(
     all_points: pd.core.frame.DataFrame, metrics_to_calculate: list
 ) -> pd.core.frame.DataFrame:
     """

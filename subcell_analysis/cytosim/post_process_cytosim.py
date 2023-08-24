@@ -20,6 +20,7 @@ def convert_and_save_dataframe(
     fiber_forces_all: list,
     suffix: str = None,
     rigidity: float = 0.041,
+    save_folder: Path = Path("../data/dataframes"),
 ) -> pd.DataFrame:
     """
     Convert cytosim output to pandas dataframe and save to csv.
@@ -89,10 +90,7 @@ def convert_and_save_dataframe(
     all_outputs["segment_energy"] = all_outputs["segment_curvature"] * rigidity * 1000
     # fiber_forces_outputs_allruns.append(all_outputs)
 
-    save_folder = Path("dataframes")
-    save_folder.mkdir(exist_ok=True, parents=True)
-
-    file_name = "actin_forces"
+    file_name = "cytosim_actin_compression"
 
     if suffix is not None:
         file_name += suffix
@@ -125,7 +123,7 @@ def get_s3_file(bucket_name: str, file_name: str) -> object:
 
 
 def create_dataframes_for_repeats(
-    bucket_name: str, num_repeats: int, configs: list
+    bucket_name: str, num_repeats: int, configs: list, save_folder: Path
 ) -> None:
     """
     Create dataframes for all repeats of given configs.
@@ -151,7 +149,8 @@ def create_dataframes_for_repeats(
             convert_and_save_dataframe(
                 fibenergy[index][repeat],
                 segenergy[index][repeat],
-                suffix=f"_{config}_{repeat}",
+                suffix=f"_velocity_{config}_repeat_{repeat}",
+                save_folder=save_folder,
             )
 
 
