@@ -19,6 +19,29 @@ class COMPRESSIONMETRIC(Enum):
     ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
 
 
+def get_end_to_end_unit_vector(
+    polymer_trace: np.ndarray,
+) -> Tuple[np.ndarray, float]:
+    """
+    Returns the unit vector of the end-to-end axis of a polymer trace.
+    
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace points
+    
+    Returns
+    ----------
+    end_to_end_unit_vector: [3 x 1] numpy array
+        unit vector of the end-to-end axis of the polymer trace
+    end_to_end_axis_length: float
+        length of the end-to-end axis of the polymer trace
+    """
+    end_to_end_axis = polymer_trace[-1] - polymer_trace[0]
+
+    return get_unit_vector(end_to_end_axis)
+
+
 def get_end_to_end_axis_distances_and_projections(
     polymer_trace: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -49,20 +72,20 @@ def get_end_to_end_axis_distances_and_projections(
         The distance from projection_positions
         to the trace points is the shortest distance from the end-to-end axis
     """
-    end_to_end_axis = polymer_trace[-1] - polymer_trace[0]
-    end_to_end_axis_length = np.linalg.norm(end_to_end_axis)
+    end_to_end_axis, end_to_end_axis_length = get_end_to_end_unit_vector(
+        polymer_trace=polymer_trace
+    )
 
     position_vectors = polymer_trace - polymer_trace[0]
-    dot_products = np.dot(position_vectors, end_to_end_axis)
+    projections = np.dot(position_vectors, end_to_end_axis)
+    scaled_projections = projections / end_to_end_axis_length
 
-    projections = dot_products / end_to_end_axis_length
     projection_positions = (
         polymer_trace[0]
-        + projections[:, None] * end_to_end_axis / end_to_end_axis_length
+        + projections[:, None] * end_to_end_axis
     )
 
     perp_distances = np.linalg.norm(polymer_trace - projection_positions, axis=1)
-    scaled_projections = projections / end_to_end_axis_length
 
     return perp_distances, scaled_projections, projection_positions
 
@@ -123,9 +146,17 @@ def get_asymmetry_of_peak(
         return 0
 
     projection_of_peak = scaled_projections[perp_distances == np.max(perp_distances)]
-    peak_asym = np.max(projection_of_peak - 0.5)  # max kinda handles multiple peaks
+    peak_asym = np.max(np.abs(projection_of_peak - 0.5))  # max kinda handles multiple peaks
 
     return peak_asym
+
+
+def get_unit_vector(vector: np.array) -> np.array:
+    if np.linalg.norm(vector) < ABS_TOL or np.isnan(vector).any():
+        return np.array([0, 0, 0]), 0
+    else:
+        vec_length = np.linalg.norm(vector)
+        return vector / vec_length, vec_length
 
 
 def get_total_fiber_twist(
@@ -145,7 +176,7 @@ def get_total_fiber_twist(
     -------
     total_twist: float
         sum of angles between vectors from trace points to axis
-        in number of rotations
+        in degrees
     """
     (
         perp_distances,
@@ -158,15 +189,39 @@ def get_total_fiber_twist(
         return 0
 
     perp_vectors = polymer_trace - projection_positions
-    perp_vec_lengths = np.linalg.norm(perp_vectors, axis=1)
-    perp_vec_lengths[perp_vec_lengths < ABS_TOL] = 1
-    perp_vectors = perp_vectors / perp_vec_lengths[:, None]
-    perp_vectors[perp_vec_lengths < ABS_TOL] = [np.nan, np.nan, np.nan]
 
-    consecutive_angles = np.arccos(
-        np.einsum("ij,ij->i", perp_vectors[1:], perp_vectors[:-1])
-    )
-    total_twist = np.nansum(consecutive_angles) / 2 / np.pi
+    twist_angle = 0
+
+    prev_vec, prev_vec_length = get_unit_vector(perp_vectors[0])
+
+    for i in range(1, len(perp_vectors)):
+        curr_vec, curr_vec_length = get_unit_vector(perp_vectors[i])
+
+        if prev_vec_length < ABS_TOL:
+            prev_vec = curr_vec
+            prev_vec_length = curr_vec_length
+            continue
+
+        if curr_vec_length < ABS_TOL:
+            continue
+
+        dot_product = np.dot(prev_vec, curr_vec)
+
+        if np.isnan(dot_product):
+            continue
+
+        # print(prev_vec_length, curr_vec_length, dot_product, twist_angle)
+        if np.abs(dot_product) > 1:
+            dot_product = 1
+
+        curr_angle = np.arccos(dot_product)
+
+        if ~np.isnan(curr_angle):
+            twist_angle += curr_angle
+            prev_vec = curr_vec
+            prev_vec_length = curr_vec_length
+
+    total_twist = twist_angle / np.pi
 
     return total_twist
 
