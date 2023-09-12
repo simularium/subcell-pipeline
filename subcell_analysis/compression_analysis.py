@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 
 # TODO: consider creating a fiber class?
 
-ABS_TOL = 1e-16
+ABS_TOL = 1e-6
 
 
 class COMPRESSIONMETRIC(Enum):
@@ -161,6 +161,7 @@ def get_unit_vector(vector: np.array) -> np.array:
 
 def get_total_fiber_twist(
     polymer_trace: np.ndarray,
+    tolerance: float = ABS_TOL,
 ) -> float:
     """
     Returns the sum of angles between consecutive vectors from the
@@ -185,34 +186,32 @@ def get_total_fiber_twist(
     ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
 
     # if all perpendicular distances are zero, return 0
-    if np.all(perp_distances < ABS_TOL):
+    if np.all(perp_distances < tolerance):
         return 0
 
     perp_vectors = polymer_trace - projection_positions
 
     twist_angle = 0
 
-    prev_vec, prev_vec_length = get_unit_vector(perp_vectors[0])
+    prev_vec, prev_vec_length = get_unit_vector(perp_vectors[1])
 
-    for i in range(1, len(perp_vectors)):
+    for i in range(2, len(perp_vectors) - 1):
         curr_vec, curr_vec_length = get_unit_vector(perp_vectors[i])
 
-        if prev_vec_length < ABS_TOL:
+        if prev_vec_length < tolerance:
             prev_vec = curr_vec
             prev_vec_length = curr_vec_length
             continue
 
-        if curr_vec_length < ABS_TOL:
+        if curr_vec_length < tolerance:
             continue
 
         dot_product = np.dot(prev_vec, curr_vec)
 
-        if np.isnan(dot_product):
+        if np.isnan(dot_product) or np.abs(dot_product) > 1:
             continue
 
         # print(prev_vec_length, curr_vec_length, dot_product, twist_angle)
-        if np.abs(dot_product) > 1:
-            dot_product = 1
 
         curr_angle = np.arccos(dot_product)
 
