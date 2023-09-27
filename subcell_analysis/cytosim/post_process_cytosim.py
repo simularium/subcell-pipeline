@@ -4,15 +4,14 @@ from typing import Dict
 import boto3
 import numpy as np
 import pandas as pd
-from IPython.display import Image
-from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
 from simulariumio import (
-    MetaData,
-    DisplayData,
     DISPLAY_TYPE,
-    ModelMetaData,
+    DisplayData,
     InputFileData,
+    MetaData,
+    ModelMetaData,
 )
+from simulariumio.cytosim import CytosimData, CytosimObjectInfo
 
 
 def convert_and_save_dataframe(
@@ -22,9 +21,8 @@ def convert_and_save_dataframe(
     rigidity: float = 0.041,
     save_folder: Path = Path("../data/dataframes"),
 ) -> pd.DataFrame:
-    """
-    Convert cytosim output to pandas dataframe and save to csv.
-    """
+    # Convert cytosim output to pandas dataframe and saves to csv.
+
     bending_energies = []
     for line in fiber_energy_all:
         line = line.strip()
@@ -45,7 +43,7 @@ def convert_and_save_dataframe(
             elif line.startswith("% end"):
                 df = pd.DataFrame.from_dict(singles, orient="index")
                 outputs.append(df)
-                #                     fiber_point=0
+                fiber_point = 0
                 fid = 0
                 # print 'finished parsing ' + rundir + ' timepoint ' + str(time)
         elif len(line.split()) > 0:
@@ -103,9 +101,8 @@ def convert_and_save_dataframe(
 
 
 def read_cytosim_s3_file(bucket_name: str, file_name: str) -> list:
-    """
-    Read a file from S3 bucket and return a list of lines.
-    """
+    # Read a file from S3 bucket and return a list of lines.
+
     s3 = boto3.client("s3")
     try:
         response = s3.get_object(Bucket=bucket_name, Key=file_name)
@@ -125,9 +122,8 @@ def get_s3_file(bucket_name: str, file_name: str) -> object:
 def create_dataframes_for_repeats(
     bucket_name: str, num_repeats: int, configs: list, save_folder: Path
 ) -> None:
-    """
-    Create dataframes for all repeats of given configs.
-    """
+    # Create dataframes for all repeats of given configs.
+
     segenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergylabels = np.empty((len(configs), num_repeats), dtype=object)
@@ -155,7 +151,11 @@ def create_dataframes_for_repeats(
 
 
 def cytosim_to_simularium(
-    path, box_size=2, scale_factor=10, color=None, actin_number=0
+    path: str,
+    box_size: float = 2,
+    scale_factor: float = 10,
+    color: list = None,
+    actin_number: str = 0,
 ):
     example_data = CytosimData(
         meta_data=MetaData(
