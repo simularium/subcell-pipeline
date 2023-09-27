@@ -1,5 +1,4 @@
-name: anaconda-client-env
-channels:
+name: subcell_analysis
   - conda-forge
 dependencies:
   - readdy
