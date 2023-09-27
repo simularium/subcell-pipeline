@@ -10,11 +10,12 @@ from .compression_analysis import (
     get_sum_bending_energy,
     get_third_component_variance,
     get_total_fiber_twist,
+    get_sum_bending_energy,
 )
 
 
 def run_metric_calculation(
-    all_points: pd.core.frame.DataFrame, metric: COMPRESSIONMETRIC
+    all_points: pd.core.frame.DataFrame, metric: COMPRESSIONMETRIC, **options: dict
 ) -> pd.core.frame.DataFrame:
     """
     Given cytosim output, run_metric_calculation calculates a chosen metric over
@@ -38,49 +39,57 @@ def run_metric_calculation(
     all_points[metric.value] = np.nan
     for _ct, (_time, fiber_at_time) in enumerate(all_points.groupby("time")):
         if metric == COMPRESSIONMETRIC.PEAK_ASYMMETRY:
-            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[fiber_at_time.index, metric.value] = get_asymmetry_of_peak(
-                fiber_values
+                polymer_trace,
+                **options,
             )
 
         if metric == COMPRESSIONMETRIC.NON_COPLANARITY:
-            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[
                 fiber_at_time.index, metric.value
-            ] = get_third_component_variance(fiber_values)
+            ] = get_third_component_variance(
+                polymer_trace,
+                **options,
+            )
 
         if metric == COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE:
-            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[
                 fiber_at_time.index, metric.value
-            ] = get_average_distance_from_end_to_end_axis(fiber_values)
+            ] = get_average_distance_from_end_to_end_axis(polymer_trace, **options)
 
         if metric == COMPRESSIONMETRIC.TOTAL_FIBER_TWIST:
-            fiber_values = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[fiber_at_time.index, metric.value] = get_total_fiber_twist(
-                fiber_values
+                polymer_trace,
+                **options,
             )
 
         if metric == COMPRESSIONMETRIC.ENERGY_ASYMMETRY:
-            fiber_values = fiber_at_time[
+            polymer_trace = fiber_at_time[
                 ["xpos", "ypos", "zpos", "segment_energy"]
             ].values
             all_points.loc[fiber_at_time.index, metric.value] = get_energy_asymmetry(
-                fiber_values
+                polymer_trace,
+                **options,
             )
 
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
-            fiber_values = fiber_at_time[
+            polymer_trace = fiber_at_time[
                 ["xpos", "ypos", "zpos", "segment_energy"]
             ].values
             all_points.loc[fiber_at_time.index, metric.value] = get_sum_bending_energy(
-                fiber_values
+                polymer_trace, **options
             )
     return all_points
 
 
-def run_workflow(
-    all_points: pd.core.frame.DataFrame, metrics_to_calculate: list
+def compression_metrics_workflow(
+    all_points: pd.core.frame.DataFrame,
+    metrics_to_calculate: list,
+    **options: dict,
 ) -> pd.core.frame.DataFrame:
     """
     Calculates chosen metrics from cytosim output of fiber positions and
@@ -104,7 +113,7 @@ def run_workflow(
 
     """
     for metric in metrics_to_calculate:
-        all_points = run_metric_calculation(all_points, metric)
+        all_points = run_metric_calculation(all_points, metric, **options)
     return all_points
 
 
