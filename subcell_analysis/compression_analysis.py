@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from typing import Tuple
-from pacmap import PaCMAP
 from enum import Enum
+from typing import Tuple
+
 import numpy as np
+from pacmap import PaCMAP
 from sklearn.decomposition import PCA
 
 # TODO: consider creating a fiber class?
@@ -382,7 +383,7 @@ def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    polymer_trace: [k x t x n x 3] numpy array
+    polymer_trace_time_series: [k x t x n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at each time point. k = number of traces, t = number of time points,
         n = number of points in each trace

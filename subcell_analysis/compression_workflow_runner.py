@@ -7,6 +7,7 @@ from .compression_analysis import (
     get_asymmetry_of_peak,
     get_average_distance_from_end_to_end_axis,
     get_energy_asymmetry,
+    get_sum_bending_energy,
     get_third_component_variance,
     get_total_fiber_twist,
     get_sum_bending_energy,
