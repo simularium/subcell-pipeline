@@ -90,7 +90,7 @@ def get_end_to_end_axis_distances_and_projections(
 
 def get_average_distance_from_end_to_end_axis(
     polymer_trace: np.ndarray,
-    **options,
+    **options: dict,
 ) -> float:
     """
     Returns the average perpendicular distance of polymer trace points from
@@ -118,7 +118,7 @@ def get_average_distance_from_end_to_end_axis(
 
 def get_asymmetry_of_peak(
     polymer_trace: np.ndarray,
-    **options,
+    **options: dict,
 ) -> float:
     """
     returns the scaled distance of the projection of the peak from the
@@ -186,7 +186,7 @@ def get_total_fiber_twist(
     compression_axis: int = 0,
     signed: bool = True,
     tolerance: float = ABS_TOL,
-    **options,
+    **options: dict,
 ) -> float:
     """
     Calculates the total twist using projections of the polymer trace
@@ -428,7 +428,7 @@ def fit_pca_to_polymer_trace(
 
 def get_third_component_variance(
     polymer_trace: np.ndarray,
-    **options,
+    **options: dict,
 ) -> float:
     """
     Returns the third PCA component given the x,y,z positions of a fiber at
@@ -451,7 +451,7 @@ def get_third_component_variance(
 
 def get_energy_asymmetry(
     fiber_energy: np.ndarray,
-    **options,
+    **options: dict,
 ) -> float:
     """
     Returns the sum bending energy given a single fiber x,y,z positions
@@ -479,6 +479,6 @@ def get_energy_asymmetry(
 
 def get_sum_bending_energy(
     fiber_energy: np.ndarray,
-    **options,
+    **options: dict,
 ) -> float:
     return fiber_energy[3].sum()

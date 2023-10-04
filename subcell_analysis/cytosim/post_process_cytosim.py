@@ -155,8 +155,8 @@ def cytosim_to_simularium(
     box_size: float = 2,
     scale_factor: float = 10,
     color: list = None,
-    actin_number: str = 0,
-):
+    actin_number: int = 0,
+) -> CytosimData:
     example_data = CytosimData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),
