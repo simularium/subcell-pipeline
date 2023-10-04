@@ -8,13 +8,15 @@ from scipy import interpolate as spinterp
 # %%
 num_repeats = 5
 df_list = []
-configs = ['vary_compress_rate0006']
-directory = '../data/dataframes'
+configs = ["vary_compress_rate0006"]
+directory = "../data/dataframes"
 for config in configs:
     for repeat in range(num_repeats):
         print(config, repeat)
-        #cytosim_actin_compression_velocity_vary_compress_rate0006_repeat_0.csv
-        df = pd.read_csv(f'{directory}/cytosim_actin_compression_velocity_{config}_repeat_{repeat}.csv')
+        # cytosim_actin_compression_velocity_vary_compress_rate0006_repeat_0.csv
+        df = pd.read_csv(
+            f"{directory}/cytosim_actin_compression_velocity_{config}_repeat_{repeat}.csv"
+        )
         df["repeat"] = repeat
         df["config"] = config
         df_list.append(df)
@@ -37,8 +39,10 @@ for config, df_config in df_all.groupby("config"):
             u = np.linspace(0, 1, num_monomers)
             all_times.append(F(u).T)
         all_times = np.array(all_times)
-        interp_timepoints = np.around(len(all_times) / num_timepoints * np.arange(num_timepoints)).astype(int)
-        all_config_repeats.append(np.array(all_times)[interp_timepoints,:,:])
+        interp_timepoints = np.around(
+            len(all_times) / num_timepoints * np.arange(num_timepoints)
+        ).astype(int)
+        all_config_repeats.append(np.array(all_times)[interp_timepoints, :, :])
 all_config_repeats = np.array(all_config_repeats)
 
 # %%
@@ -48,6 +52,7 @@ embed_pos = embedding.fit_transform(reshaped_metrics)
 
 # %%
 import matplotlib.pyplot as plt
+
 fig, ax = plt.subplots()
 configs = [3, 4]
 for ct, config in enumerate(configs):
@@ -60,6 +65,3 @@ ax.legend()
 plt.show()
 
 # %%
-
-
-

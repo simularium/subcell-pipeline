@@ -11,10 +11,10 @@ from preconfig import Preconfig
 # Preconfig class allows us to parse a template file and generate a list of config files.
 # Two loops puts the generated config files for a given number of repeats in S3.
 preconfig = Preconfig()
-path_to_template = '../templates/vary_compress_rate.cym.tpl'
-configs = preconfig.parse(path_to_template,{})
+path_to_template = "../templates/vary_compress_rate.cym.tpl"
+configs = preconfig.parse(path_to_template, {})
 s3_client = boto3.client("s3")
-bucket = 'cytosim-working-bucket'
+bucket = "cytosim-working-bucket"
 num_repeats = 5
 job_names = []
 buffered = np.empty((len(configs)), dtype=object)
@@ -23,7 +23,7 @@ for index, config in enumerate(configs):
     job_names.append(job_name)
     for repeat in range(num_repeats):
         opened_config = open(config, "rb")
-        config_name = f'{job_name}/config/{job_name}_{repeat}.cym' 
+        config_name = f"{job_name}/config/{job_name}_{repeat}.cym"
         s3_client.put_object(Bucket=bucket, Key=config_name, Body=opened_config)
 job_names
 
@@ -40,12 +40,13 @@ job_definition_arn = "job_definition_arn"
 # Parameters for a job definition
 from container_collection.batch.register_batch_job import register_batch_job
 from container_collection.batch.make_batch_job import make_batch_job
+
 job_definition_name = "karthikv_cytosim_varycompressrate"
 image = "simularium/cytosim:latest"
 vcpus = 1
 memory = 7000
 bucket_name = "s3://cytosim-working-bucket/"
-simulation_name = ''
+simulation_name = ""
 
 # %%
 account = getpass.getpass()
@@ -59,12 +60,19 @@ for index in range(len(configs)):
     print(index)
     simulation_name = job_names[index]
     print(simulation_name)
-    job_definition = make_batch_job(f"cytosim-test-varycompressrate-{str(index)}", 'simularium/cytosim:latest', account, 'us-west-2', 'karthikv', 1, 7000, 's3://cytosim-working-bucket/')
+    job_definition = make_batch_job(
+        f"cytosim-test-varycompressrate-{str(index)}",
+        "simularium/cytosim:latest",
+        account,
+        "us-west-2",
+        "karthikv",
+        1,
+        7000,
+        "s3://cytosim-working-bucket/",
+    )
     registered_jd = register_batch_job(job_definition)
     job_definitions[index] = registered_jd
     break
-
-        
 
 
 # %% [markdown]
@@ -93,9 +101,15 @@ job_name
 # Loop to submit our batch jobs [index * size for total number of simulations]
 for index in range(len(new_configs)):
     print(index)
-    print(f'{job_name}-completerun-config{index}')
-    submit_batch_job(name=f'{job_name}-completerun-config{index}', job_definition_arn=job_definitions[index],user=user,queue=queue,size=size)
-    
+    print(f"{job_name}-completerun-config{index}")
+    submit_batch_job(
+        name=f"{job_name}-completerun-config{index}",
+        job_definition_arn=job_definitions[index],
+        user=user,
+        queue=queue,
+        size=size,
+    )
+
 
 # %% [markdown]
 # # 4. Monitor job status
@@ -113,14 +127,11 @@ from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_
 import pandas as pd
 
 # %%
-bucket_name = 'cytosim-working-bucket'
+bucket_name = "cytosim-working-bucket"
 num_repeats = 5
 num_velocities = 7
 configs = [f"vary_compress_rate000{num}" for num in range(3, num_velocities)]
 
-# %%
-%load_ext autoreload
-%autoreload 2
 
 # %%
 from pathlib import Path
@@ -132,7 +143,11 @@ save_folder = Path("../data/dataframes")
 create_dataframes_for_repeats(bucket_name, num_repeats, configs, save_folder)
 
 # %%
-from subcell_analysis.compression_workflow_runner import compression_metrics_workflow,  plot_metric, plot_metric_list
+from subcell_analysis.compression_workflow_runner import (
+    compression_metrics_workflow,
+    plot_metric,
+    plot_metric_list,
+)
 from subcell_analysis.compression_analysis import (
     COMPRESSIONMETRIC,
 )
@@ -142,21 +157,39 @@ config_inds = [3, 4]
 outputs = [[None] * num_repeats] * len(config_inds)
 
 # %%
-#TODO: Run metric calculations on repeats.
+# TODO: Run metric calculations on repeats.
 num_repeats = 5
 outputs = [None] * num_repeats
 for repeat in range(num_repeats):
-    all_output = pd.read_csv(f'dataframes/actin-forces0_{repeat}.csv')
-    outputs[repeat] = compression_metrics_workflow(all_output, [COMPRESSIONMETRIC.PEAK_ASYMMETRY, COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE, COMPRESSIONMETRIC.NON_COPLANARITY, COMPRESSIONMETRIC.TOTAL_FIBER_TWIST, COMPRESSIONMETRIC.SUM_BENDING_ENERGY])
+    all_output = pd.read_csv(f"dataframes/actin-forces0_{repeat}.csv")
+    outputs[repeat] = compression_metrics_workflow(
+        all_output,
+        [
+            COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
+            COMPRESSIONMETRIC.NON_COPLANARITY,
+            COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
+            COMPRESSIONMETRIC.SUM_BENDING_ENERGY,
+        ],
+    )
 
 # %%
 import matplotlib.pyplot as plt
+
 config_ind = 0
-metrics = [COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE, COMPRESSIONMETRIC.TOTAL_FIBER_TWIST, COMPRESSIONMETRIC.SUM_BENDING_ENERGY, COMPRESSIONMETRIC.PEAK_ASYMMETRY, COMPRESSIONMETRIC.NON_COPLANARITY]
+metrics = [
+    COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
+    COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
+    COMPRESSIONMETRIC.SUM_BENDING_ENERGY,
+    COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+    COMPRESSIONMETRIC.NON_COPLANARITY,
+]
 for metric in metrics:
     fig, ax = plt.subplots()
     for repeat in range(num_repeats):
-        metric_by_time = outputs[config_ind][repeat].groupby(["time"])[metric.value].mean()
+        metric_by_time = (
+            outputs[config_ind][repeat].groupby(["time"])[metric.value].mean()
+        )
         ax.plot(metric_by_time, label=f"config ind {config_ind} repeat {repeat}")
     ax.legend()
     ax.set_xlabel("time")
@@ -182,7 +215,7 @@ df_list = []
 configs = [3, 4]
 for config in configs:
     for repeat in range(num_repeats):
-        df = pd.read_csv(f'dataframes/actin_forces{config}_{repeat}.csv')
+        df = pd.read_csv(f"dataframes/actin_forces{config}_{repeat}.csv")
         df["repeat"] = repeat
         df["config"] = config
         df_list.append(df)
@@ -207,8 +240,10 @@ for config, df_config in df_all.groupby("config"):
             u = np.linspace(0, 1, num_monomers)
             all_times.append(F(u).T)
         all_times = np.array(all_times)
-        interp_timepoints = np.around(len(all_times) / num_timepoints * np.arange(num_timepoints)).astype(int)
-        all_config_repeats.append(np.array(all_times)[interp_timepoints,:,:])
+        interp_timepoints = np.around(
+            len(all_times) / num_timepoints * np.arange(num_timepoints)
+        ).astype(int)
+        all_config_repeats.append(np.array(all_times)[interp_timepoints, :, :])
 all_config_repeats = np.array(all_config_repeats)
 
 # %%
@@ -237,5 +272,3 @@ ax.set_ylabel("embedding 2")
 ax.set_title("PaCMAP embedding of all repeats")
 ax.legend()
 plt.show()
-
-

@@ -20,7 +20,11 @@ readdy_compression_velocities = [4.7, 15, 47, 150]
 cytosim_compression_velocities = [0.15, 0.47434165, 1.5, 4.7, 15, 47, 150]
 
 # %%
-metrics =  [COMPRESSIONMETRIC.NON_COPLANARITY, COMPRESSIONMETRIC.PEAK_ASYMMETRY, COMPRESSIONMETRIC.TOTAL_FIBER_TWIST]
+metrics = [
+    COMPRESSIONMETRIC.NON_COPLANARITY,
+    COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+    COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
+]
 
 # %% [markdown]
 # ### Process cytosim data
@@ -34,17 +38,27 @@ velocity_inds = range(3, 7)
 df_metrics = []
 for index in velocity_inds:
     for repeat in range(num_repeats):
-        print(f"Calculating metrics for velocity {cytosim_compression_velocities[index]} and repeat {repeat}")
-        df = pd.read_csv(f"{df_path}/cytosim_actin_compression_velocity_vary_compress_rate000{index}_repeat_{repeat}.csv")
+        print(
+            f"Calculating metrics for velocity {cytosim_compression_velocities[index]} and repeat {repeat}"
+        )
+        df = pd.read_csv(
+            f"{df_path}/cytosim_actin_compression_velocity_vary_compress_rate000{index}_repeat_{repeat}.csv"
+        )
         df = compression_metrics_workflow(df, metrics, signed=False)
-        metric_df = df.groupby("time")[[metric.value for metric in metrics]].mean().reset_index()
+        metric_df = (
+            df.groupby("time")[[metric.value for metric in metrics]]
+            .mean()
+            .reset_index()
+        )
         metric_df["velocity"] = cytosim_compression_velocities[index]
         metric_df["repeat"] = repeat
         df_metrics.append(metric_df)
         # break
     # break
 df_cytosim = pd.concat(df_metrics)
-df_cytosim.to_csv(f"{df_path}/cytosim_actin_compression_metrics_all_velocities_and_repeats.csv")
+df_cytosim.to_csv(
+    f"{df_path}/cytosim_actin_compression_metrics_all_velocities_and_repeats.csv"
+)
 
 # %% [markdown]
 # Load from saved data
@@ -60,26 +74,37 @@ num_repeats = 3
 df_metrics = []
 for velocity in readdy_compression_velocities:
     for repeat in range(num_repeats):
-        file_path = df_path / f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv"
+        file_path = (
+            df_path
+            / f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv"
+        )
         if file_path.is_file():
             df = pd.read_csv(file_path)
         else:
             continue
         print(f"Calculating metrics for velocity {velocity} and repeat {repeat}")
         df = compression_metrics_workflow(df, metrics, signed=False)
-        metric_df = df.groupby("time")[[metric.value for metric in metrics]].mean().reset_index()
+        metric_df = (
+            df.groupby("time")[[metric.value for metric in metrics]]
+            .mean()
+            .reset_index()
+        )
         metric_df["velocity"] = velocity
         metric_df["repeat"] = repeat
         df_metrics.append(metric_df)
 
 df_readdy = pd.concat(df_metrics)
-df_readdy.to_csv(f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv")
+df_readdy.to_csv(
+    f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv"
+)
 
 # %% [markdown]
 # Load from saved data
 
 # %%
-df_readdy = pd.read_csv(f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv")
+df_readdy = pd.read_csv(
+    f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv"
+)
 
 # %% [markdown]
 # Plot metrics for readdy and cytosim
@@ -98,15 +123,14 @@ df_combined = pd.concat([df_cytosim, df_readdy])
 df_combined
 
 # %%
-color_map = {
-    "cytosim": "C0",
-    "readdy": "C1"
-}
+color_map = {"cytosim": "C0", "readdy": "C1"}
 
 # %%
 num_velocities = df_combined["velocity"].nunique()
 for metric in metrics:
-    fig, axs = plt.subplots(1, num_velocities, figsize=(num_velocities * 5, 5), sharey=True, dpi=300)
+    fig, axs = plt.subplots(
+        1, num_velocities, figsize=(num_velocities * 5, 5), sharey=True, dpi=300
+    )
     for ct, (velocity, df_velocity) in enumerate(df_combined.groupby("velocity")):
         for simulator, df_simulator in df_velocity.groupby("simulator"):
             for repeat, df_repeat in df_simulator.groupby("repeat"):
@@ -139,9 +163,6 @@ for metric in metrics:
 # df_cytosim.groupby(["velocity", "repeat"]).agg("size")
 
 # %%
-df_combined["TOTAL_FIBER_TWIST"].hist(bins=[0.5,1.5,2.5,3.5])
+df_combined["TOTAL_FIBER_TWIST"].hist(bins=[0.5, 1.5, 2.5, 3.5])
 
 # %%
-
-
-

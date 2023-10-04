@@ -203,7 +203,9 @@ def get_total_fiber_twist(
     total_twist: float
         sum of angles between PCA projection vectors
     """
-    trace_2d = polymer_trace[:, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]]
+    trace_2d = polymer_trace[
+        :, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]
+    ]
     trace_2d = trace_2d - np.mean(trace_2d, axis=0)
 
     return get_total_fiber_twist_2d(trace_2d, signed=signed, tolerance=tolerance)

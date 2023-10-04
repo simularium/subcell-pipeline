@@ -22,7 +22,11 @@ config_id = 4
 # %%
 s3_client = boto3.client("s3")
 for repeat in range(num_repeats):
-    s3_client.download_file("cytosim-working-bucket", f"vary_compress_rate0006/outputs/{repeat}/fiber_segment_curvature.txt", f"data/fiber_segment_curvature_{repeat}.txt")
+    s3_client.download_file(
+        "cytosim-working-bucket",
+        f"vary_compress_rate0006/outputs/{repeat}/fiber_segment_curvature.txt",
+        f"data/fiber_segment_curvature_{repeat}.txt",
+    )
 
 # %% [markdown]
 # ### Process single repeat
@@ -33,7 +37,9 @@ input_file_path = f"data/fiber_segment_curvature_{repeat}.txt"
 
 box_size = 3.0
 scale_factor = 100
-fiber_data = cytosim_to_simularium(input_file_path, box_size=box_size, scale_factor=scale_factor)
+fiber_data = cytosim_to_simularium(
+    input_file_path, box_size=box_size, scale_factor=scale_factor
+)
 
 # %% [markdown]
 # Create cytosim converter object
@@ -52,22 +58,28 @@ df = pd.read_csv(df_path)
 # Add metric plots
 
 # %%
-plot_metrics = [COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE, COMPRESSIONMETRIC.TOTAL_FIBER_TWIST, COMPRESSIONMETRIC.SUM_BENDING_ENERGY, COMPRESSIONMETRIC.PEAK_ASYMMETRY, COMPRESSIONMETRIC.NON_COPLANARITY]
+plot_metrics = [
+    COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
+    COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
+    COMPRESSIONMETRIC.SUM_BENDING_ENERGY,
+    COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+    COMPRESSIONMETRIC.NON_COPLANARITY,
+]
 
 # %%
 for metric in plot_metrics:
     metric_by_time = df.groupby(["time"])[metric.value].mean()
     cytosim_converter.add_plot(
-    ScatterPlotData(
-        title=f"{metric} over time",
-        xaxis_title="Time",
-        yaxis_title=metric.value,
-        xtrace=np.arange(len(metric_by_time))*1E-5,
-        ytraces={
-            f"repeat {repeat}": metric_by_time,
-        },
+        ScatterPlotData(
+            title=f"{metric} over time",
+            xaxis_title="Time",
+            yaxis_title=metric.value,
+            xtrace=np.arange(len(metric_by_time)) * 1e-5,
+            ytraces={
+                f"repeat {repeat}": metric_by_time,
+            },
+        )
     )
-)
 
 # %% [markdown]
 # Save converted data
@@ -88,7 +100,13 @@ colors = ["#F0F0F0", "#0000FF", "#FF0000", "#00FF00", "#FF00FF"]
 
 # %%
 input_file_path = f"data/fiber_segment_curvature_0.txt"
-fiber_data = cytosim_to_simularium(input_file_path, box_size=box_size, scale_factor=scale_factor, color=colors[0], actin_number=0)
+fiber_data = cytosim_to_simularium(
+    input_file_path,
+    box_size=box_size,
+    scale_factor=scale_factor,
+    color=colors[0],
+    actin_number=0,
+)
 cytosim_converter = CytosimConverter(fiber_data)
 
 trajectory_data = cytosim_converter._data
@@ -99,7 +117,13 @@ trajectory_data = cytosim_converter._data
 # %%
 for repeat in range(1, num_repeats):
     input_file_path = f"data/fiber_segment_curvature_{repeat}.txt"
-    fiber_data = cytosim_to_simularium(input_file_path, box_size=box_size, scale_factor=scale_factor, color=colors[repeat], actin_number=repeat)
+    fiber_data = cytosim_to_simularium(
+        input_file_path,
+        box_size=box_size,
+        scale_factor=scale_factor,
+        color=colors[repeat],
+        actin_number=repeat,
+    )
     cytosim_converter = CytosimConverter(fiber_data)
     new_agent_data = cytosim_converter._data.agent_data
 
@@ -112,7 +136,13 @@ all_repeats_converter = TrajectoryConverter(trajectory_data)
 # ### Add plots for all repeats
 
 # %%
-plot_metrics = [COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE, COMPRESSIONMETRIC.TOTAL_FIBER_TWIST, COMPRESSIONMETRIC.SUM_BENDING_ENERGY, COMPRESSIONMETRIC.PEAK_ASYMMETRY, COMPRESSIONMETRIC.NON_COPLANARITY]
+plot_metrics = [
+    COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
+    COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
+    COMPRESSIONMETRIC.SUM_BENDING_ENERGY,
+    COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+    COMPRESSIONMETRIC.NON_COPLANARITY,
+]
 
 # %% [markdown]
 # Get metrics for all repeats
@@ -121,7 +151,7 @@ plot_metrics = [COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE, COMPRESSIONMETRIC.TOTAL
 df_list = []
 for repeat in range(num_repeats):
     df_path = f"dataframes/actin_forces{config_id}_{repeat}_compression_metrics.csv"
-    df = pd.read_csv(df_path)   
+    df = pd.read_csv(df_path)
     df["repeat"] = repeat
     df_list.append(df)
 df_all = pd.concat(df_list)
@@ -140,7 +170,7 @@ for metric in plot_metrics:
             title=f"{metric.value} over time",
             xaxis_title="Time",
             yaxis_title=metric.value,
-            xtrace=np.arange(metric_by_time.shape[0])*1E-5,
+            xtrace=np.arange(metric_by_time.shape[0]) * 1e-5,
             ytraces=ytraces,
             render_mode="lines",
         )
@@ -151,5 +181,3 @@ for metric in plot_metrics:
 
 # %%
 all_repeats_converter.save(f"outputs/vary_compress_rate_0006_all_repeats")
-
-
