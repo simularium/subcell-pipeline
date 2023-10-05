@@ -50,7 +50,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: ${{ matrix.python-version }}
-        activate-environment: anaconda-client-env
+        activate-environment: subcell_analysis
         environment-file: ./environment.yml
     - name: Install Dependencies
       shell: bash -l {0}

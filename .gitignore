@@ -112,3 +112,10 @@ ENV/
 
 # VSCode
 .vscode
+
+# data files
+*.csv
+**/data/**
+**/figures/**
+**/outputs/**
+**/figures/**

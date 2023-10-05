@@ -26,7 +26,6 @@ import subcell_analysis
 sys.path.insert(0, os.path.abspath(".."))
 
 
-
 # -- General configuration ---------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -45,7 +44,7 @@ extensions = [
     "sphinx_copybutton",
     # Doc installs
     "m2r2",
-    "numpydoc", 
+    "numpydoc",
 ]
 
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
@@ -166,7 +165,9 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(main_doc, "subcell_analysis", "subcell-analysis Documentation", [author], 1)]
+man_pages = [
+    (main_doc, "subcell_analysis", "subcell-analysis Documentation", [author], 1)
+]
 
 
 # -- Options for Texinfo output ----------------------------------------

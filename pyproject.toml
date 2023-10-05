@@ -32,7 +32,11 @@ dependencies = [
   "pandas",
   "matplotlib",
   "tqdm",
+  "pacmap",
   "simulariumio",
+  "container-collection",
+  "boto3",
+  "scikit-learn"
 ]
 
 [project.urls]
@@ -141,6 +145,7 @@ ignore = [
   "*.ipynb",
   "*notebooks/*",
   "*tests/**",
+  "*templates/*",
   "environment.yml",
 ]
 
