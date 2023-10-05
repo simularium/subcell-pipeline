@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>subcell_analysis.cytosim.post_process_cytosim - subcell-analysis 0.1.dev1+g42094c3 documentation</title>
+        <title>subcell_analysis.cytosim.post_process_cytosim - subcell-analysis 0.1.dev1+g4d0e8f4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g42094c3 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g4d0e8f4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g42094c3 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4d0e8f4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -202,45 +202,60 @@
         </div>
         <article role="main">
           <h1>Source code for subcell_analysis.cytosim.post_process_cytosim</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">simulariumio</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DISPLAY_TYPE</span><span class="p">,</span>
+    <span class="n">DisplayData</span><span class="p">,</span>
+    <span class="n">InputFileData</span><span class="p">,</span>
+    <span class="n">MetaData</span><span class="p">,</span>
+    <span class="n">ModelMetaData</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">simulariumio.cytosim</span> <span class="kn">import</span> <span class="n">CytosimData</span><span class="p">,</span> <span class="n">CytosimObjectInfo</span>
+
+<span class="n">save_folder_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../data/dataframes&quot;</span><span class="p">)</span>
 
 
-<span class="c1"># TODO add actual types</span>
-<div class="viewcode-block" id="read_fiber_forces">
-<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.read_fiber_forces">[docs]</a>
-<span class="k">def</span> <span class="nf">read_fiber_forces</span><span class="p">(</span><span class="n">input_file</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="c1"># input_file is&#39;fiber_segment_curvature.txt&#39;</span>
-    <span class="n">fiber_forces</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">fiber_forces</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span></div>
+<div class="viewcode-block" id="convert_and_save_dataframe">
+<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.convert_and_save_dataframe">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_and_save_dataframe</span><span class="p">(</span>
+    <span class="n">fiber_energy_all</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">fiber_forces_all</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rigidity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.041</span><span class="p">,</span>
+    <span class="n">save_folder</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">save_folder_path</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="c1"># Convert cytosim output to pandas dataframe and saves to csv.</span>
 
+    <span class="n">bending_energies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fiber_energy_all</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">bending_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">bending_energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bending_energy</span><span class="p">)</span>
 
-
-<span class="c1"># TODO add actual types</span>
-<div class="viewcode-block" id="all_fibers">
-<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.all_fibers">[docs]</a>
-<span class="k">def</span> <span class="nf">all_fibers</span><span class="p">(</span><span class="n">input_file</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="c1"># input_file is&#39;fiber_segment_curvature.txt&#39;</span>
-    <span class="n">fibers</span> <span class="o">=</span> <span class="n">read_fiber_forces</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+    <span class="n">single_all_lines</span> <span class="o">=</span> <span class="n">fiber_forces_all</span>
     <span class="n">timepoints_forces</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">fid</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">fiber_point</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fibers</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">single_all_lines</span><span class="p">:</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;% time&quot;</span><span class="p">):</span>
                 <span class="n">time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">timepoints_forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
-                <span class="n">singles</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">singles</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">% e</span><span class="s2">nd&quot;</span><span class="p">):</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">singles</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
                 <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-                <span class="c1">#                     fiber_point=0</span>
+                <span class="n">fiber_point</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">fid</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="c1"># print &#39;finished parsing &#39; + rundir + &#39; timepoint &#39; + str(time)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># print(line.split())</span>
             <span class="p">[</span>
                 <span class="n">fiber_id</span><span class="p">,</span>
                 <span class="n">xpos</span><span class="p">,</span>
@@ -254,25 +269,148 @@
             <span class="c1">#                 figure out if you&#39;re on the first, second fiber point etc</span>
             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">):</span>
                 <span class="n">fiber_point</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="c1">#                     print(fiber_point)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fiber_point</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">fid</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="c1">#                     print(&#39;id: &#39;+str(fid))</span>
-        <span class="n">singles</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fiber_point</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;fiber_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">),</span>
-            <span class="s2">&quot;xpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">xpos</span><span class="p">),</span>
-            <span class="s2">&quot;ypos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ypos</span><span class="p">),</span>
-            <span class="s2">&quot;zpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">zpos</span><span class="p">),</span>
-            <span class="s2">&quot;xforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">xforce</span><span class="p">),</span>
-            <span class="s2">&quot;yforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">yforce</span><span class="p">),</span>
-            <span class="s2">&quot;zforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">zforce</span><span class="p">),</span>
-            <span class="s2">&quot;segment_curvature&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">segment_curvature</span><span class="p">),</span>
-        <span class="p">}</span>
+            <span class="c1">#                     print(&#39;id: &#39;+str(fid))</span>
+            <span class="n">singles</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fiber_point</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;fiber_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">),</span>
+                <span class="s2">&quot;xpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">xpos</span><span class="p">),</span>
+                <span class="s2">&quot;ypos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ypos</span><span class="p">),</span>
+                <span class="s2">&quot;zpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">zpos</span><span class="p">),</span>
+                <span class="s2">&quot;xforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">xforce</span><span class="p">),</span>
+                <span class="s2">&quot;yforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">yforce</span><span class="p">),</span>
+                <span class="s2">&quot;zforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">zforce</span><span class="p">),</span>
+                <span class="s2">&quot;segment_curvature&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">segment_curvature</span><span class="p">),</span>
+            <span class="p">}</span>
 
     <span class="n">all_outputs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="n">timepoints_forces</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">])</span>
+    <span class="c1"># all_outputs = all_outputs.swaplevel(&#39;time&#39;,&#39;id&#39;,axis=0).sort_index()</span>
+    <span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;force_magnitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;xforce&quot;</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;yforce&quot;</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;zforce&quot;</span><span class="p">])</span>
+    <span class="p">)</span>
 
+    <span class="c1">#  Segment bending energy, in pN nm</span>
+    <span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;segment_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;segment_curvature&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rigidity</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="c1"># fiber_forces_outputs_allruns.append(all_outputs)</span>
+
+    <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;cytosim_actin_compression&quot;</span>
+
+    <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_name</span> <span class="o">+=</span> <span class="n">suffix</span>
+
+    <span class="n">all_outputs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">save_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved Output to </span><span class="si">{</span><span class="n">save_folder</span><span class="o">/</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">all_outputs</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">all_outputs</span></div>
+
+
+
+<div class="viewcode-block" id="read_cytosim_s3_file">
+<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.read_cytosim_s3_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_cytosim_s3_file</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="c1"># Read a file from S3 bucket and return a list of lines.</span>
+
+    <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">Key</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">file_content</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">file_content</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred while reading the file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+
+
+<div class="viewcode-block" id="get_s3_file">
+<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.get_s3_file">[docs]</a>
+<span class="k">def</span> <span class="nf">get_s3_file</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">Key</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="create_dataframes_for_repeats">
+<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.create_dataframes_for_repeats">[docs]</a>
+<span class="k">def</span> <span class="nf">create_dataframes_for_repeats</span><span class="p">(</span>
+    <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_repeats</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">configs</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">save_folder</span><span class="p">:</span> <span class="n">Path</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Create dataframes for all repeats of given configs.</span>
+
+    <span class="n">segenergy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span> <span class="n">num_repeats</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">fibenergy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span> <span class="n">num_repeats</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">fibenergylabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span> <span class="n">num_repeats</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">configs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">repeat</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_repeats</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing config </span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2"> and repeat </span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">segenergy</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">repeat</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_cytosim_s3_file</span><span class="p">(</span>
+                <span class="n">bucket_name</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">/outputs/</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">/fiber_segment_curvature.txt&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">fibenergylabels</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">repeat</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_cytosim_s3_file</span><span class="p">(</span>
+                <span class="n">bucket_name</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">/outputs/</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">/fiber_energy_labels.txt&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">fibenergy</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">repeat</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_cytosim_s3_file</span><span class="p">(</span>
+                <span class="n">bucket_name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">/outputs/</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">/fiber_energy.txt&quot;</span>
+            <span class="p">)</span>
+            <span class="n">convert_and_save_dataframe</span><span class="p">(</span>
+                <span class="n">fibenergy</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">repeat</span><span class="p">],</span>
+                <span class="n">segenergy</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">repeat</span><span class="p">],</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;_velocity_</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">_repeat_</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">save_folder</span><span class="o">=</span><span class="n">save_folder</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cytosim_to_simularium">
+<a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.cytosim_to_simularium">[docs]</a>
+<span class="k">def</span> <span class="nf">cytosim_to_simularium</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">box_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">scale_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">color</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">actin_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CytosimData</span><span class="p">:</span>
+    <span class="n">example_data</span> <span class="o">=</span> <span class="n">CytosimData</span><span class="p">(</span>
+        <span class="n">meta_data</span><span class="o">=</span><span class="n">MetaData</span><span class="p">(</span>
+            <span class="n">box_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">]),</span>
+            <span class="n">scale_factor</span><span class="o">=</span><span class="n">scale_factor</span><span class="p">,</span>
+            <span class="n">trajectory_title</span><span class="o">=</span><span class="s2">&quot;Some parameter set&quot;</span><span class="p">,</span>
+            <span class="n">model_meta_data</span><span class="o">=</span><span class="n">ModelMetaData</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Some agent-based model&quot;</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="s2">&quot;8.1&quot;</span><span class="p">,</span>
+                <span class="n">authors</span><span class="o">=</span><span class="s2">&quot;A Modeler&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;An agent-based model run with some parameter set&quot;</span><span class="p">),</span>
+                <span class="n">doi</span><span class="o">=</span><span class="s2">&quot;10.1016/j.bpj.2016.02.002&quot;</span><span class="p">,</span>
+                <span class="n">source_code_url</span><span class="o">=</span><span class="s2">&quot;https://github.com/simularium/simulariumio&quot;</span><span class="p">,</span>
+                <span class="n">source_code_license_url</span><span class="o">=</span><span class="s2">&quot;https://github.com/simularium/simulariumio/blob/main/LICENSE&quot;</span><span class="p">,</span>
+                <span class="n">input_data_url</span><span class="o">=</span><span class="s2">&quot;https://allencell.org/path/to/native/engine/input/files&quot;</span><span class="p">,</span>
+                <span class="n">raw_output_data_url</span><span class="o">=</span><span class="s2">&quot;https://allencell.org/path/to/native/engine/output/files&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">object_info</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;fibers&quot;</span><span class="p">:</span> <span class="n">CytosimObjectInfo</span><span class="p">(</span>
+                <span class="n">cytosim_file</span><span class="o">=</span><span class="n">InputFileData</span><span class="p">(</span>
+                    <span class="n">file_path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">display_data</span><span class="o">=</span><span class="p">{</span>
+                    <span class="mi">1</span><span class="p">:</span> <span class="n">DisplayData</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;actin#</span><span class="si">{</span><span class="n">actin_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">radius</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+                        <span class="n">display_type</span><span class="o">=</span><span class="n">DISPLAY_TYPE</span><span class="o">.</span><span class="n">FIBER</span><span class="p">,</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">},</span>
+            <span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">example_data</span></div>
 
 </pre></div>
         </article>
@@ -306,7 +444,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=186c6d1b"></script>
+</div><script src="../../../_static/documentation_options.js?v=fe764670"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
