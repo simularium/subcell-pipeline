@@ -1,12 +1,12 @@
 # %%
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
 from subcell_analysis.compression_workflow_runner import compression_metrics_workflow
-
-from pathlib import Path
 
 # %% set matplotlib defaults
 plt.rcdefaults()

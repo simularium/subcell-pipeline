@@ -32,7 +32,7 @@ def get_end_to_end_unit_vector(
         array containing the x,y,z positions of the polymer trace points
 
     Returns
-    ----------
+    -------
     end_to_end_unit_vector: [3 x 1] numpy array
         unit vector of the end-to-end axis of the polymer trace
     end_to_end_axis_length: float
@@ -170,7 +170,7 @@ def get_pca_polymer_trace_projection(
     polymer_trace: np.ndarray,
 ) -> np.ndarray:
     """
-    Returns the PCA projection of the polymer trace
+    Returns the PCA projection of the polymer trace.
 
     Parameters
     ----------
@@ -178,7 +178,7 @@ def get_pca_polymer_trace_projection(
         array containing the x,y,z positions of the polymer trace
 
     Returns
-    ----------
+    -------
     pca_projection: [n x 3] numpy array
         PCA projection of the polymer trace
     """
@@ -195,7 +195,7 @@ def get_total_fiber_twist(
 ) -> float:
     """
     Calculates the total twist using projections of the polymer trace
-    in the 2nd and 3rd dimension
+    in the 2nd and 3rd dimension.
 
     Parameters
     ----------
@@ -229,7 +229,7 @@ def get_total_fiber_twist_pca(
 ) -> float:
     """
     Calculates the total twist using PCA projections of the polymer trace
-    in the 2nd and 3rd dimension
+    in the 2nd and 3rd dimension.
 
     Parameters
     ----------
@@ -255,7 +255,7 @@ def get_angle_between_vectors(
     signed: bool = False,
 ) -> float:
     """
-    Returns the signed angle between two vectors
+    Returns the signed angle between two vectors.
 
     Parameters
     ----------
@@ -267,7 +267,7 @@ def get_angle_between_vectors(
         if True, returns the signed angle between vec1 and vec2
 
     Returns
-    ----------
+    -------
     signed_angle: float
         signed angle between vec1 and vec2
     """
@@ -293,7 +293,7 @@ def get_total_fiber_twist_2d(
     tolerance: float = ABS_TOL,
 ) -> float:
     """
-    Calculates the total twist for 2d traces
+    Calculates the total twist for 2d traces.
 
     Parameters
     ----------
@@ -308,7 +308,6 @@ def get_total_fiber_twist_2d(
     total_twist: float
         sum of angles between trace vectors
     """
-
     prev_vec = None
     angles = np.zeros(len(trace_2d))
     for i in range(len(trace_2d)):
@@ -428,7 +427,7 @@ def fit_pca_to_polymer_trace(
     polymer_trace: np.ndarray,
 ) -> PCA:
     """
-    Returns the pca object fit to the polymer trace
+    Returns the pca object fit to the polymer trace.
 
     Parameters
     ----------
@@ -436,7 +435,7 @@ def fit_pca_to_polymer_trace(
         array containing the x,y,z positions of the polymer trace
 
     Returns
-    ----------
+    -------
     pca: PCA object
     """
     pca = PCA(n_components=3)
@@ -484,6 +483,7 @@ def get_energy_asymmetry(
         at a given time
     **options: dict
         Additional options as key-value pairs.
+
     Returns
     -------
     total_energy: float

@@ -10,7 +10,6 @@ from .compression_analysis import (
     get_sum_bending_energy,
     get_third_component_variance,
     get_total_fiber_twist,
-    get_sum_bending_energy,
 )
 
 ABS_TOL = 1e-6
