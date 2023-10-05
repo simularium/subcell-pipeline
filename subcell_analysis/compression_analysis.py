@@ -102,7 +102,8 @@ def get_average_distance_from_end_to_end_axis(
         array containing the x,y,z positions of the polymer trace
         at a given time
 
-    **options (dict): Additional options as key-value pairs.
+    **options: dict
+        Additional options as key-value pairs.
 
     Returns
     -------
@@ -131,7 +132,8 @@ def get_asymmetry_of_peak(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
-    **options (dict): Additional options as key-value pairs.
+    **options: dict
+        Additional options as key-value pairs.
 
     Returns
     -------
@@ -200,10 +202,14 @@ def get_total_fiber_twist(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
-    **options (dict): Additional options as key-value pairs.
-    **compression_axis (int): axis along which the polymer trace is compressed
-    **signed (bool): whether to return the signed or unsigned total twist
-    **tolerance (float): ABS_TOL
+    **options: dict
+        Additional options as key-value pairs.
+    **compression_axis: int
+        axis along which the polymer trace is compressed
+    **signed: bool
+        whether to return the signed or unsigned total twist
+    **tolerance: float 
+        ABS_TOL
     Returns
     ----------
     total_twist: float

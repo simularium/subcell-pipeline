@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from typing import Dict, Any
-
 
 from .compression_analysis import (
     COMPRESSIONMETRIC,
@@ -97,7 +95,7 @@ def run_metric_calculation(
 def compression_metrics_workflow(
     all_points: pd.core.frame.DataFrame,
     metrics_to_calculate: list,
-    **options: Dict[str, Any],
+    **options: dict
 ) -> pd.core.frame.DataFrame:
     """
     Calculates chosen metrics from cytosim output of fiber positions and
