@@ -44,7 +44,7 @@ for index in velocity_inds:
             f"""{df_path}/cytosim_actin_compression_velocity_vary_
             compress_rate000{index}_repeat_{repeat}.csv"""
         )
-        df = compression_metrics_workflow(df, metrics, **options)
+        df = compression_metrics_workflow(df, metrics, **options) # type: ignore
         metric_df = (
             df.groupby("time")[[metric.value for metric in metrics]]
             .mean()
@@ -78,7 +78,7 @@ for velocity in readdy_compression_velocities:
         else:
             continue
         print(f"Calculating metrics for velocity {velocity} and repeat {repeat}")
-        df = compression_metrics_workflow(df, metrics, **options)
+        df = compression_metrics_workflow(df, metrics, **options) # type: ignore
         metric_df = (
             df.groupby("time")[[metric.value for metric in metrics]]
             .mean()
