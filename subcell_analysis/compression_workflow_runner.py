@@ -94,9 +94,7 @@ def run_metric_calculation(
 
 
 def compression_metrics_workflow(
-    all_points: pd.core.frame.DataFrame,
-    metrics_to_calculate: list,
-    **options: dict
+    all_points: pd.core.frame.DataFrame, metrics_to_calculate: list, **options: dict
 ) -> pd.core.frame.DataFrame:
     """
     Calculates chosen metrics from cytosim output of fiber positions and

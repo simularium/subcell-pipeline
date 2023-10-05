@@ -208,7 +208,7 @@ def get_total_fiber_twist(
         axis along which the polymer trace is compressed
     signed: bool
         whether to return the signed or unsigned total twist
-    tolerance: float 
+    tolerance: float
         ABS_TOL
     Returns
     ----------
