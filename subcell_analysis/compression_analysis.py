@@ -102,6 +102,8 @@ def get_average_distance_from_end_to_end_axis(
         array containing the x,y,z positions of the polymer trace
         at a given time
 
+    **options (dict): Additional options as key-value pairs.
+
     Returns
     -------
     avg_perp_distance: float
@@ -129,6 +131,7 @@ def get_asymmetry_of_peak(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
+    **options (dict): Additional options as key-value pairs.
 
     Returns
     -------
@@ -197,7 +200,10 @@ def get_total_fiber_twist(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
-
+    **options (dict): Additional options as key-value pairs.
+    **compression_axis (int): axis along which the polymer trace is compressed
+    **signed (bool): whether to return the signed or unsigned total twist
+    **tolerance (float): ABS_TOL
     Returns
     ----------
     total_twist: float
@@ -224,7 +230,8 @@ def get_total_fiber_twist_pca(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
-
+    tolerance: float
+        ABS_TOL
     Returns
     ----------
     total_twist: float
@@ -286,7 +293,10 @@ def get_total_fiber_twist_2d(
     ----------
     trace_2d: [n x 2] numpy array
         array containing the x,y positions of the polymer trace
-
+    signed: bool
+        if True, returns the signed total twist
+    tolerance: float
+        ABS_TOL
     Returns
     ----------
     total_twist: float
@@ -326,6 +336,8 @@ def get_total_fiber_twist_bak(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
+    tolerance: float
+        ABS_TOL
 
     Returns
     -------
@@ -439,6 +451,8 @@ def get_third_component_variance(
     polymer_trace: [n x 3] numpy array
         array containing the x,y,z positions of the polymer trace
         at a given time
+    **options: dict
+        Additional options as key-value pairs.
 
     Returns
     -------
@@ -462,7 +476,8 @@ def get_energy_asymmetry(
     fiber_energy: [n x 4] numpy array
         array containing the x,y,z positions of the polymer trace and segment energy
         at a given time
-
+    **options: dict
+        Additional options as key-value pairs.
     Returns
     -------
     total_energy: float

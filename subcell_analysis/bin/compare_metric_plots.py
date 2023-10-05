@@ -36,10 +36,12 @@ df_metrics = []
 for index in velocity_inds:
     for repeat in range(num_repeats):
         print(
-            f"Calculating metrics for velocity {cytosim_compression_velocities[index]} and repeat {repeat}"
+            f"""Calculating metrics for velocity 
+            {cytosim_compression_velocities[index]} and repeat {repeat}"""
         )
         df = pd.read_csv(
-            f"{df_path}/cytosim_actin_compression_velocity_vary_compress_rate000{index}_repeat_{repeat}.csv"
+            f"""{df_path}/cytosim_actin_compression_velocity_vary_
+            compress_rate000{index}_repeat_{repeat}.csv"""
         )
         df = compression_metrics_workflow(df, metrics, **options)
         metric_df = (
@@ -58,7 +60,8 @@ df_cytosim.to_csv(
 )
 
 # %% Load from saved data
-# df_cytosim = pd.read_csv(f"{df_path}/cytosim_actin_compression_metrics_all_velocities_and_repeats.csv")
+# df_cytosim = pd.read_csv(f"{df_path}/cytosim_actin_compression_
+# metrics_all_velocities_and_repeats.csv")
 
 # %% Process readdy data
 num_repeats = 3
@@ -90,7 +93,8 @@ df_readdy.to_csv(
 )
 
 # %% Load from saved data
-# df_readdy = pd.read_csv(f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv")
+# df_readdy = pd.read_csv(f"{df_path}/readdy_actin
+# _compression_metrics_all_velocities_and_repeats.csv")
 
 # %% Plot metrics for readdy and cytosim
 figure_path = Path("../../figures")
