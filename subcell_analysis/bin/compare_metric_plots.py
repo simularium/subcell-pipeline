@@ -13,7 +13,8 @@ plt.rcdefaults()
 
 # %% Set parameters
 readdy_compression_velocities = [4.7, 15, 47, 150]
-# cytosim_compression_velocities = [0.15, 0.47434165, 1.5, 4.73413649, 15, 47.4341649, 150]
+# cytosim_compression_velocities = [0.15, 0.47434165, 1.5,
+#  4.73413649, 15, 47.4341649, 150]
 cytosim_compression_velocities = [0.15, 0.47434165, 1.5, 4.7, 15, 47, 150]
 
 # %%

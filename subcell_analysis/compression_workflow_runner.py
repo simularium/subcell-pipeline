@@ -70,7 +70,8 @@ def run_metric_calculation(
                 polymer_trace,
                 compression_axis=0,
                 signed=True,
-                tolerance=ABS_TOL**options,
+                tolerance=ABS_TOL,
+                **options,
             )
 
         if metric == COMPRESSIONMETRIC.ENERGY_ASYMMETRY:

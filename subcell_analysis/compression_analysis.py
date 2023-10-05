@@ -204,11 +204,11 @@ def get_total_fiber_twist(
         at a given time
     **options: dict
         Additional options as key-value pairs.
-    **compression_axis: int
+    compression_axis: int
         axis along which the polymer trace is compressed
-    **signed: bool
+    signed: bool
         whether to return the signed or unsigned total twist
-    **tolerance: float 
+    tolerance: float 
         ABS_TOL
     Returns
     ----------
