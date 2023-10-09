@@ -15,14 +15,12 @@ Analysis functionality for subcellular models
 ### Prerequisite 
 
 1. Install Conda: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+2. Set up `just`: https://just.systems/man/en/chapter_4.html
 
 ### Setup 
 1. create a virtual env: `conda create -n subcell_analysis python=3.10`
 2. `conda activate subcell_analysis`
-3. `conda install readdy==2.0.9`
-3. `pip install -e '.[lint,test,docs,dev]'`
-
-**Note: `just install` will not install `readdy` correctly, which is needed for tests to pass.
+3. `just install`
 
 ## Documentation
 
