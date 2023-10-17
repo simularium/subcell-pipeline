@@ -18,6 +18,7 @@ class COMPRESSIONMETRIC(Enum):
     AVERAGE_PERP_DISTANCE = "AVERAGE_PERP_DISTANCE"
     TOTAL_FIBER_TWIST = "TOTAL_FIBER_TWIST"
     ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
+    CALC_BENDING_ENERGY = "CALC_BENDING_ENERGY"
 
 
 def get_end_to_end_unit_vector(
@@ -186,11 +187,40 @@ def get_pca_polymer_trace_projection(
     return pca.transform(polymer_trace)
 
 
+def get_bending_energy_from_trace(
+    polymer_trace: np.ndarray,
+    **options: dict,
+) -> float:
+    """
+    Returns the bending energy per monomer of a polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+    **options: dict
+        Additional options as key-value pairs.
+        bending_constant: float
+            bending constant of the fiber
+    """
+    bending_constant = options.get("bending_constant", 1)
+
+    cos_angle = np.zeros(len(polymer_trace) - 2)
+    for ind in range(len(polymer_trace) - 2):
+        vec1 = polymer_trace[ind + 1] - polymer_trace[ind]
+        vec2 = polymer_trace[ind + 2] - polymer_trace[ind + 1]
+
+        cos_angle[ind] = (
+            np.dot(vec1, vec2) / np.linalg.norm(vec1) / np.linalg.norm(vec2)
+        )
+
+    energy = bending_constant * np.nanmean(1 - cos_angle)
+
+    return energy
+
+
 def get_total_fiber_twist(
     polymer_trace: np.ndarray,
-    compression_axis: int = 0,
-    signed: bool = True,
-    tolerance: float = ABS_TOL,
     **options: dict,
 ) -> float:
     """
@@ -203,18 +233,23 @@ def get_total_fiber_twist(
         array containing the x,y,z positions of the polymer trace
         at a given time
     **options: dict
-        Additional options as key-value pairs.
-    compression_axis: int
-        axis along which the polymer trace is compressed
-    signed: bool
-        whether to return the signed or unsigned total twist
-    tolerance: float
-        ABS_TOL
+        Additional options as key-value pairs:
+
+        compression_axis: int
+            axis along which the polymer trace is compressed
+        signed: bool
+            whether to return the signed or unsigned total twist
+        tolerance: float
+            ABS_TOL
     Returns
     ----------
     total_twist: float
         sum of angles between PCA projection vectors
     """
+    compression_axis = options.get("compression_axis", 0)
+    signed = options.get("signed", True)
+    tolerance = options.get("tolerance", ABS_TOL)
+
     trace_2d = polymer_trace[
         :, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]
     ]
