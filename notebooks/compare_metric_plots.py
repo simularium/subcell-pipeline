@@ -44,6 +44,43 @@ df.to_csv(
     f"{df_path}/combined_actin_compression_metrics_all_velocities_and_repeats_subsampled.csv"
 )
 
+# %% Load from saved data
+# df_cytosim = pd.read_csv(f"{df_path}/cytosim_actin_compression_
+# metrics_all_velocities_and_repeats.csv")
+
+# %% Process readdy data
+num_repeats = 3
+df_metrics = []
+for velocity in readdy_compression_velocities:
+    for repeat in range(num_repeats):
+        file_path = (
+            df_path
+            / f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv"
+        )
+        if file_path.is_file():
+            df = pd.read_csv(file_path)
+        else:
+            continue
+        print(f"Calculating metrics for velocity {velocity} and repeat {repeat}")
+        df = compression_metrics_workflow(df, metrics, **options)  # type: ignore
+        metric_df = (
+            df.groupby("time")[[metric.value for metric in metrics]]
+            .mean()
+            .reset_index()
+        )
+        metric_df["velocity"] = velocity
+        metric_df["repeat"] = repeat
+        df_metrics.append(metric_df)
+
+df_readdy = pd.concat(df_metrics)
+df_readdy.to_csv(
+    f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv"
+)
+
+# %% Load from saved data
+df_cytosim = pd.read_csv(f"{df_path}/cytosim_actin_compression_subsampled.csv")
+df_readdy = pd.read_csv(f"{df_path}/readdy_actin_compression_subsampled.csv")
+
 # %% Plot metrics for readdy and cytosim
 figure_path = Path("../../figures")
 figure_path.mkdir(exist_ok=True)
@@ -84,5 +121,7 @@ for metric in metrics:
     fig.suptitle(f"{metric.value}")
     plt.tight_layout()
     fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time_subsampled.png")
+
+# %%
 
 # %%
