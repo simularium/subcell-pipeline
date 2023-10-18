@@ -11,6 +11,7 @@ from .compression_analysis import (
     get_third_component_variance,
     get_total_fiber_twist,
     get_bending_energy_from_trace,
+    get_spline_distance_from_trace,
 )
 
 ABS_TOL = 1e-6
@@ -79,6 +80,12 @@ def run_metric_calculation(
                 polymer_trace,
                 **options,
             )
+
+        if metric == COMPRESSIONMETRIC.SPLINE_DISTANCE:
+            polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[
+                fiber_at_time.index, metric.value
+            ] = get_spline_distance_from_trace(polymer_trace, **options)
 
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
             polymer_trace = fiber_at_time[

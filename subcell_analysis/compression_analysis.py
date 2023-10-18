@@ -19,6 +19,7 @@ class COMPRESSIONMETRIC(Enum):
     TOTAL_FIBER_TWIST = "TOTAL_FIBER_TWIST"
     ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
     CALC_BENDING_ENERGY = "CALC_BENDING_ENERGY"
+    SPLINE_DISTANCE = "SPLINE_DISTANCE"
 
 
 def get_end_to_end_unit_vector(
@@ -185,6 +186,31 @@ def get_pca_polymer_trace_projection(
     """
     pca = fit_pca_to_polymer_trace(polymer_trace=polymer_trace)
     return pca.transform(polymer_trace)
+
+
+def get_spline_distance_from_trace(
+    polymer_trace: np.ndarray,
+    **options: dict,
+) -> float:
+    """
+    Returns the sum of inter-monomer distances in the trace
+
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+    **options: dict
+        Additional options as key-value pairs.
+
+    Returns
+    ----------
+    total_distance: float
+        sum of inter-monomer distances in the trace
+    """
+    total_distance = 0
+    for i in range(len(polymer_trace) - 1):
+        total_distance += np.linalg.norm(polymer_trace[i] - polymer_trace[i + 1])
+    return total_distance
 
 
 def get_bending_energy_from_trace(

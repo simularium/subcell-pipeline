@@ -17,6 +17,7 @@ metrics = [
     COMPRESSIONMETRIC.PEAK_ASYMMETRY,
     COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
+    COMPRESSIONMETRIC.SPLINE_DISTANCE,
 ]
 
 # %% Process cytosim data
@@ -63,10 +64,14 @@ for metric in metrics:
                     label = f"{simulator}"
                 else:
                     label = "_nolegend_"
+                xvals = np.linspace(0, 1, df_repeat["time"].nunique())
+                yvals = df_repeat.groupby("time")[metric.value].mean()
+                if simulator == "cytosim" and metric.value == "SPLINE_DISTANCE":
+                    yvals = yvals * 1000
                 axs[ct].plot(
-                    np.linspace(0, 1, df_repeat["time"].nunique()),
+                    xvals,
                     # df_repeat["time"] * time_scale,
-                    df_repeat.groupby("time")[metric.value].mean(),
+                    yvals,
                     label=label,
                     color=color_map[simulator],
                     alpha=0.7,
