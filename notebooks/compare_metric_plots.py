@@ -17,7 +17,7 @@ metrics = [
     COMPRESSIONMETRIC.PEAK_ASYMMETRY,
     COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
-    COMPRESSIONMETRIC.SPLINE_DISTANCE,
+    COMPRESSIONMETRIC.CONTOUR_LENGTH,
 ]
 
 # %% Process cytosim data
@@ -42,39 +42,6 @@ for simulator, df_sim in df.groupby("simulator"):
 # %% save dataframe
 df.to_csv(
     f"{df_path}/combined_actin_compression_metrics_all_velocities_and_repeats_subsampled.csv"
-)
-
-# %% Load from saved data
-# df_cytosim = pd.read_csv(f"{df_path}/cytosim_actin_compression_
-# metrics_all_velocities_and_repeats.csv")
-
-# %% Process readdy data
-num_repeats = 3
-df_metrics = []
-for velocity in readdy_compression_velocities:
-    for repeat in range(num_repeats):
-        file_path = (
-            df_path
-            / f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv"
-        )
-        if file_path.is_file():
-            df = pd.read_csv(file_path)
-        else:
-            continue
-        print(f"Calculating metrics for velocity {velocity} and repeat {repeat}")
-        df = compression_metrics_workflow(df, metrics, **options)  # type: ignore
-        metric_df = (
-            df.groupby("time")[[metric.value for metric in metrics]]
-            .mean()
-            .reset_index()
-        )
-        metric_df["velocity"] = velocity
-        metric_df["repeat"] = repeat
-        df_metrics.append(metric_df)
-
-df_readdy = pd.concat(df_metrics)
-df_readdy.to_csv(
-    f"{df_path}/readdy_actin_compression_metrics_all_velocities_and_repeats.csv"
 )
 
 # %% Load from saved data
@@ -103,7 +70,7 @@ for metric in metrics:
                     label = "_nolegend_"
                 xvals = np.linspace(0, 1, df_repeat["time"].nunique())
                 yvals = df_repeat.groupby("time")[metric.value].mean()
-                if simulator == "cytosim" and metric.value == "SPLINE_DISTANCE":
+                if simulator == "cytosim" and metric.value == "CONTOUR_LENGTH":
                     yvals = yvals * 1000
                 axs[ct].plot(
                     xvals,
@@ -121,7 +88,3 @@ for metric in metrics:
     fig.suptitle(f"{metric.value}")
     plt.tight_layout()
     fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time_subsampled.png")
-
-# %%
-
-# %%

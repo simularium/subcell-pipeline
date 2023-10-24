@@ -19,7 +19,7 @@ class COMPRESSIONMETRIC(Enum):
     TOTAL_FIBER_TWIST = "TOTAL_FIBER_TWIST"
     ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
     CALC_BENDING_ENERGY = "CALC_BENDING_ENERGY"
-    SPLINE_DISTANCE = "SPLINE_DISTANCE"
+    CONTOUR_LENGTH = "CONTOUR_LENGTH"
 
 
 def get_end_to_end_unit_vector(
@@ -188,7 +188,7 @@ def get_pca_polymer_trace_projection(
     return pca.transform(polymer_trace)
 
 
-def get_spline_distance_from_trace(
+def get_contour_length_from_trace(
     polymer_trace: np.ndarray,
     **options: dict,
 ) -> float:
