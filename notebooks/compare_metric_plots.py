@@ -44,10 +44,6 @@ df.to_csv(
     f"{df_path}/combined_actin_compression_metrics_all_velocities_and_repeats_subsampled.csv"
 )
 
-# %% Load from saved data
-df_cytosim = pd.read_csv(f"{df_path}/cytosim_actin_compression_subsampled.csv")
-df_readdy = pd.read_csv(f"{df_path}/readdy_actin_compression_subsampled.csv")
-
 # %% Plot metrics for readdy and cytosim
 figure_path = Path("../../figures")
 figure_path.mkdir(exist_ok=True)
@@ -88,3 +84,5 @@ for metric in metrics:
     fig.suptitle(f"{metric.value}")
     plt.tight_layout()
     fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time_subsampled.png")
+
+# %%
