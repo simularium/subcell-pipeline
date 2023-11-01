@@ -60,7 +60,7 @@ for index, df in enumerate(dfs):
                 df_subsample_list[index].append(df_tmp)
 
     df_subsampled[index] = pd.concat(df_subsample_list[index])
-    # %%
+# %%
 df_subsampled[0].to_csv(
     df_folder / "cytosim_actin_compression_subsampled.csv", index=False
 )
