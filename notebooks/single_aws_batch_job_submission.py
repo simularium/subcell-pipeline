@@ -37,7 +37,7 @@ job_definition = make_batch_job(
     image="simularium/cytosim:latest",
     vcpus=1,
     memory=7000,
-    job_role_arn=f"arn:aws:iam::108503617402:role/BatchJobRole",
+    job_role_arn=f"arn:aws:iam::{account}:role/BatchJobRole",
     environment=[
     {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
     {"name": "FILE_SET_NAME", "value": f"{config[:-4]}"},
