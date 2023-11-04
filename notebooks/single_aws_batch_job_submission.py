@@ -6,8 +6,8 @@ from preconfig import Preconfig
 
 # %%
 preconfig = Preconfig()
-path_to_config = "../configs/no_linkers_no_compression.cym"
-config = "no_linkers_no_compression.cym"
+path_to_config = "../configs/free_barbed_end_final.cym"
+config = "free_barbed_end_final.cym"
 s3_client = boto3.client("s3")
 bucket = "cytosim-working-bucket"
 num_repeats = 5
@@ -33,14 +33,17 @@ account = getpass.getpass()
 # %%
 
 job_definition = make_batch_job(
-    name=f"no_linkers_no_compression",
-    image="simularium/cytosim:latest",  # Direct Docker Hub reference
-    account="108503617402",
-    region="us-west-2",
-    user="karthikv",  # Empty user since we're not using a user-specific path in Docker Hub
+    name="free_barbed_end_final",
+    image="simularium/cytosim:latest",
     vcpus=1,
     memory=7000,
-    prefix="s3://cytosim-working-bucket/"
+    job_role_arn=f"arn:aws:iam::108503617402:role/BatchJobRole",
+    environment=[
+    {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
+    {"name": "FILE_SET_NAME", "value": f"{config[:-4]}"},
+    {"name": "SIMULATION_TYPE", "value": "AWS"}
+    
+]
 )
 
 registered_jd = register_batch_job(job_definition)
@@ -50,7 +53,7 @@ registered_jd = register_batch_job(job_definition)
 from container_collection.batch.submit_batch_job import submit_batch_job
 # %%
 # Parameters for our batch job [size indicates our desired number of repeats]
-job_name = "no_linkers_no_compression"
+job_name = "free_barbed_end_final"
 user = "karthikv"
 queue = "general_on_demand"
 size = 5
