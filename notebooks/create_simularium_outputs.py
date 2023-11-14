@@ -10,25 +10,19 @@ from botocore.exceptions import ClientError
 from scipy.spatial.transform import Rotation
 from simularium_readdy_models.visualization import ActinVisualization
 from simulariumio import (DISPLAY_TYPE, AgentData, CameraData, DisplayData,
-                          InputFileData, MetaData, ScatterPlotData,
-                          TrajectoryConverter, TrajectoryData, UnitData)
-from simulariumio.cytosim import (CytosimConverter, CytosimData,
-                                  CytosimObjectInfo)
+                          MetaData, ScatterPlotData, TrajectoryConverter,
+                          TrajectoryData, UnitData)
 
 from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
 from subcell_analysis.compression_workflow_runner import \
     compression_metrics_workflow
 from subcell_analysis.cytosim.post_process_cytosim import cytosim_to_simularium
-from subcell_analysis.spatial_aligner import SpatialAligner
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Visualizes ReaDDy and Cytosim actin simulations"
     )
-    # parser.add_argument(
-    #     "params_path", help="the file path of an excel file with parameters"
-    # )
     parser.add_argument('--sub_sampled', action=argparse.BooleanOptionalAction)
     parser.set_defaults(sub_sampled=True)
     return parser.parse_args()
@@ -91,28 +85,44 @@ def rmsd(vec1: np.ndarray, vec2: np.ndarray) -> np.ndarray:
     return np.sqrt(((((vec1 - vec2) ** 2)) * 3).mean())
 
 def align(fibers: np.ndarray) -> np.ndarray:
-    # find the best alignment angle for each fiber
+    """
+    Rotationally align the given fibers around the x-axis.
+
+    Parameters
+    ----------
+    fiber_points: np.ndarray (shape = time x fiber x (3 * points_per_fiber))
+        Array containing the flattened x,y,z positions of control points
+        for each fiber at each time.
+        
+    Returns
+    ----------
+    aligned_data: np.ndarray
+        The given data aligned.        
+    """
+    # get angle to align each fiber at the last time point
     align_by = []
-    ref = fibers[-1][0].copy()
+    points_per_fiber = int(fibers.shape[2] / 3)
+    ref = fibers[-1][0].copy().reshape((points_per_fiber, 3))
     for fiber_ix in range(len(fibers[-1])):
         best_rmsd = math.inf
-        for j in np.linspace(0, 2 * np.pi, 1000):
-            r = Rotation.from_rotvec(j * np.array([1, 0, 0]))
+        for angle in np.linspace(0, 2 * np.pi, 1000):
+            rot = Rotation.from_rotvec(angle * np.array([1, 0, 0]))
             new_vec = Rotation.apply(
-                r, fibers[-1][fiber_ix].copy()
+                rot, fibers[-1][fiber_ix].copy().reshape((points_per_fiber, 3))
             )
-            if rmsd(new_vec, ref) < best_rmsd:
-                best_rot = j
-                best_rmsd = rmsd(new_vec, ref)
-        align_by.append(best_rot)
-    # align all the different curves to ref
+            test_rmsd = rmsd(new_vec, ref)
+            if test_rmsd < best_rmsd:
+                best_angle = angle
+                best_rmsd = test_rmsd
+        align_by.append(best_angle)
+    # align all the fibers to ref across all time points
     aligned = np.zeros_like(fibers)
-    for fiber_ix in range(len(fibers[-1])):
-        r = Rotation.from_rotvec(align_by[fiber_ix] * np.array([1, 0, 0]))
-        for time_ix in range(len(fibers)):
-            a = fibers[time_ix][fiber_ix].copy()
-            new_vec = Rotation.apply(r, a)
-            aligned[time_ix][fiber_ix] = new_vec
+    for fiber_ix in range(fibers.shape[1]):
+        rot = Rotation.from_rotvec(align_by[fiber_ix] * np.array([1, 0, 0]))
+        for time_ix in range(fibers.shape[0]):
+            fiber = fibers[time_ix][fiber_ix].copy().reshape((points_per_fiber, 3))
+            new_fiber = Rotation.apply(rot, fiber)
+            aligned[time_ix][fiber_ix] = new_fiber.flatten()
     return aligned
                 
 def convert_sub_sampled_to_simularium() -> Tuple[TrajectoryData, List[ScatterPlotData]]:
@@ -125,6 +135,20 @@ def convert_sub_sampled_to_simularium() -> Tuple[TrajectoryData, List[ScatterPlo
         47,
         150,
     ]
+    colors = {
+        "cytosim" : {
+            4.7 : "#4DFE8A",
+            15 : "#c1fe4d",
+            47 : "#fee34d",
+            150 : "#fe8b4d",
+        },
+        "readdy" : {
+            4.7 : "#94dbfc",
+            15 : "#627EFB",
+            47 : "#b594fc",
+            150 : "#e994fc",
+        },
+    }
     num_repeats = 2
     total_conditions = num_repeats * len(simulators) * len(conditions)
     points_per_fiber = 200
@@ -173,34 +197,35 @@ def convert_sub_sampled_to_simularium() -> Tuple[TrajectoryData, List[ScatterPlo
             render_mode="lines"
         ),
     }
-    for repeat_ix in range(num_repeats):
-        print(f"repeat_ix = {repeat_ix}")
-        rep_df = df.loc[df["repeat"] == repeat_ix]
-        rep_df.sort_values(by=["repeat", "simulator", "velocity", "time", "monomer_ids"])
-        for sim_ix, simulator in enumerate(simulators):
-            print(f"simulator = {simulator}")
-            sim_df = rep_df.loc[rep_df["simulator"] == simulator]
-            for condition_ix, condition in enumerate(conditions):
-                print(f"condition = {condition}")
-                condition_df = sim_df.loc[sim_df["velocity"] == condition]
+    # these metrics need to be multiplied by 1000 in cytosim
+    cytosim_metrics_to_scale = [
+        COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
+        COMPRESSIONMETRIC.CONTOUR_LENGTH,
+    ]
+    for sim_ix, simulator in enumerate(simulators):
+        sim_df = df.loc[df["simulator"] == simulator]
+        sim_df.sort_values(by=["repeat", "simulator", "velocity", "time", "monomer_ids"])
+        for condition_ix, condition in enumerate(conditions):
+            condition_df = sim_df.loc[sim_df["velocity"] == condition]
+            for repeat_ix in range(num_repeats):
+                rep_df = condition_df.loc[condition_df["repeat"] == repeat_ix]
                 for time_ix in range(total_steps):
-                    ix = (repeat_ix * len(simulators) * len(conditions)) + (sim_ix * len(conditions)) + condition_ix
+                    ix = (sim_ix * len(conditions) * num_repeats) + (condition_ix * num_repeats) + repeat_ix
                     subpoints[time_ix][ix] = (
                         (1000. if simulator == "cytosim" else 1) * 
-                        np.array(condition_df[time_ix * 200:(time_ix + 1) * 200][["xpos", "ypos", "zpos"]]).flatten()
+                        np.array(rep_df[time_ix * 200:(time_ix + 1) * 200][["xpos", "ypos", "zpos"]]).flatten()
                     )
-                types_per_step.append(f"{condition} um/s#{simulator} {repeat_ix}")
+                types_per_step.append(f"{simulator}#{condition} um/s {repeat_ix}")
                 display_data[types_per_step[-1]] = DisplayData(
                     name=types_per_step[-1],
                     display_type=DISPLAY_TYPE.FIBER,
+                    color=colors[simulator][condition],
                 )
-                metrics_df = compression_metrics_workflow(condition_df.copy(), list(scatter_plots.keys()))
+                metrics_df = compression_metrics_workflow(rep_df.copy(), list(scatter_plots.keys()))
                 metrics_df = metrics_df[metrics_df["monomer_ids"] == 0]
                 for metric in scatter_plots:
-                    scatter_plots[metric].ytraces[types_per_step[-1]] = np.array(metrics_df[metric.value])
-                # pd.Series(list(map(set,metrics_df[-200:].values.T)),index=metrics_df[-200:].columns)
-                # import ipdb; ipdb.set_trace()
-                
+                    scale_factor = 1000. if (simulator == "cytosim" and metric in cytosim_metrics_to_scale) or metric == COMPRESSIONMETRIC.CALC_BENDING_ENERGY else 1.
+                    scatter_plots[metric].ytraces[types_per_step[-1]] = scale_factor * np.array(metrics_df[metric.value])
     box_size = 600.
     traj_data = TrajectoryData(
         meta_data=MetaData(
@@ -221,7 +246,7 @@ def convert_sub_sampled_to_simularium() -> Tuple[TrajectoryData, List[ScatterPlo
             positions=np.zeros((total_steps, total_conditions, 3)),
             radii=np.ones((total_steps, total_conditions)),
             n_subpoints=3 * points_per_fiber * np.ones((total_steps, total_conditions)),
-            subpoints=subpoints, #TODO SpatialAligner.align_fibers_y(subpoints),
+            subpoints=align(subpoints),
             display_data=display_data,
         ),
         time_units=UnitData("count"),  # frames
