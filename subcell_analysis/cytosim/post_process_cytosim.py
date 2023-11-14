@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import boto3
 import numpy as np
@@ -9,9 +9,9 @@ from simulariumio import (
     DisplayData,
     InputFileData,
     MetaData,
-    ModelMetaData,
+    TrajectoryData,
 )
-from simulariumio.cytosim import CytosimData, CytosimObjectInfo
+from simulariumio.cytosim import CytosimData, CytosimObjectInfo, CytosimConverter
 
 save_folder_path = Path("../data/dataframes")
 
@@ -153,43 +153,46 @@ def create_dataframes_for_repeats(
 
 
 def cytosim_to_simularium(
-    path: str,
+    title: str,
+    fiber_points_path: str,
+    singles_path: Optional[str],
     box_size: float = 2,
     scale_factor: float = 10,
-    color: list = None,
-    actin_number: int = 0,
-) -> CytosimData:
-    example_data = CytosimData(
+    exp_name: str = "",
+) -> TrajectoryData:
+    object_info={
+        "fibers" : CytosimObjectInfo(
+            cytosim_file=InputFileData(
+                file_path=fiber_points_path,
+            ),
+            display_data={
+                1 : DisplayData(
+                    name=f"{exp_name}#actin",
+                    radius=0.02,
+                    display_type=DISPLAY_TYPE.FIBER,
+                )
+            }
+        )
+    }
+    if singles_path is not None:
+        object_info["singles"] = CytosimObjectInfo(
+            cytosim_file=InputFileData(
+                file_path=singles_path,
+            ),
+            display_data={
+                1 : DisplayData(
+                    name=f"{exp_name}#anchor",
+                    radius=0.05,
+                    display_type=DISPLAY_TYPE.SPHERE,
+                ),
+            }
+        )
+    cytosim_data = CytosimData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),
             scale_factor=scale_factor,
-            trajectory_title="Some parameter set",
-            model_meta_data=ModelMetaData(
-                title="Some agent-based model",
-                version="8.1",
-                authors="A Modeler",
-                description=("An agent-based model run with some parameter set"),
-                doi="10.1016/j.bpj.2016.02.002",
-                source_code_url="https://github.com/simularium/simulariumio",
-                source_code_license_url="https://github.com/simularium/simulariumio/blob/main/LICENSE",
-                input_data_url="https://allencell.org/path/to/native/engine/input/files",
-                raw_output_data_url="https://allencell.org/path/to/native/engine/output/files",
-            ),
+            trajectory_title=title,
         ),
-        object_info={
-            "fibers": CytosimObjectInfo(
-                cytosim_file=InputFileData(
-                    file_path=path,
-                ),
-                display_data={
-                    1: DisplayData(
-                        name=f"actin#{actin_number}",
-                        radius=0.02,
-                        display_type=DISPLAY_TYPE.FIBER,
-                        color=color,
-                    )
-                },
-            ),
-        },
+        object_info=object_info,
     )
-    return example_data
+    return CytosimConverter(cytosim_data)._data

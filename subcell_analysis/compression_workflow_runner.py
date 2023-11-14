@@ -14,8 +14,6 @@ from .compression_analysis import (
     get_contour_length_from_trace,
 )
 
-ABS_TOL = 1e-6
-
 
 def run_metric_calculation(
     all_points: pd.core.frame.DataFrame, metric: COMPRESSIONMETRIC, **options: dict
