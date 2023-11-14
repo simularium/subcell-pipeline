@@ -16,6 +16,8 @@ from simulariumio.cytosim import (CytosimConverter, CytosimData,
                                   CytosimObjectInfo)
 
 from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
+from subcell_analysis.compression_workflow_runner import \
+    compression_metrics_workflow
 from subcell_analysis.cytosim.post_process_cytosim import cytosim_to_simularium
 from subcell_analysis.spatial_aligner import SpatialAligner
 
@@ -113,10 +115,8 @@ def align(fibers: np.ndarray) -> np.ndarray:
             aligned[time_ix][fiber_ix] = new_vec
     return aligned
                 
-def convert_sub_sampled_to_simularium() -> TrajectoryData:
+def convert_sub_sampled_to_simularium() -> Tuple[TrajectoryData, List[ScatterPlotData]]:
     df = pd.read_csv("data/aws_downloads/combined_actin_compression_dataset_subsampled.csv")
-    first_rep_df = df.loc[df["repeat"] == 0]
-    first_rep_df.sort_values(by=["simulator", "velocity", "time", "monomer_ids"])
     total_steps = 200
     simulators = ["cytosim", "readdy"]
     conditions = [
@@ -125,27 +125,84 @@ def convert_sub_sampled_to_simularium() -> TrajectoryData:
         47,
         150,
     ]
-    total_conditions = 2 * len(conditions)
+    num_repeats = 2
+    total_conditions = num_repeats * len(simulators) * len(conditions)
     points_per_fiber = 200
     subpoints = np.zeros((total_steps, total_conditions, 3 * points_per_fiber))
     types_per_step = []
     display_data={}
-    for sim_ix, simulator in enumerate(simulators):
-        sim_df = first_rep_df.loc[first_rep_df["simulator"] == simulator]
-        for condition_ix, condition in enumerate(conditions):
-            condition_df = sim_df.loc[sim_df["velocity"] == condition]
-            for time_ix in range(total_steps):
-                subpoints[time_ix][(sim_ix * len(conditions)) + condition_ix] = (
-                    (1000. if simulator == "cytosim" else 1) * 
-                    np.array(condition_df[time_ix * 200:(time_ix + 1) * 200][["xpos", "ypos", "zpos"]]).flatten()
+    scatter_plots = {
+        COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE : ScatterPlotData(
+            title="Average Perpendicular Distance",
+            xaxis_title="normalized time",
+            yaxis_title="distance (nm)",
+            xtrace=np.arange(total_steps),
+            ytraces={},
+            render_mode="lines"
+        ),
+        COMPRESSIONMETRIC.CALC_BENDING_ENERGY : ScatterPlotData(
+            title="Bending Energy",
+            xaxis_title="normalized time",
+            yaxis_title="energy",
+            xtrace=np.arange(total_steps),
+            ytraces={},
+            render_mode="lines"
+        ),
+        COMPRESSIONMETRIC.NON_COPLANARITY : ScatterPlotData(
+            title="Non-coplanarity",
+            xaxis_title="normalized time",
+            yaxis_title="3rd component variance from PCA",
+            xtrace=np.arange(total_steps),
+            ytraces={},
+            render_mode="lines"
+        ),
+        COMPRESSIONMETRIC.PEAK_ASYMMETRY : ScatterPlotData(
+            title="Peak Asymmetry",
+            xaxis_title="normalized time",
+            yaxis_title="normalized peak distance",
+            xtrace=np.arange(total_steps),
+            ytraces={},
+            render_mode="lines"
+        ),
+        COMPRESSIONMETRIC.CONTOUR_LENGTH : ScatterPlotData(
+            title="Contour Length",
+            xaxis_title="normalized time",
+            yaxis_title="filament contour length (nm)",
+            xtrace=np.arange(total_steps),
+            ytraces={},
+            render_mode="lines"
+        ),
+    }
+    for repeat_ix in range(num_repeats):
+        print(f"repeat_ix = {repeat_ix}")
+        rep_df = df.loc[df["repeat"] == repeat_ix]
+        rep_df.sort_values(by=["repeat", "simulator", "velocity", "time", "monomer_ids"])
+        for sim_ix, simulator in enumerate(simulators):
+            print(f"simulator = {simulator}")
+            sim_df = rep_df.loc[rep_df["simulator"] == simulator]
+            for condition_ix, condition in enumerate(conditions):
+                print(f"condition = {condition}")
+                condition_df = sim_df.loc[sim_df["velocity"] == condition]
+                for time_ix in range(total_steps):
+                    ix = (repeat_ix * len(simulators) * len(conditions)) + (sim_ix * len(conditions)) + condition_ix
+                    subpoints[time_ix][ix] = (
+                        (1000. if simulator == "cytosim" else 1) * 
+                        np.array(condition_df[time_ix * 200:(time_ix + 1) * 200][["xpos", "ypos", "zpos"]]).flatten()
+                    )
+                types_per_step.append(f"{condition} um/s#{simulator} {repeat_ix}")
+                display_data[types_per_step[-1]] = DisplayData(
+                    name=types_per_step[-1],
+                    display_type=DISPLAY_TYPE.FIBER,
                 )
-            types_per_step.append(f"{condition} um/s#{simulator}")
-            display_data[types_per_step[-1]] = DisplayData(
-                name=types_per_step[-1],
-                display_type=DISPLAY_TYPE.FIBER,
-            )
+                metrics_df = compression_metrics_workflow(condition_df.copy(), list(scatter_plots.keys()))
+                metrics_df = metrics_df[metrics_df["monomer_ids"] == 0]
+                for metric in scatter_plots:
+                    scatter_plots[metric].ytraces[types_per_step[-1]] = np.array(metrics_df[metric.value])
+                # pd.Series(list(map(set,metrics_df[-200:].values.T)),index=metrics_df[-200:].columns)
+                # import ipdb; ipdb.set_trace()
+                
     box_size = 600.
-    return TrajectoryData(
+    traj_data = TrajectoryData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),
             camera_defaults=CameraData(
@@ -170,6 +227,7 @@ def convert_sub_sampled_to_simularium() -> TrajectoryData:
         time_units=UnitData("count"),  # frames
         spatial_units=UnitData("nm"),  # nanometer
     )
+    return traj_data, list(scatter_plots.values())
 
 def convert_raw_to_simularium(
     cytosim_conditions: Dict[str,str], 
@@ -290,8 +348,11 @@ def main():
         )
         save_trajectories(cytosim_conditions, traj_data)
     else:
-        traj_data = convert_sub_sampled_to_simularium()
-        TrajectoryConverter(traj_data).save(f"data/actin_compression_repeat=0")
+        traj_data, plots = convert_sub_sampled_to_simularium()
+        converter = TrajectoryConverter(traj_data)
+        for plot in plots:
+            converter.add_plot(plot, "scatter")
+        converter.save(f"data/actin_compression")
 
 
 if __name__ == "__main__":
