@@ -1,5 +1,6 @@
 # %%
 import numpy as np
+import pacmap
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -50,15 +51,15 @@ fibers = a.reshape((2020, 3, 500))
 
 
 # %%
-
-NUM_TIMEPOINTS = 101
+NUM_TIMEPOINTS = 101 # what's the unit of time?
 NUM_FIBERS = 20
 NUM_MONOMER_DIMS = 3
 NUM_MONOMERS = 500
 NUM_FIBERS_BY_TIME_POINTS = NUM_TIMEPOINTS * NUM_FIBERS
 NUM_MONOMERS_WITH_DIMS = NUM_MONOMER_DIMS * NUM_MONOMERS
 
-USE_SCALAR_SCALED_DATA = True
+# While normalizing data is important for PCA, our data are spatial points. We don't want to transform it
+USE_SCALAR_SCALED_DATA = False
 
 # why are we reshaping this? (101 timepoints * 20 fibers) * (3 dimensions * 500 monomer points)
 pca_dataset = np.array(fibers)
@@ -77,18 +78,8 @@ pcs = pca_inst.fit_transform(x) # not a fan of this re-writing of a vague x vari
 print(f"Explained Variance Ratio: {pca_inst.explained_variance_ratio_}")
 
 # %%
-principalDf = pd.DataFrame(
-    data=pcs,
-    columns=["principal component 1", "principal component 2"],
-)
-
-print(principalDf)
-
-# %%
 # ### Run Params
-# We have 4 different run params I believe: 4.7, 15, 47, 150, what they stand for idk.
-
-# what are these? simulation velocity?
+# Param changing between simulations: velocity
 SIMULATION_1_VELOCITY = 4.7
 SIMULATION_2_VELOCITY = 15
 SIMULATION_3_VELOCITY = 47
@@ -97,13 +88,13 @@ SIMULATION_4_VELOCITY = 150
 sims = []
 for i in range(2020):
     if i % 20 < 5:
-        sims.append(4.7)
+        sims.append(SIMULATION_1_VELOCITY)
     elif i % 20 < 10:
-        sims.append(15)
+        sims.append(SIMULATION_2_VELOCITY)
     elif i % 20 < 15:
-        sims.append(150)
+        sims.append(SIMULATION_4_VELOCITY)
     else:
-        sims.append(47)
+        sims.append(SIMULATION_3_VELOCITY)
 
 time = []
 for i in range(NUM_FIBERS_BY_TIME_POINTS):
@@ -111,18 +102,24 @@ for i in range(NUM_FIBERS_BY_TIME_POINTS):
     t = i // 20
     time.append(t)
 
-# these need to be dimensions of 2020 or throws
-# this also feels weird. are we reconciling/aligning reshaped data based on prior data positions?
-principalDf["label"] = sims
-principalDf["time"] = time
+
+# %%
+# ### PCA: DataFrame
+
+pca_dataframe = pd.DataFrame(
+    data=pcs,
+    columns=["principal component 1", "principal component 2"],
+)
+pca_dataframe["label"] = sims
+pca_dataframe["time"] = time
 
 
 # %%
-# ### PCA Plot
-print(f"PCA Plot (Scaled Data: {USE_SCALAR_SCALED_DATA})")
+# ### PCA: Plot
 
 # could make this function have better param selections maybe?
-def pca_plot(dataframe, param_label, param_simulation_run_vars):
+def plot_pca(dataframe, param_label, param_simulation_run_vars):
+    print(f"PCA Plot (Scaled Data: {USE_SCALAR_SCALED_DATA})")
     fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
     time_points = range(0, NUM_TIMEPOINTS)
     # List of parameters or conditions under which the PCA was run.
@@ -144,14 +141,52 @@ def pca_plot(dataframe, param_label, param_simulation_run_vars):
                 s=70,
             )
 
-pca_plot(principalDf, "Sim. Velocity(?)", [SIMULATION_1_VELOCITY, SIMULATION_2_VELOCITY, SIMULATION_3_VELOCITY, SIMULATION_4_VELOCITY])
+
+# %%
+# ### PACMAP: DataFrame
+
+embedding = pacmap.PaCMAP(n_components=2, n_neighbors=5)
+x_transformed = embedding.fit_transform(x, init="pca")
+y = np.array(sims)
+pacmap_dataframe = pd.DataFrame(
+    data=x_transformed, columns=["pacmap component 1", "pacmap component 2"]
+)
+pacmap_dataframe["label"] = sims
+pacmap_dataframe["time"] = time
+
+# %%
+# ### PACMAP: Plot
+
+def plot_pacmap(dataframe, param_label, param_simulation_run_vars):
+    print(f"PacMap Visualization (Scaled Data: {USE_SCALAR_SCALED_DATA})")
+    fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
+    targets = range(0, 101)
+    ax[1][1].set_xlabel("PC1")
+    ax[1][1].set_ylabel("PC2")
+    for i in range(2):
+        for j in range(2):
+            ax[i][j].set_xlabel("PC1", loc="left")
+            ax[i][j].set_ylabel("PC2", loc="bottom")
+            ax[i][j].set_title(f"{param_label} = {param_simulation_run_vars[2 * i + j]}", fontsize=10)
+    for i in range(len(targets)):
+        for j in range(len(param_simulation_run_vars)):
+            col = colors[i]
+            indicesToKeep = (dataframe["time"] == targets[i]) & (
+                dataframe["label"] == param_simulation_run_vars[j]
+            )
+            ax[j // 2][j % 2].scatter(
+                dataframe.loc[indicesToKeep, "pacmap component 1"],
+                dataframe.loc[indicesToKeep, "pacmap component 2"],
+                c=col,
+                s=70,
+            )
 
 
 # %%
 # ### Explained Variance Visualization
-print(f"Explained Variance Visualization (Scaled Data: {USE_SCALAR_SCALED_DATA})")
 
-def explained_variance_visualization(pca: PCA):
+def plot_explained_variance_visualization(pca: PCA):
+    print(f"Explained Variance Visualization (Scaled Data: {USE_SCALAR_SCALED_DATA})")
     plt.figure(figsize=(8, 4))
     # Plot the individual explained variance as a bar chart
     # The height of the bar represents the variance ratio for each principal component.
@@ -167,42 +202,9 @@ def explained_variance_visualization(pca: PCA):
     plt.legend(loc='best')
     plt.tight_layout()
 
-explained_variance_visualization(pca_inst)
-
 
 # %%
-# ### Biplot Visualization
-print(f"Biplot (Scaled Data: {USE_SCALAR_SCALED_DATA})")
+plot_pca(pca_dataframe, "Sim. Velocity", [SIMULATION_1_VELOCITY, SIMULATION_2_VELOCITY, SIMULATION_3_VELOCITY, SIMULATION_4_VELOCITY])
 
-def biplot(score, coeff, labels=None):
-    # `score`: PCA scores, the transformed dataset with reduced dimensions.
-    # `coeff`: PCA loadings, the importance of each feature on the components.
-    # `labels`: Feature names for plotting (optional).
-    # Extract the scores for the first two principal components.
-    xs = score[:,0]  # Scores for PC1
-    ys = score[:,1]  # Scores for PC2
-    # Determine the number of variables based on the loadings shape.
-    n = coeff.shape[0]  # Number of original features
-    # Normalize the scale of the scatter plot to ensure it fits well in the figure.
-    # This prevents the arrows from being too short or too long.
-    scalex = 1.0/(xs.max() - xs.min())  # Scaling factor for x-axis
-    scaley = 1.0/(ys.max() - ys.min())  # Scaling factor for y-axis
-    # Create a scatter plot of the principal components.
-    plt.scatter(xs * scalex, ys * scaley)  # Plot the normalized scores
-    # Loop over the number of variables to plot the PCA loadings (arrows).
-    for i in range(n):
-        # Draw an arrow from the origin (0,0) to the end point of the loading vector.
-        plt.arrow(0, 0, coeff[i,0], coeff[i,1], color='r', alpha=0.5)
-        # Add labels to the arrows. If no labels provided, use 'Var1', 'Var2', etc.
-        if labels is None:
-            # If labels are not provided, name them as Var1, Var2, and so on.
-            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, "Var"+str(i+1), color='g', ha='center', va='center')
-        else:
-            # If labels are provided, use them and place the text slightly beyond the arrow's tip.
-            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color='g', ha='center', va='center')
-    # Label the axes with the principal components.
-    plt.xlabel("PC1")
-    plt.ylabel("PC2")
-    plt.grid()
-
-biplot(pcs, np.transpose(pca_inst.components_[0:2, :]))
+# %%
+plot_pacmap(pacmap_dataframe, "Sim. Velocity", [SIMULATION_1_VELOCITY, SIMULATION_2_VELOCITY, SIMULATION_3_VELOCITY, SIMULATION_4_VELOCITY])
