@@ -87,47 +87,11 @@ def align(fibers: np.ndarray) -> np.ndarray:
 
 
 # %%
-# ### Run Params
-NUM_TIMEPOINTS = 101 # what's the unit of time?
-NUM_FIBERS = 5
-NUM_SIMULATIONS = 4
-NUM_MONOMER_DIMS = 3
-NUM_MONOMERS = 500
-NUM_FIBERS_BY_SIMULATION_BY_TIME_POINTS = NUM_TIMEPOINTS * NUM_FIBERS * NUM_SIMULATIONS # 101 * 5 * 4
-NUM_MONOMERS_WITH_DIMS = NUM_MONOMER_DIMS * NUM_MONOMERS
-
-# Param changing between simulations: velocity
+# ### Simulations
 SIMULATION_1_VELOCITY = 4.7
 SIMULATION_2_VELOCITY = 15
 SIMULATION_3_VELOCITY = 47
 SIMULATION_4_VELOCITY = 150
-
-
-# %%
-# ### Incrementing Specturm/Legend
-
-def plot_timepoint_sepectrum(colors_by_step: list[str], step_label: str):
-    num_steps = len(colors_by_step)
-    # Plot
-    plt.figure(figsize=(8, 1))
-    for i, color in enumerate(colors_by_step):
-        plt.barh(1, width=1, left=i, height=1, color=color)
-    # Add step labels
-    plt.text(0, 1.5, '0', ha='center', va='bottom')
-    plt.text(num_steps, 1.5, num_steps, ha='center', va='bottom')
-    for i in range(math.trunc(num_steps / 6), num_steps, math.trunc(num_steps / 6)):
-        plt.text(i, 1.5, str(i), ha='center', va='bottom')
-    # Add legend/title/etc.
-    plt.xlim(0, num_steps)
-    plt.axis('off')  # Turning off the axis for a clean look
-    plt.title(f"Legend: {step_label}", size=10, pad=14)
-    plt.show()
-
-plot_timepoint_sepectrum(color_list_generator(NUM_TIMEPOINTS), "Simulation Step")
-
-
-# %%
-# ### Simulations
 
 # The shape of all_actin_vectors_all_time is 101 timepoints * 5 fibers * 4 simulations * 3 dimensions * 500 monomer points
 raw_microscopy_array = np.loadtxt(f"{data_directory}/cytosim_dimensionality_positions.txt")
@@ -162,6 +126,30 @@ def get_sim_df_analysis_dataset(sim_df: pd.DataFrame, aligned: bool = False):
     simulation_fibers_flattened = np.ravel(fibers)
     pca_dataset = simulation_fibers_flattened.reshape((num_pca_samples, num_pca_features))
     return pca_dataset
+
+
+# %%
+# ### Incrementing Specturm/Legend
+
+def plot_timepoint_sepectrum(colors_by_step: list[str], step_label: str):
+    num_steps = len(colors_by_step)
+    # Plot
+    plt.figure(figsize=(8, 1))
+    for i, color in enumerate(colors_by_step):
+        plt.barh(1, width=1, left=i, height=1, color=color)
+    # Add step labels
+    plt.text(0, 1.5, '0', ha='center', va='bottom')
+    plt.text(num_steps, 1.5, num_steps, ha='center', va='bottom')
+    for i in range(math.trunc(num_steps / 6), num_steps, math.trunc(num_steps / 6)):
+        plt.text(i, 1.5, str(i), ha='center', va='bottom')
+    # Add legend/title/etc.
+    plt.xlim(0, num_steps)
+    plt.axis('off')  # Turning off the axis for a clean look
+    plt.title(f"Legend: {step_label}", size=10, pad=14)
+    plt.show()
+
+timepoint_step_range = int(simulation_dataframes[0].num_timepoints) # grabbing a sim timepoint count for sake of a legend
+plot_timepoint_sepectrum(color_list_generator(timepoint_step_range), "Simulation Time Intervals")
 
 
 # %%
