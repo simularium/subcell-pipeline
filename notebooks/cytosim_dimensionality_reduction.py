@@ -290,17 +290,17 @@ for sim_df in simulation_dataframes:
     # PCA
     # --- not aligned
     pca_df = get_simulation_fibers_pca_df(sim_df, aligned=False)
-    plot_simulation_fibers_pca(pca_df, sim_df, f"Simulation Velocity = {float(sim_df.param_velocity)}", figsize=4)
+    plot_simulation_fibers_pca(pca_df, sim_df, f"PAC: Aligned={False},Velocity={float(sim_df.param_velocity)}", figsize=4)
     # FYI alignment has no impact on PCA, but it does affect PACMAP
     # # --- aligned
     # pca_aligned_df = get_simulation_fibers_pca_df(sim_df, aligned=True)
-    # plot_simulation_fibers_pca(pca_aligned_df, sim_df, f"Simulation Velocity = {float(sim_df.param_velocity)}", figsize=4)
+    # plot_simulation_fibers_pca(pca_aligned_df, sim_df, f"Aligned={True},Velocity={float(sim_df.param_velocity)}", figsize=4)
 
     # PACMAP
     # --- not aligned
     pacmap_df = get_simulation_fibers_pacmap_df(sim_df, aligned=False)
-    plot_simulation_fibers_pacmap(pacmap_df, sim_df, f"Simulation Velocity = {float(sim_df.param_velocity)}", figsize=4)
+    plot_simulation_fibers_pacmap(pacmap_df, sim_df, f"PaCMAP: Aligned={False},Velocity={float(sim_df.param_velocity)}", figsize=4)
     # --- aligned
     pacmap_aligned_df = get_simulation_fibers_pacmap_df(sim_df, aligned=True)
-    plot_simulation_fibers_pacmap(pacmap_aligned_df, sim_df, f"Simulation Velocity = {float(sim_df.param_velocity)}", figsize=4)
+    plot_simulation_fibers_pacmap(pacmap_aligned_df, sim_df, f"PaCMAP: Aligned={True},Velocity={float(sim_df.param_velocity)}", figsize=4)
 
