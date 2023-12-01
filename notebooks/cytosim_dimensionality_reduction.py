@@ -43,7 +43,7 @@ def color_list_generator (num: int, idx: int = 0) -> list[str]:
     return [colorFader(c1, c2, i / num) for i in range(num)]
 
 # --- BLAIR'S NOTEBOOK FUNCS. TODO: REMOVE THIS
-def align(fibers: np.ndarray) -> np.ndarray:
+def align_fibers(fibers: np.ndarray) -> np.ndarray:
     """
     Rotationally align the given fibers around the x-axis.
 
@@ -87,44 +87,92 @@ def align(fibers: np.ndarray) -> np.ndarray:
 
 
 # %%
-# ### Simulations
-SIMULATION_1_VELOCITY = 4.7
-SIMULATION_2_VELOCITY = 15
-SIMULATION_3_VELOCITY = 47
-SIMULATION_4_VELOCITY = 150
+# ### Study Data: Microscope
 
 # The shape of all_actin_vectors_all_time is 101 timepoints * 5 fibers * 4 simulations * 3 dimensions * 500 monomer points
-raw_microscopy_array = np.loadtxt(f"{data_directory}/cytosim_dimensionality_positions.txt")
+raw_microscopy_array = np.loadtxt(f"{data_directory}/microscope_dimensionality_positions.txt")
 # go from raw data and reshape from (101, 4, 5, 3, 500) to (4, 5, 101, 500, 3)
-fibers_array = raw_microscopy_array.reshape(101, 4, 5, 1500) # 3 * 500 combining monomers/dimensions bc align code expects that
-simulation_fibers_array = fibers_array.transpose(1, 2, 0, 3) # numbers refer to prior positions
-simulation_fibers_params = [
-    { "velocity": SIMULATION_1_VELOCITY },
-    { "velocity": SIMULATION_2_VELOCITY },
-    { "velocity": SIMULATION_3_VELOCITY },
-    { "velocity": SIMULATION_4_VELOCITY },
-]
+raw_microscopy_fibers_array = raw_microscopy_array.reshape(101, 4, 5, 1500) # 3 * 500 combining monomers/dimensions bc align code expects that
+raw_microscope_study_fibers_array = raw_microscopy_fibers_array.transpose(1, 2, 0, 3) # numbers refer to prior positions -> (sims, fibers, timepoints, dims/monos)
 
-simulation_dataframes = []
-for i, fibers in enumerate(simulation_fibers_array):
+
+# %%
+# each batch of fibers has a velocity param. as we loop through, we'll reference the param below. This is unfortunately a hard coded situation
+microscope_study_params = [
+    { "velocity": 4.7 }, # run 1
+    { "velocity": 15 }, # run 2
+    { "velocity": 47 }, # run 3
+    { "velocity": 150 }, # run 4
+]
+microscope_study_dataframes = []
+for i, fibers in enumerate(raw_microscope_study_fibers_array):
+    param_fiber_monomers = 500
+    param_timepoints = 101
+    df = pd.DataFrame({
+        'fibers': [fibers], # fibers -> timepoints -> monomers (dims)
+        'source': 'microscopy', # when we ingest other datasets, this will change to simulator name
+        'param_fibers': 5,
+        'param_fiber_monomers': param_fiber_monomers,
+        'param_timepoints': param_timepoints, # at each time point, expect the monomer positions
+        'param_dimensions': 3, # seems obvious i know, but i want the named variable for clarity in other operations
+        'param_velocity': microscope_study_params[i].get("velocity")
+    })
+    microscope_study_dataframes.append(df)
+
+# %%
+# ### Study Data: Simulation Cytosim
+
+# cytosim_study_dataframes = []
+# cytosim_df = pd.read_csv(f"{data_directory}/dataframes/cytosim_actin_compression_all_velocities_and_repeats.csv", index_col=0)
+
+# # %%
+# print(cytosim_df.shape)
+# print(cytosim_df.keys())
+
+
+# %%
+# ### Study Data: Simulation Readdy
+
+readdy_df = pd.read_csv(f"{data_directory}/dataframes/readdy_actin_compression_all_velocities_and_repeats.csv", index_col=0)
+readdy_df = readdy_df.rename(columns={"id": "fiber_id"})
+
+# %%
+readdy_study_dataframes = []
+for param_velocity, velocity_df in readdy_df.groupby('velocity'):
+    param_fiber_monomers = 50
+    param_timepoints = 1001
+    fibers = [] # 1 fiber per simulation, so treating 'repeats' as fibers
+    for repeat, repeat_df in velocity_df.groupby('repeat'):
+        fiber_timepoints = []
+        for time, time_df in repeat_df.groupby('time'):
+            fiber_timepoints.append(time_df[['xpos', 'ypos', 'zpos']].values.flatten()) # flattening to match data patterns
+        fibers.append(fiber_timepoints) # 1001 timepoints x flattened(50 monomers x 3 dimensions)
+    # --- append "study"
     df = pd.DataFrame({
         'fibers': [fibers],
-        # --- break down of vars
-        'num_fibers': 5,
-        'num_timepoints': 101,
-        'num_monomers': 500,
-        'num_dimensions': 3, # seems obvious i know, but i want the named variable for clarity in other operations
-        # --- simulation params
-        'param_velocity': simulation_fibers_params[i].get("velocity")
+        'source': 'readdy', # when we ingest other datasets, this will change to simulator name
+        'param_fibers': len(fibers),
+        'param_timepoints': param_timepoints, # at each time point, expect the monomer positions
+        'param_fiber_monomers': param_fiber_monomers,
+        'param_dimensions': 3, # seems obvious i know, but i want the named variable for clarity in other operations
+        'param_velocity': param_velocity
     })
-    simulation_dataframes.append(df)
+    readdy_study_dataframes.append(df)
 
-def get_sim_df_analysis_dataset(sim_df: pd.DataFrame, aligned: bool = False):
-    num_pca_samples = int(sim_df.num_fibers) * int(sim_df.num_timepoints)
-    num_pca_features = int(sim_df.num_monomers) * int(sim_df.num_dimensions)
-    fibers = sim_df.fibers[0] if aligned == False else align(sim_df.fibers[0])
-    simulation_fibers_flattened = np.ravel(fibers)
-    pca_dataset = simulation_fibers_flattened.reshape((num_pca_samples, num_pca_features))
+
+# %%
+# ### Data Preppers
+
+def get_study_df_analysis_dataset(study_df: pd.DataFrame, align: bool = False):
+    """
+    Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis
+    """
+    # print('get_study_df_analysis_dataset: ', np.array(study_df.fibers[0]).shape)
+    num_pca_samples = int(study_df.param_fibers) * int(study_df.param_timepoints)
+    num_pca_features = int(study_df.param_fiber_monomers) * int(study_df.param_dimensions)
+    fibers = study_df.fibers[0] if align == False else align_fibers(study_df.fibers[0])
+    fibers_flattened = np.ravel(fibers)
+    pca_dataset = fibers_flattened.reshape((num_pca_samples, num_pca_features))
     return pca_dataset
 
 
@@ -148,19 +196,16 @@ def plot_timepoint_sepectrum(colors_by_step: list[str], step_label: str):
     plt.title(f"Legend: {step_label}", size=10, pad=14)
     plt.show()
 
-timepoint_step_range = int(simulation_dataframes[0].num_timepoints) # grabbing a sim timepoint count for sake of a legend
-plot_timepoint_sepectrum(color_list_generator(timepoint_step_range), "Simulation Time Intervals")
-
 
 # %%
 # ### PCA: Setup
 
-def get_simulation_fibers_pca_df(sim_df: pd.DataFrame, aligned: bool) -> pd.DataFrame:
+def get_study_fibers_pca_df(study_df: pd.DataFrame, align: bool) -> pd.DataFrame:
     """
-    Get a PCA analysis dataframe from a fiber simulation dataframe.
+    Get a PCA analysis dataframe from a fiber study dataframe.
     """
     # --- compute
-    pca_dataset = get_sim_df_analysis_dataset(sim_df, aligned)
+    pca_dataset = get_study_df_analysis_dataset(study_df, align)
     pca = PCA(n_components=2)
     pca_samples_components = pca.fit_transform(pca_dataset)
     # --- setup dataframe for plotting
@@ -168,13 +213,13 @@ def get_simulation_fibers_pca_df(sim_df: pd.DataFrame, aligned: bool) -> pd.Data
         data=pca_samples_components,
         columns=["principal component 1", "principal component 2"],
     )
-    pca_df["label"] = sim_df.param_velocity
-    pca_df["time"] = int(sim_df.num_timepoints)
+    pca_df["label"] = study_df.param_velocity
+    pca_df["time"] = int(study_df.param_timepoints)
     # --- return
     return pca_df
 
 
-def plot_simulation_fibers_pca(pca_df: pd.DataFrame, sim_df: pd.DataFrame, title: str, figsize=6):
+def plot_study_fibers_pca(pca_df: pd.DataFrame, study_df: pd.DataFrame, title: str, figsize=6):
     """
     Plot a PCA analysis dataframe
     """
@@ -185,7 +230,7 @@ def plot_simulation_fibers_pca(pca_df: pd.DataFrame, sim_df: pd.DataFrame, title
     ax.set_title(title, fontsize=10)
     # --- compile flat arr of colors (505 points for pc1, which is 101 chunks. this feels a little weird but it works)
     num_pc1_points = int(pca_df['principal component 1'].shape[0])
-    num_fiber_points = int(sim_df.num_timepoints)
+    num_fiber_points = int(study_df.param_timepoints)
     pc1_color_lists = []
     for idx in range(num_pc1_points // num_fiber_points):
         # incrimenting idx by 1 per set of 101 points across the full count of pc1 points
@@ -204,26 +249,26 @@ def plot_simulation_fibers_pca(pca_df: pd.DataFrame, sim_df: pd.DataFrame, title
 # %%
 # ### PACMAP: Setup
 
-def get_simulation_fibers_pacmap_df(sim_df: pd.DataFrame, aligned: bool) -> pd.DataFrame:
+def get_study_fibers_pacmap_df(study_df: pd.DataFrame, align: bool) -> pd.DataFrame:
     """
-    Get a PACMAP analysis dataframe from a fiber simulation dataframe.     
+    Get a PACMAP analysis dataframe from a fiber study dataframe.     
     """
     # --- compute
-    pacmap_dataset = get_sim_df_analysis_dataset(sim_df, aligned)
-    embedding = pacmap.PaCMAP(n_components=2, n_neighbors=int(sim_df.num_fibers))
+    pacmap_dataset = get_study_df_analysis_dataset(study_df, align)
+    embedding = pacmap.PaCMAP(n_components=2, n_neighbors=int(study_df.param_fibers))
     pacmap_samples_components = embedding.fit_transform(pacmap_dataset, init="pca")
     # --- setup dataframe for plotting
     pacmap_df = pd.DataFrame(
         data=pacmap_samples_components,
         columns=["principal component 1", "principal component 2"],
     )
-    pacmap_df["label"] = sim_df.param_velocity
-    pacmap_df["time"] = int(sim_df.num_timepoints) # range(num_pacmap_samples)
+    pacmap_df["label"] = study_df.param_velocity
+    pacmap_df["time"] = int(study_df.param_timepoints) # range(num_pacmap_samples)
     # --- return
     return pacmap_df
 
 
-def plot_simulation_fibers_pacmap(pacmap_df: np.ndarray, sim_df: pd.DataFrame, title: str, figsize=6):
+def plot_study_fibers_pacmap(pacmap_df: np.ndarray, study_df: pd.DataFrame, title: str, figsize=6):
     """
     Plot a PACMAP analysis dataframe
     """
@@ -234,7 +279,7 @@ def plot_simulation_fibers_pacmap(pacmap_df: np.ndarray, sim_df: pd.DataFrame, t
     ax.set_title(title, fontsize=10)
     # --- compile flat arr of colors (505 points for pc1, which is 101 chunks. this feels a little weird but it works)
     num_pc1_points = int(pacmap_df['principal component 1'].shape[0])
-    num_fiber_points = int(sim_df.num_timepoints)
+    num_fiber_points = int(study_df.param_timepoints)
     pc1_color_lists = []
     for idx in range(num_pc1_points // num_fiber_points):
         # incrimenting idx by 1 per set of 101 points across the full count of pc1 points
@@ -272,23 +317,42 @@ def plot_explained_variance_visualization(pca: PCA):
 
 
 # %%
-# Plot
+# # Plot: Legend for Color Transitions/Steps
+microscope_timepoint_step_range = int(microscope_study_dataframes[0].param_timepoints) # grabbing a sim timepoint count for sake of a legend
+plot_timepoint_sepectrum(color_list_generator(microscope_timepoint_step_range), "Simulation Time Intervals")
 
-for sim_df in simulation_dataframes:
+
+# %%
+# # Plot: Fibers - Microscopy
+
+for idx, microscope_study_df in enumerate(microscope_study_dataframes):
+    print(f"Plotting microscope_study_df #{idx}...")
     # PCA
     # --- not aligned
-    pca_df = get_simulation_fibers_pca_df(sim_df, aligned=False)
-    plot_simulation_fibers_pca(pca_df, sim_df, f"PAC: Aligned={False},Velocity={float(sim_df.param_velocity)}", figsize=4)
-    # FYI alignment has no impact on PCA, but it does affect PACMAP
-    # # --- aligned
-    # pca_aligned_df = get_simulation_fibers_pca_df(sim_df, aligned=True)
-    # plot_simulation_fibers_pca(pca_aligned_df, sim_df, f"Aligned={True},Velocity={float(sim_df.param_velocity)}", figsize=4)
-
+    pca_df = get_study_fibers_pca_df(microscope_study_df, align=False)
+    plot_study_fibers_pca(pca_df, microscope_study_df, f"PAC: Aligned={False},Velocity={float(microscope_study_df.param_velocity)}", figsize=4)
+    # # --- aligned (has no impact on PCA)
     # PACMAP
     # --- not aligned
-    pacmap_df = get_simulation_fibers_pacmap_df(sim_df, aligned=False)
-    plot_simulation_fibers_pacmap(pacmap_df, sim_df, f"PaCMAP: Aligned={False},Velocity={float(sim_df.param_velocity)}", figsize=4)
+    pacmap_df = get_study_fibers_pacmap_df(microscope_study_df, align=False)
+    plot_study_fibers_pacmap(pacmap_df, microscope_study_df, f"PaCMAP: Aligned={False},Velocity={float(microscope_study_df.param_velocity)}", figsize=4)
     # --- aligned
-    pacmap_aligned_df = get_simulation_fibers_pacmap_df(sim_df, aligned=True)
-    plot_simulation_fibers_pacmap(pacmap_aligned_df, sim_df, f"PaCMAP: Aligned={True},Velocity={float(sim_df.param_velocity)}", figsize=4)
+    pacmap_aligned_df = get_study_fibers_pacmap_df(microscope_study_df, align=True)
+    plot_study_fibers_pacmap(pacmap_aligned_df, microscope_study_df, f"PaCMAP: Aligned={True},Velocity={float(microscope_study_df.param_velocity)}", figsize=4)
+
+
+# %%
+# # Plot: Fibers - ReaDDy
+
+for idx, readdy_study_df in enumerate(readdy_study_dataframes):
+    print(f"Plotting readdy_study_df #{idx}...")
+    # PCA
+    # --- not aligned
+    pca_df = get_study_fibers_pca_df(readdy_study_df, align=False)
+    plot_study_fibers_pca(pca_df, readdy_study_df, f"PAC: Aligned={False},Velocity={float(readdy_study_df.param_velocity)}", figsize=4)
+    # --- aligned (TODO)
+    # PACMAP
+    # --- not aligned
+    pacmap_df = get_study_fibers_pacmap_df(readdy_study_df, align=False)
+    plot_study_fibers_pacmap(pacmap_df, readdy_study_df, f"PaCMAP: Aligned={False},Velocity={float(readdy_study_df.param_velocity)}", figsize=4)
 
