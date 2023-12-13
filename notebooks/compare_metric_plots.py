@@ -15,6 +15,7 @@ plt.rcdefaults()
 metrics = [
     COMPRESSIONMETRIC.NON_COPLANARITY,
     COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+    COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
     COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
     COMPRESSIONMETRIC.CONTOUR_LENGTH,
@@ -66,7 +67,7 @@ for metric in metrics:
                     label = "_nolegend_"
                 xvals = np.linspace(0, 1, df_repeat["time"].nunique())
                 yvals = df_repeat.groupby("time")[metric.value].mean()
-                if simulator == "cytosim" and metric.value == "CONTOUR_LENGTH":
+                if simulator == "cytosim" and metric.value in ["CONTOUR_LENGTH", "AVERAGE_PERP_DISTANCE"]:
                     yvals = yvals * 1000
                 axs[ct].plot(
                     xvals,
