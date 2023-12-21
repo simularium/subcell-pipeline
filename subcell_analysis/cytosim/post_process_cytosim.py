@@ -11,7 +11,7 @@ from simulariumio import (
     MetaData,
     TrajectoryData,
 )
-from simulariumio.cytosim import CytosimData, CytosimObjectInfo, CytosimConverter
+from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
 
 save_folder_path = Path("../data/dataframes")
 
@@ -160,18 +160,18 @@ def cytosim_to_simularium(
     scale_factor: float = 10,
     exp_name: str = "",
 ) -> TrajectoryData:
-    object_info={
-        "fibers" : CytosimObjectInfo(
+    object_info = {
+        "fibers": CytosimObjectInfo(
             cytosim_file=InputFileData(
                 file_path=fiber_points_path,
             ),
             display_data={
-                1 : DisplayData(
+                1: DisplayData(
                     name=f"{exp_name}#actin",
                     radius=0.02,
                     display_type=DISPLAY_TYPE.FIBER,
                 )
-            }
+            },
         )
     }
     if singles_path is not None:
@@ -180,12 +180,12 @@ def cytosim_to_simularium(
                 file_path=singles_path,
             ),
             display_data={
-                1 : DisplayData(
+                1: DisplayData(
                     name=f"{exp_name}#anchor",
                     radius=0.05,
                     display_type=DISPLAY_TYPE.SPHERE,
                 ),
-            }
+            },
         )
     cytosim_data = CytosimData(
         meta_data=MetaData(
