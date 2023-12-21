@@ -185,7 +185,7 @@ def get_contour_length_from_trace(
     **options: dict,
 ) -> float:
     """
-    Returns the sum of inter-monomer distances in the trace
+    Returns the sum of inter-monomer distances in the trace.
 
     Parameters
     ----------
@@ -195,7 +195,7 @@ def get_contour_length_from_trace(
         Additional options as key-value pairs.
 
     Returns
-    ----------
+    -------
     total_distance: float
         sum of inter-monomer distances in the trace
     """
@@ -273,7 +273,9 @@ def get_total_fiber_twist(
     ]
     trace_2d = trace_2d - np.mean(trace_2d, axis=0)
 
-    return get_total_fiber_twist_2d(trace_2d, signed=signed, tolerance=tolerance)
+    return get_total_fiber_twist_2d(
+        trace_2d, signed=signed, tolerance=tolerance  # type: ignore
+    )
 
 
 def get_total_fiber_twist_pca(
