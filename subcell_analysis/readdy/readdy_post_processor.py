@@ -347,8 +347,8 @@ class ReaddyPostProcessor:
                     )
         return result
 
+    @staticmethod
     def linear_fiber_control_points(
-        self,
         axis_positions: List[List[np.ndarray]],
         segment_length: float,
     ) -> List[List[np.ndarray]]:
