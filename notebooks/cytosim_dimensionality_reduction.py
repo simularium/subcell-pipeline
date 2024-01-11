@@ -22,6 +22,14 @@ def rmsd(vec1: np.ndarray, vec2: np.ndarray) -> np.ndarray:
     return np.sqrt(((((vec1 - vec2) ** 2)) * 3).mean())
 
 # --- color funcs
+color_list = [
+    "blue",
+    "red",
+    "green",
+    "purple",
+    "orange",
+]
+
 def color_fader(c1, c2, mix=0) -> str:
     """Get a colour gradient to represent time"""
     c1 = np.array(mpl.colors.to_rgba(c1))
@@ -32,14 +40,8 @@ def color_list_generator(num_of_vals_to_make: int, idx: int = 0) -> list[str]:
     """For each fiber, we'll want a different color for intensity to differentiate when aligning"""
      # TODO: adjust the alpha on the choices above based on idx
     c1 = "white"
-    # select new colors via incrementing idx so we can color fibers differently
-    c2 = [
-        "blue",
-        "red",
-        "green",
-        "purple",
-        "orange",
-    ][idx]
+    # select new colors via incrementing idx so we can color fibers differently (cycling through color_list)
+    c2 = color_list[idx % len(color_list)]
     # return range of values
     return [color_fader(c1, c2, i / num_of_vals_to_make) for i in range(num_of_vals_to_make)]
 
@@ -54,7 +56,7 @@ def marker_list_generator(num_of_vals_to_make: int, idx: int = 0) -> list[str]:
     return [marker_list[idx]] * num_of_vals_to_make
 
 # --- BLAIR'S NOTEBOOK FUNCS. TODO: REMOVE THIS
-def align_fibers(fibers: np.ndarray) -> np.ndarray:
+def align_fibers(fibers: np.ndarray, align_to_fiber = np.ndarray) -> np.ndarray:
     """
     Rotationally align the given fibers around the x-axis.
 
@@ -73,7 +75,7 @@ def align_fibers(fibers: np.ndarray) -> np.ndarray:
     align_by = []
     points_per_fiber = int(fibers.shape[2] / 3)
     # reference fiber selected. choosing last fiber position for reference?
-    ref = fibers[-1][0].copy().reshape((points_per_fiber, 3))
+    ref = (align_to_fiber if align_to_fiber is not None else fibers[-1][0]).copy().reshape((points_per_fiber, 3))
     for fiber_ix in range(len(fibers[-1])):
         best_rmsd = math.inf
         for angle in np.linspace(0, 2 * np.pi, 1000):
@@ -100,29 +102,6 @@ def align_fibers(fibers: np.ndarray) -> np.ndarray:
 # %%
 # ### Data Preppers
 
-# --- loaded csvs/txt files into study dataframes (DEPRECATED: we're now expecting a pre-processed single CSV of subsampled data)
-def study_loader(data_df, source, num_fiber_monomers, num_timepoints):
-    study_dfs = []
-    for param_velocity, velocity_df in data_df.groupby('velocity'):
-        fibers = [] # 1 fiber per simulation, so treating 'repeats' as fibers
-        for repeat, repeat_df in velocity_df.groupby('repeat'):
-            fiber_timepoints = []
-            for time, time_df in repeat_df.groupby('time'):
-                fiber_timepoints.append(time_df[['xpos', 'ypos', 'zpos']].values.flatten()) # flattening to match data patterns
-            fibers.append(fiber_timepoints) # 1001 timepoints x flattened(50 monomers x 3 dimensions)
-        # --- append
-        df = pd.DataFrame({
-            'fibers': [np.array(fibers)], # need as np array for shape property
-            'source': source,
-            'param_fibers': len(fibers),
-            'param_timepoints': num_timepoints,
-            'param_fiber_monomers': num_fiber_monomers,
-            'param_dimensions': 3,
-            'param_velocity': param_velocity
-        })
-        study_dfs.append(df)
-    return study_dfs
-
 # --- load in prepped CSV of subsamples (pre-processed for timepoints, monomers)
 def study_subsamples_loader(subsamples_df: pd.DataFrame):
     study_dfs = []
@@ -136,6 +115,10 @@ def study_subsamples_loader(subsamples_df: pd.DataFrame):
                 for time, time_df in repeat_df.groupby('time'):
                     fiber_timepoints.append(time_df[['xpos', 'ypos', 'zpos']].values.flatten()) # flattening to match data patterns
                 fibers.append(fiber_timepoints) # 1001 timepoints x flattened(50 monomers x 3 dimensions)
+            # --- coordinate scaler (coordinate systems scale differences don't allow shared space)
+            param_coordinate_scaler = 1
+            if sim_name == "readdy":
+                param_coordinate_scaler = 0.001
             # --- append
             df = pd.DataFrame({
                 'fibers': [np.array(fibers)], # need as np array for shape property
@@ -144,23 +127,30 @@ def study_subsamples_loader(subsamples_df: pd.DataFrame):
                 'param_timepoints': num_timepoints,
                 'param_fiber_monomers': num_monomers,
                 'param_dimensions': 3,
-                'param_velocity': param_velocity
+                'param_velocity': param_velocity,
+                'param_coordinate_scaler': param_coordinate_scaler
             })
             study_dfs.append(df)
     return study_dfs
 
 
 # --- reshaping datasets for analysis
-def get_study_df_analysis_dataset(study_df: pd.DataFrame, align: bool = False):
+def get_study_df_ref_fiber(study_df: pd.DataFrame) -> np.ndarray:
+    """
+    Grab first fiber from the study dataset. We're not going to transfrom the fiber, that's for the fiber align function
+    """
+    return study_df.fibers[0][-1][0]
+
+def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False, fiber_for_alignment = None):
     """
     Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis
     """
-    # print('get_study_df_analysis_dataset: ', np.array(study_df.fibers[0]).shape)
     num_pca_samples = int(study_df.param_fibers) * int(study_df.param_timepoints)
     num_pca_features = int(study_df.param_fiber_monomers) * int(study_df.param_dimensions)
-    fibers = study_df.fibers[0] if align == False else align_fibers(study_df.fibers[0])
-    fibers_flattened = np.ravel(fibers)
-    pca_dataset = fibers_flattened.reshape((num_pca_samples, num_pca_features))
+    fibers = study_df.fibers[0] if align == False else align_fibers(study_df.fibers[0], align_to_fiber=fiber_for_alignment)
+    fibers_scaled = fibers * study_df.param_coordinate_scaler[0] # scale the coordinates for aligning multiple sims
+    fibers_scaled_flattened = np.ravel(fibers_scaled)
+    pca_dataset = fibers_scaled_flattened.reshape((num_pca_samples, num_pca_features))
     return pca_dataset
 
 
@@ -188,13 +178,14 @@ def plot_timepoint_sepectrum(colors_by_step: list[str], step_label: str):
 # %%
 # ### PCA: Setup
 
-def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.DataFrame]:
+def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> [List[pd.DataFrame], PCA]:
     """
     Get a PCA analysis dataframe from a fiber study dataframe.
     """
     pca_space = PCA(n_components=2)
     # --- create our embedding space by fitting the combined data (dataset func flattens/orders our monomer datapoints)
-    study_datasets = [get_study_df_analysis_dataset(study_df, align) for study_df in study_dfs]
+    fiber_for_alignment = get_study_df_ref_fiber(study_dfs[0])
+    study_datasets = [prep_study_df_fibers(study_df, align, fiber_for_alignment) for study_df in study_dfs]
     combined_prepared_data = np.vstack(study_datasets) # needing to create a 1 dim arr, but errs if I just pass in [study_datasets], TODO: better understand this
     pca_space.fit(combined_prepared_data)
     # --- transform the data
@@ -203,13 +194,13 @@ def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.Dat
     pca_results = []
     for study_idx, pca_transformed_study_data in enumerate(pca_transformed_study_data):
         pca_df = pd.DataFrame(
-            data=MinMaxScaler().fit_transform(pca_transformed_study_data),
+            data=pca_transformed_study_data,
             columns=["principal component 1", "principal component 2"],
         )
         pca_df["label"] = study_dfs[study_idx].param_velocity
         pca_df["time"] = int(study_dfs[study_idx].param_timepoints)
         pca_results.append(pca_df)
-    return pca_results
+    return pca_results, pca_space
 
 
 # %%
@@ -217,12 +208,13 @@ def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.Dat
 
 def get_study_pacmap_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.DataFrame]:
     """
-    Get a PACMAP analysis dataframe from a fiber study dataframe.     
+    Get a PACMAP analysis dataframe from a fiber study dataframe.
     """
     n_neighbors = sum(map(lambda df: df.param_fibers.values[0], study_dfs)) # per fiber? meaning, all study fiber counts?
     pacmap_space = pacmap.PaCMAP(n_components=2, n_neighbors=n_neighbors)
     # --- create the embedding space
-    study_datasets = [get_study_df_analysis_dataset(study_df, align) for study_df in study_dfs]
+    fiber_for_alignment = get_study_df_ref_fiber(study_dfs[0])
+    study_datasets = [prep_study_df_fibers(study_df, align, fiber_for_alignment) for study_df in study_dfs]
     combined_prepared_data = np.vstack(study_datasets)
     # --- fix+transform the data (we're using fit_trasnform, because pacmap treats "transform" as additional/new datasets and it says positions can be in different places)
     pacmap_transformed_study_data = pacmap_space.fit_transform(combined_prepared_data, init="pca")
@@ -233,7 +225,7 @@ def get_study_pacmap_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.
         num_samples = study_df.param_fibers.values[0] * study_df.param_timepoints.values[0]
         end = start + num_samples
         pacmap_df = pd.DataFrame(
-            data=MinMaxScaler().fit_transform(pacmap_transformed_study_data[start:end]),
+            data=pacmap_transformed_study_data[start:end],
             columns=["principal component 1", "principal component 2"]
         )
         pacmap_df["label"] = study_df.param_velocity
@@ -247,14 +239,14 @@ def get_study_pacmap_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.
 # ### Plotter Setup
 
 # --- for single simulation
-def plot_study_df(analysis_df: pd.DataFrame, title: str, figsize=6):
+def plot_study_df(analysis_df: pd.DataFrame, title: str, figsize=6, pca_space: PCA = None):
     """
     Plot a PCA analysis dataframe
     """
     fig, ax = plt.subplots(figsize=(figsize, figsize))
     # --- List of parameters or conditions under which the PCA was run.
-    ax.set_xlabel("PC1", loc="left")
-    ax.set_ylabel("PC2", loc="bottom")
+    ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
+    ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
     ax.set_title(title, fontsize=10)
     # --- setup points + skip counter
     num_pc1_points = int(analysis_df['principal component 1'].shape[0])
@@ -279,14 +271,14 @@ def plot_study_df(analysis_df: pd.DataFrame, title: str, figsize=6):
     plt.show()
 
 # --- for many simulations overlapping
-def plot_study_dfs(analysis_dfs: List[pd.DataFrame], title: str, figsize=6):
+def plot_study_dfs(analysis_dfs: List[pd.DataFrame], title: str, figsize=6, pca_space: PCA = None):
     """
     Plot multiple analysis dataframes atop each other. Increment colors by simulator count
     """
     fig, ax = plt.subplots(figsize=(figsize, figsize))
     # --- List of parameters or conditions under which the PCA was run.
-    ax.set_xlabel("PC1", loc="left")
-    ax.set_ylabel("PC2", loc="bottom")
+    ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
+    ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
     ax.set_title(title, fontsize=10)
     # --- for each simulation, plot..
     for analysis_idx, analysis_df in enumerate(analysis_dfs):
@@ -297,14 +289,12 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], title: str, figsize=6):
         if num_timepoints > 200:
             n_skip = math.floor(num_timepoints / 200) # skip data points for faster plotting
             print("High Volume Plot. Setting n_skip = ", n_skip)
-
         # --- create a list for colors/markers
         pc1_color_lists = []
         pc1_marker_lists = []
         for fiber_idx in range(num_pc1_points // num_timepoints):
             pc1_color_lists.append(color_list_generator(num_timepoints, analysis_idx)) # all fibers for this sim will be same color, but we'll have opacity shift
             pc1_marker_lists.append(marker_list_generator(num_timepoints, fiber_idx)) # for each fiber, fill a list of symbol tags
-
         # --- scatter (flatten the lists so they pair with the scattered points)
         pc1_point_colors = [c for cl in pc1_color_lists for c in cl]
         pc1_point_markers = [m for ml in pc1_marker_lists for m in ml]
@@ -318,28 +308,10 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], title: str, figsize=6):
             )
     plt.show()
 
-
-
-# %%
-# ### Explained Variance: Setup
-
-def plot_explained_variance_visualization(pca: PCA):
-    print(f"Explained Variance Visualization")
-    plt.figure(figsize=(8, 4))
-    # Plot the individual explained variance as a bar chart
-    # The height of the bar represents the variance ratio for each principal component.
-    plt.bar(range(pca.n_components_), pca.explained_variance_ratio_, alpha=0.5, align='center',
-            label='Individual explained variance')
-    # Overlay the cumulative explained variance as a step plot
-    # np.cumsum computes the cumulative sum of explained variance ratios.
-    # 'where=mid' places the step change in the middle of the x-tick.
-    plt.step(range(pca.n_components_), np.cumsum(pca.explained_variance_ratio_), where='mid',
-             label='Cumulative explained variance')
-    plt.ylabel('Explained variance ratio')
-    plt.xlabel('Principal components')
-    plt.legend(loc='best')
-    plt.tight_layout()
-    plt.show()
+# --- quick way to see what colors are being used for what sims
+def plot_study_dfs_legend(study_dfs: List[pd.DataFrame]):
+    for idx, study_df in enumerate(study_dfs):
+        print(f"{study_df.source[0]}: {color_list[idx]}")
 
 
 # %%
@@ -348,10 +320,18 @@ subsamples_df = pd.read_csv(f"{data_directory}/dataframes/combined_actin_compres
 study_dfs = study_subsamples_loader(subsamples_df)
 
 
+
 # %%
-# # Plot: Graph per Simulation
+# # Plot: All PCA
+pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs, align=True)
+plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity=All", figsize=10, pca_space=pca_aligned_space)
+pca_aligned_dfs = get_study_pacmap_dfs(study_dfs, align=True)
+plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity=All", figsize=10)
 
 
+
+# %%
+# # Plot: Per Simulation
 velocities_to_plot = list(set(map(lambda df: df.param_velocity.values[0], study_dfs))) # grabs all unique velocities, and sort low->high
 velocities_to_plot.sort()
 
@@ -363,35 +343,34 @@ for velocity in velocities_to_plot:
     for st_df in study_dfs_to_plot:
         source = st_df['source'].values[0].upper()
         print(f"Plotting '{source}' PCA...")
-        [pca_df] = get_study_pca_dfs([st_df], align=False)
-        plot_study_df(pca_df, f"{source} (PAC): Aligned={False}, Velocity={float(velocity)}", figsize=4)
-        [pca_aligned_df] = get_study_pca_dfs([st_df], align=True)
-        plot_study_df(pca_aligned_df, f"{source} (PAC): Aligned={True},Velocity={float(velocity)}", figsize=4)
+        # [pca_df], pca_space = get_study_pca_dfs([st_df], align=False)
+        # plot_study_df(pca_df, f"{source} (PCA): Aligned={False}, Velocity={float(velocity)}", figsize=5, pca_space=pca_space)
+        [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
+        plot_study_df(pca_aligned_df, f"{source} (PCA): Aligned={True},Velocity={float(velocity)}", figsize=5, pca_space=pca_aligned_space)
 
     # PCA: All Sims
     print(f"Plotting All PCA...")
-    pca_dfs = get_study_pca_dfs(study_dfs_to_plot, align=False)
-    plot_study_dfs(pca_dfs, f"ALL (PAC): Aligned={False}, Velocity={float(velocity)}", figsize=4)
-    pca_aligned_dfs = get_study_pca_dfs(study_dfs_to_plot, align=True)
-    plot_study_dfs(pca_aligned_dfs, f"ALL (PAC): Aligned={True}, Velocity={float(velocity)}", figsize=4)
+    plot_study_dfs_legend(study_dfs_to_plot)
+    # pca_dfs, pca_space = get_study_pca_dfs(study_dfs_to_plot, align=False)
+    # plot_study_dfs(pca_dfs, f"ALL (PCA): Aligned={False}, Velocity={float(velocity)}", figsize=5, pca_space=pca_space)
+    pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
+    plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity={float(velocity)}", figsize=5, pca_space=pca_aligned_space)
 
     # PACMAP
     for st_df in study_dfs_to_plot:
         source = st_df['source'].values[0].upper()
         print(f"Plotting '{source}' PaCMAP...")
-        [pacmap_df] = get_study_pacmap_dfs([st_df], align=False)
-        plot_study_df(pacmap_df, f"{source} (PaCMAP): Aligned={False},Velocity={float(velocity)}", figsize=4)
+        # [pacmap_df] = get_study_pacmap_dfs([st_df], align=False)
+        # plot_study_df(pacmap_df, f"{source} (PaCMAP): Aligned={False},Velocity={float(velocity)}", figsize=5)
         [pacmap_aligned_df] = get_study_pacmap_dfs([st_df], align=True)
-        plot_study_df(pacmap_aligned_df, f"{source} (PaCMAP): Aligned={True},Velocity={float(velocity)}", figsize=4)
+        plot_study_df(pacmap_aligned_df, f"{source} (PaCMAP): Aligned={True},Velocity={float(velocity)}", figsize=5)
 
     # PACMAP: All Sims
     print(f"Plotting All PaCMAP...")
-    pca_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=False)
-    plot_study_dfs(pca_dfs, f"ALL (PaCMAP): Aligned={False}, Velocity={float(velocity)}", figsize=4)
+    plot_study_dfs_legend(study_dfs_to_plot)
+    # pca_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=False)
+    # plot_study_dfs(pca_dfs, f"ALL (PaCMAP): Aligned={False}, Velocity={float(velocity)}", figsize=5)
     pca_aligned_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=True)
-    plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity={float(velocity)}", figsize=4)
-
-
-
+    plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity={float(velocity)}", figsize=5)
 
 
