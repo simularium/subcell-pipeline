@@ -6,6 +6,8 @@ import pacmap
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D  # This is necessary for 3D plotting
+import seaborn as sns
 from scipy.spatial.transform import Rotation
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
@@ -28,6 +30,11 @@ color_list = [
     "green",
     "purple",
     "orange",
+    "cyan",
+    "black",
+    "gray",
+    "yellow",
+    "pink",
 ]
 
 def color_fader(c1, c2, mix=0) -> str:
@@ -315,19 +322,68 @@ def plot_study_dfs_legend(study_dfs: List[pd.DataFrame]):
 
 
 # %%
-# Data Loading: Combiled Subsample
-subsamples_df = pd.read_csv(f"{data_directory}/dataframes/combined_actin_compression_dataset_subsampled.csv")
-study_dfs = study_subsamples_loader(subsamples_df)
+# # Inverse Transformations Funcs: Exmaning Differences in Original/Transformed Data
+def calc_pca_component_distributions(pca_transform_dataframes: List[pd.DataFrame]) -> List[dict]:
+    pca_sets = []
+    for pca_transform_dataframe in pca_transform_dataframes:
+        for idx, label in enumerate(["principal component 1", "principal component 2"]):
+            pc_mean = np.mean(pca_transform_dataframe[label].values)
+            pc_std = abs(np.std(pca_transform_dataframe[label].values))
+            pca_sets.extend([
+                dict(input=[pc_mean - pc_std * 2, 0] if idx == 0 else [0, pc_mean - pc_std * 2], fiber=None),
+                dict(input=[pc_mean - pc_std, 0] if idx == 0 else [0, pc_mean - pc_std], fiber=None),
+                dict(input=[pc_mean, 0] if idx == 0 else [0, pc_mean], fiber=None),
+                dict(input=[pc_mean + pc_std, 0] if idx == 0 else [0, pc_mean + pc_std], fiber=None),
+                dict(input=[pc_mean + pc_std * 2, 0] if idx == 0 else [0, pc_mean + pc_std * 2], fiber=None),
+            ])
+    return pca_sets
 
+def map_fibers_on_pca_component_distributions(pca_space: PCA, pca_component_distributions: List[dict]):
+    pca_sets = []
+    for d in pca_component_distributions:
+        projected_fiber = pca_space.inverse_transform([d['input'][0], d['input'][1]]) # duplicative, but just want to make clear the interface
+        d['fiber'] = projected_fiber.reshape(-1, 3) # transformation is a flat
+        pca_sets.append(d)
+    return pca_sets
+
+def plot_inverse_transform_pca(pcas_fibers: List[dict], title: str):
+    # 2D Layout
+    plt.figure(figsize=(24, 24))
+    for dim in [0, 1, 2]:
+        plt.subplot(3, 1, dim + 1)
+        dim_readable = ['X', 'Y', 'Z'][dim]
+        plt.ylabel(f'Dimension {dim_readable}')
+        plt.xlabel('Monomer')
+        plt.title(title)
+        # ... for each fiber
+        for idx_pca, pca_dict in enumerate(pcas_fibers):
+            c = color_list[idx_pca % len(color_list)] # this function is confusing as shit 
+            for idx_m in range(len(pca_dict['fiber'])):
+                plt.scatter(idx_m, pca_dict['fiber'][idx_m][dim], c=c, label=f"[{pca_dict['input'][0]},{pca_dict['input'][1]}]" if idx_m == 0 else None)
+        plt.legend() # show in each graph
+    plt.show()
+
+    # 3D plot of fiber positions
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    # using plot instead of scatter so we get lines
+    for idx_pca, pca_dict in enumerate(pcas_fibers):
+        c = color_list[idx_pca % len(color_list)] # this function is confusing as shit 
+        x, y, z = zip(*pca_dict['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
+        ax.plot(x, y, z, c=c, label=f"[{pca_dict['input'][0]},{pca_dict['input'][1]}]")
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
+    ax.set_title(title)
+    ax.legend()
+    fig.show()
+    plt.show()
 
 
 # %%
-# # Plot: All PCA
-pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs, align=True)
-plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity=All", figsize=10, pca_space=pca_aligned_space)
-pca_aligned_dfs = get_study_pacmap_dfs(study_dfs, align=True)
-plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity=All", figsize=10)
-
+# Data Loading: Combiled Subsample
+subsamples_df = pd.read_csv(f"{data_directory}/dataframes/combined_actin_compression_dataset_subsampled.csv")
+study_dfs = study_subsamples_loader(subsamples_df)
 
 
 # %%
@@ -344,33 +400,50 @@ for velocity in velocities_to_plot:
         source = st_df['source'].values[0].upper()
         print(f"Plotting '{source}' PCA...")
         # [pca_df], pca_space = get_study_pca_dfs([st_df], align=False)
-        # plot_study_df(pca_df, f"{source} (PCA): Aligned={False}, Velocity={float(velocity)}", figsize=5, pca_space=pca_space)
+        # plot_study_df(pca_df, f"{source} (PCA): Aligned={False}, Velocity={float(velocity)}", figsize=6, pca_space=pca_space)
         [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
-        plot_study_df(pca_aligned_df, f"{source} (PCA): Aligned={True},Velocity={float(velocity)}", figsize=5, pca_space=pca_aligned_space)
+        # plot_study_df(pca_aligned_df, f"{source} (PCA): Aligned={True},Velocity={float(velocity)}", figsize=6, pca_space=pca_aligned_space)
+        # ... inverted (scaling the transformed data bc plot lib drops decimals, and we get straight lines)
+        print(f"Plotting '{source}' PCA Inverted Transformation...")
+        # what even is this returning
+        pca_component_dists = calc_pca_component_distributions([pca_aligned_df])
+        pca_component_dists_with_fibers = map_fibers_on_pca_component_distributions(pca_space=pca_aligned_space, pca_component_distributions=pca_component_dists)
+        plot_inverse_transform_pca(pcas_fibers=pca_component_dists_with_fibers, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}")
 
     # PCA: All Sims
     print(f"Plotting All PCA...")
-    plot_study_dfs_legend(study_dfs_to_plot)
+    # plot_study_dfs_legend(study_dfs_to_plot)
     # pca_dfs, pca_space = get_study_pca_dfs(study_dfs_to_plot, align=False)
-    # plot_study_dfs(pca_dfs, f"ALL (PCA): Aligned={False}, Velocity={float(velocity)}", figsize=5, pca_space=pca_space)
+    # plot_study_dfs(pca_dfs, f"ALL (PCA): Aligned={False}, Velocity={float(velocity)}", figsize=6, pca_space=pca_space)
     pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
-    plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity={float(velocity)}", figsize=5, pca_space=pca_aligned_space)
+    # plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity={float(velocity)}", figsize=6, pca_space=pca_aligned_space)
+    # inverted transformation covariance explanation
+    pca_component_dists = calc_pca_component_distributions(pca_aligned_dfs)
+    pca_component_dists_with_fibers = map_fibers_on_pca_component_distributions(pca_space=pca_aligned_space, pca_component_distributions=pca_component_dists)
+    plot_inverse_transform_pca(pcas_fibers=pca_component_dists_with_fibers, title=f"ALL (PCA): Aligned=True,Velocity={float(velocity)}")
 
-    # PACMAP
-    for st_df in study_dfs_to_plot:
-        source = st_df['source'].values[0].upper()
-        print(f"Plotting '{source}' PaCMAP...")
-        # [pacmap_df] = get_study_pacmap_dfs([st_df], align=False)
-        # plot_study_df(pacmap_df, f"{source} (PaCMAP): Aligned={False},Velocity={float(velocity)}", figsize=5)
-        [pacmap_aligned_df] = get_study_pacmap_dfs([st_df], align=True)
-        plot_study_df(pacmap_aligned_df, f"{source} (PaCMAP): Aligned={True},Velocity={float(velocity)}", figsize=5)
+    # # PACMAP
+    # for st_df in study_dfs_to_plot:
+    #     source = st_df['source'].values[0].upper()
+    #     print(f"Plotting '{source}' PaCMAP...")
+    #     # [pacmap_df] = get_study_pacmap_dfs([st_df], align=False)
+    #     # plot_study_df(pacmap_df, f"{source} (PaCMAP): Aligned={False},Velocity={float(velocity)}", figsize=6)
+    #     [pacmap_aligned_df] = get_study_pacmap_dfs([st_df], align=True)
+    #     plot_study_df(pacmap_aligned_df, f"{source} (PaCMAP): Aligned={True},Velocity={float(velocity)}", figsize=6)
 
-    # PACMAP: All Sims
-    print(f"Plotting All PaCMAP...")
-    plot_study_dfs_legend(study_dfs_to_plot)
-    # pca_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=False)
-    # plot_study_dfs(pca_dfs, f"ALL (PaCMAP): Aligned={False}, Velocity={float(velocity)}", figsize=5)
-    pca_aligned_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=True)
-    plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity={float(velocity)}", figsize=5)
+    # # PACMAP: All Sims
+    # print(f"Plotting All PaCMAP...")
+    # plot_study_dfs_legend(study_dfs_to_plot)
+    # # pca_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=False)
+    # # plot_study_dfs(pca_dfs, f"ALL (PaCMAP): Aligned={False}, Velocity={float(velocity)}", figsize=6)
+    # pca_aligned_dfs = get_study_pacmap_dfs(study_dfs_to_plot, align=True)
+    # plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity={float(velocity)}", figsize=6)
 
+
+# %%
+# # Plot: All PCA
+# pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs, align=True)
+# plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity=All", figsize=12, pca_space=pca_aligned_space)
+# pca_aligned_dfs = get_study_pacmap_dfs(study_dfs, align=True)
+# plot_study_dfs(pca_aligned_dfs, f"ALL (PaCMAP): Aligned={True}, Velocity=All", figsize=12)
 
