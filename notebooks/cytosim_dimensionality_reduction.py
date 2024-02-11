@@ -404,13 +404,13 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str):
         list(filter(lambda pca_set: pca_set['label'][0] == "principal component 1", pca_sets)),
         list(filter(lambda pca_set: pca_set['label'][0] == "principal component 2", pca_sets)),
     ]
-    for idx_pca_comp, pca_set_by_comp in enumerate(pca_sets_by_comp):
+    for idx_pca_comp, pca_set_by_component in enumerate(pca_sets_by_comp):
         ax = fig.add_subplot(1, 2, idx_pca_comp + 1, projection='3d')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
-        ax.set_title(f"[{title_prefix}] {pca_set_by_comp[0]['label'][0]}", fontsize=14)
-        for idx_pca, pca_set in enumerate(pca_set_by_comp):
+        ax.set_title(f"[{title_prefix}] {pca_set_by_component[0]['label'][0]}", fontsize=14)
+        for idx_pca, pca_set in enumerate(pca_set_by_component):
             for idx_val, val in enumerate(pca_set['values']):
                 c = color_list[idx_val % len(color_list)] # this function is confusing as shit 
                 x, y, z = zip(*val['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
@@ -508,6 +508,8 @@ for source in sources_to_plot:
     pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
     # --- pca: plot
     plot_study_dfs(pca_aligned_dfs, f"{source} (PCA): Aligned={True}, Velocity=All", figsize=(7, 7), pca_space=pca_aligned_space)
+    # --- histograms
+    plot_pca_histogram(pca_sets=pca_aligned_dfs)
     # --- inverse transform
     pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space, pca_transform_dataframes=pca_aligned_dfs)
     plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source}")
