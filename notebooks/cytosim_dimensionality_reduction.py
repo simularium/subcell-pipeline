@@ -24,6 +24,9 @@ data_directory = "../data"
 def rmsd(vec1: np.ndarray, vec2: np.ndarray) -> np.ndarray:
     return np.sqrt(((((vec1 - vec2) ** 2)) * 3).mean())
 
+def normalize(value, min_value, max_value):
+    return (value - min_value) / (max_value - min_value)
+
 # --- color funcs
 color_list = [
     "blue",
@@ -40,9 +43,9 @@ color_list = [
 
 def color_fader(c1, c2, mix=0) -> str:
     """Get a colour gradient to represent time"""
-    c1 = np.array(mpl.colors.to_rgba(c1))
-    c2 = np.array(mpl.colors.to_rgba(c2))
-    return mpl.colors.to_rgba((1 - mix) * c1 + mix * c2)
+    c1 = np.array(mpl.colors.to_rgb(c1))
+    c2 = np.array(mpl.colors.to_rgb(c2))
+    return mpl.colors.to_rgb((1 - mix) * c1 + mix * c2) # dropping to rgb because alpha is being used by metrics now
 
 def color_list_generator(num_of_vals_to_make: int, idx: int = 0) -> list[str]:
     """For each fiber, we'll want a different color for intensity to differentiate when aligning"""
@@ -110,33 +113,41 @@ def align_fibers(fibers: np.ndarray, align_to_fiber = np.ndarray) -> np.ndarray:
 # %%
 # ### Data Preppers
 
+# --- metrics
+repeat_time_metrics_list = ["time", "NON_COPLANARITY", "PEAK_ASYMMETRY", "AVERAGE_PERP_DISTANCE", "TOTAL_FIBER_TWIST", "CALC_BENDING_ENERGY", "CONTOUR_LENGTH"]
+
 # --- load in prepped CSV of subsamples (pre-processed for timepoints, monomers)
 def study_subsamples_loader(subsamples_df: pd.DataFrame):
     study_dfs = []
     num_timepoints = 200
     num_monomers = 200
     for sim_name, sim_df in subsamples_df.groupby("simulator"):
-        for param_velocity, velocity_df in sim_df.groupby('velocity'):
-            fibers = [] # 1 fiber per simulation, so treating 'repeats' as fibers
-            for repeat, repeat_df in velocity_df.groupby('repeat'):
+        for param_velocity, velocity_df in sim_df.groupby("velocity"):
+            fibers = [] # 1 fiber per simulation, so treating "repeats" as fibers
+            fibers_metrics = []
+            for repeat, repeat_df in velocity_df.groupby("repeat"):
                 fiber_timepoints = []
-                for time, time_df in repeat_df.groupby('time'):
-                    fiber_timepoints.append(time_df[['xpos', 'ypos', 'zpos']].values.flatten()) # flattening to match data patterns
+                fiber_timepoints_metrics = []
+                for time, time_df in repeat_df.groupby("time"):
+                    fiber_timepoints.append(time_df[["xpos", "ypos", "zpos"]].values.flatten()) # flattening to match data patterns
+                    # HACK: we should do this all w/ dataframes but the refactor is painful so going to try keeping metrics in parallel
+                    fiber_timepoints_metrics.append(time_df[repeat_time_metrics_list])
                 fibers.append(fiber_timepoints) # 1001 timepoints x flattened(50 monomers x 3 dimensions)
+                fibers_metrics.append(fiber_timepoints_metrics)
             # --- coordinate scaler (coordinate systems scale differences don't allow shared space)
             param_coordinate_scaler = 1
             if sim_name == "readdy":
                 param_coordinate_scaler = 0.001
             # --- append
             df = pd.DataFrame({
-                'fibers': [np.array(fibers)], # need as np array for shape property
-                'source': sim_name,
-                'param_fibers': len(fibers),
-                'param_timepoints': num_timepoints,
-                'param_fiber_monomers': num_monomers,
-                'param_dimensions': 3,
-                'param_velocity': param_velocity,
-                'param_coordinate_scaler': param_coordinate_scaler
+                "fibers": [np.array(fibers)], # need as np array for shape property, should be (-1, 600)
+                "fibers_metrics": [fibers_metrics],
+                "source": sim_name,
+                "param_fibers": len(fibers),
+                "param_timepoints": num_timepoints,
+                "param_fiber_monomers": num_monomers,
+                "param_velocity": param_velocity,
+                "param_coordinate_scaler": param_coordinate_scaler
             })
             study_dfs.append(df)
     return study_dfs
@@ -154,7 +165,7 @@ def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False, fiber_for_
     Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis
     """
     num_pca_samples = int(study_df.param_fibers) * int(study_df.param_timepoints)
-    num_pca_features = int(study_df.param_fiber_monomers) * int(study_df.param_dimensions)
+    num_pca_features = int(study_df.param_fiber_monomers) * 3
     fibers = study_df.fibers[0] if align == False else align_fibers(study_df.fibers[0], align_to_fiber=fiber_for_alignment)
     fibers_scaled = fibers * study_df.param_coordinate_scaler[0] # scale the coordinates for aligning multiple sims
     fibers_scaled_flattened = np.ravel(fibers_scaled)
@@ -251,78 +262,83 @@ def get_study_pacmap_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.
 # ### Plotter Setup
 
 # --- for single simulation
-def plot_study_df(analysis_df: pd.DataFrame, title: str, figsize=6, pca_space: PCA = None):
+def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFrame, title: str, figsize=8):
     """
     Plot a PCA analysis dataframe
     """
-    fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
-    # --- List of parameters or conditions under which the PCA was run.
-    ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
-    ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
-    ax.set_title(title, fontsize=10)
-    # --- setup points + skip counter
-    num_pc1_points = int(analysis_df['principal component 1'].shape[0])
-    num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
-    n_skip = 1 # 1 = no skips
-    if num_timepoints > 200:
-        n_skip = math.floor(num_timepoints / 200) # skip data points for faster plotting
-        print("High Volume Plot. Setting n_skip = ", n_skip)
-    # --- compile flat arr of colors (feels weird but works)
-    pc1_color_lists = []
-    for fiber_idx in range(num_pc1_points // num_timepoints): # segment by fiber
-        pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx))
-    pc1_color_list = [c for cl in pc1_color_lists for c in cl] # flattens
-    # --- scatter
-    for i in range(num_pc1_points)[::n_skip]:
-        ax.scatter(
-            analysis_df.loc[i, "principal component 1"],
-            analysis_df.loc[i, "principal component 2"],
-            c=[pc1_color_list[i]],
-            s=70,
-        )
-    plt.show()
-
-# --- for many simulations overlapping
-def plot_study_dfs(analysis_dfs: List[pd.DataFrame], title: str, figsize=6, pca_space: PCA = None):
-    """
-    Plot multiple analysis dataframes atop each other. Increment colors by simulator count
-    """
-    fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
-    # --- List of parameters or conditions under which the PCA was run.
-    ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
-    ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
-    ax.set_title(title, fontsize=10)
-    legend_handles = []
-    # --- for each simulation, plot..
-    for analysis_idx, analysis_df in enumerate(analysis_dfs):
+    for metric in repeat_time_metrics_list:
+        # TODO: subplot setup
+        fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
+        # --- List of parameters or conditions under which the PCA was run.
+        ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
+        ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
+        ax.set_title(title + f",Metric={metric}", fontsize=10)
         # --- setup points + skip counter
         num_pc1_points = int(analysis_df['principal component 1'].shape[0])
         num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
-        n_skip = 1 # 1 = no skips
-        if num_timepoints > 200:
-            n_skip = math.floor(num_timepoints / 200) # skip data points for faster plotting
-            print("High Volume Plot. Setting n_skip = ", n_skip)
-        # --- create a list for colors/markers
+        # --- flattened metrics (bc points are flattened when processed ex: 5 fiber x 200 timepoint becomes 1000 points)
+        flattened_metrics = [repeat_time[metric].values[0] for repeat_list in study_df.fibers_metrics[0] for repeat_time in repeat_list]
+        metric_min = min(flattened_metrics)
+        metric_max = max(flattened_metrics)
+        # --- compile flat arr of colors (feels weird but works)
         pc1_color_lists = []
-        pc1_marker_lists = []
-        for fiber_idx in range(num_pc1_points // num_timepoints):
-            pc1_color_lists.append(color_list_generator(num_timepoints, analysis_idx)) # all fibers for this sim will be same color, but we'll have opacity shift
-            pc1_marker_lists.append(marker_list_generator(num_timepoints, fiber_idx)) # for each fiber, fill a list of symbol tags
-        # --- scatter (flatten the lists so they pair with the scattered points)
-        pc1_point_colors = [c for cl in pc1_color_lists for c in cl]
-        pc1_point_markers = [m for ml in pc1_marker_lists for m in ml]
-        for i in range(num_pc1_points)[::n_skip]:
-            if i == 0:
-                legend_handles.append(mpatches.Patch(color=color_list[analysis_idx], label=f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+        for fiber_idx in range(num_pc1_points // num_timepoints): # segment by fiber
+            pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx))
+        pc1_color_list = [c for cl in pc1_color_lists for c in cl] # flattens
+        # --- scatter
+        for i in range(num_pc1_points):
             ax.scatter(
                 analysis_df.loc[i, "principal component 1"],
                 analysis_df.loc[i, "principal component 2"],
-                c=[pc1_point_colors[i]],
-                s=50,
-                marker=pc1_point_markers[i],
+                c=[pc1_color_list[i]],
+                alpha=normalize(flattened_metrics[i], metric_min, metric_max),
+                s=70,
             )
-    plt.legend(handles=legend_handles) # using handles so we can control how many legend items appear
-    plt.show()
+        plt.show()
+
+# --- for many simulations overlapping
+def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: pd.DataFrame, title: str, figsize=8):
+    """
+    Plot multiple analysis dataframes atop each other. Increment colors by simulator count
+    """
+    for metric in repeat_time_metrics_list:
+        fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
+        # --- List of parameters or conditions under which the PCA was run.
+        ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
+        ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
+        ax.set_title(title + f",Metric={metric}", fontsize=10)
+        legend_handles = []
+        # --- for each simulation, plot..
+        for analysis_idx, analysis_df in enumerate(analysis_dfs):
+            # --- setup points + skip counter
+            num_pc1_points = int(analysis_df['principal component 1'].shape[0])
+            num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
+            # --- flattened metrics (bc points are flattened when processed ex: 5 fiber x 200 timepoint becomes 1000 points)
+            flattened_metrics = [repeat_time[metric].values[0] for repeat_list in study_dfs[analysis_idx].fibers_metrics[0] for repeat_time in repeat_list]
+            metric_min = min(flattened_metrics)
+            metric_max = max(flattened_metrics)
+            # --- create a list for colors/markers
+            pc1_color_lists = []
+            pc1_marker_lists = []
+            for fiber_idx in range(num_pc1_points // num_timepoints):
+                pc1_color_lists.append(color_list_generator(num_timepoints, analysis_idx)) # all fibers for this sim will be same color, but we'll have opacity shift
+                pc1_marker_lists.append(marker_list_generator(num_timepoints, fiber_idx)) # for each fiber, fill a list of symbol tags
+            # --- scatter (flatten the lists so they pair with the scattered points)
+            pc1_point_colors = [c for cl in pc1_color_lists for c in cl]
+            pc1_point_markers = [m for ml in pc1_marker_lists for m in ml]
+            for i in range(num_pc1_points):
+                if i == 0:
+                    legend_handles.append(mpatches.Patch(color=color_list[analysis_idx], label=f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+                ax.scatter(
+                    analysis_df.loc[i, "principal component 1"],
+                    analysis_df.loc[i, "principal component 2"],
+                    c=[pc1_point_colors[i]],
+                    alpha=normalize(flattened_metrics[i], metric_min, metric_max),
+                    s=50,
+                    marker=pc1_point_markers[i],
+                )
+        plt.legend(handles=legend_handles) # using handles so we can control how many legend items appear
+        plt.show()
 
 # --- quick way to see what colors are being used for what sims
 def plot_study_dfs_legend(study_dfs: List[pd.DataFrame]):
@@ -461,16 +477,14 @@ def plot_pca_histogram(pca_sets: List[pd.DataFrame]):
 
 # %%
 # Data Loading: Combiled Subsample
-subsamples_df = pd.read_csv(f"{data_directory}/dataframes/combined_actin_compression_dataset_subsampled.csv")
+subsamples_filename = "combined_actin_compression_metrics_all_velocities_and_repeats_subsampled.csv"
+subsamples_df = pd.read_csv(f"{data_directory}/dataframes/{subsamples_filename}")
 study_dfs = study_subsamples_loader(subsamples_df)
 
 
 # %%
 # # PLOT PCAS: BY VELOCITY
-velocities_to_plot = list(set(map(lambda df: df.param_velocity.values[0], study_dfs))) # grabs all unique velocities, and sort low->high
-velocities_to_plot.sort()
-
-for velocity in velocities_to_plot:
+for velocity in np.sort(subsamples_df['velocity'].unique()):
     study_dfs_to_plot = list(filter(lambda df: df.param_velocity.values[0] == velocity, study_dfs))
     print(f"Plotting {len(study_dfs_to_plot)} studies with velocity = {velocity}...")
 
@@ -480,7 +494,7 @@ for velocity in velocities_to_plot:
         print(f"Plotting '{source}' PCA...")
         [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
         # --- pca scatter plot
-        plot_study_df(pca_aligned_df, f"{source} (PCA): Aligned={True},Velocity={float(velocity)}", figsize=(7, 7), pca_space=pca_aligned_space)
+        plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
         # --- pca histogram
         plot_pca_histogram(pca_sets=[pca_aligned_df])
         # --- pca inverse transforms
@@ -491,7 +505,7 @@ for velocity in velocities_to_plot:
     print(f"Plotting All PCA...")
     # --- pca scatter plot
     pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
-    plot_study_dfs(pca_aligned_dfs, f"ALL (PCA): Aligned={True}, Velocity={float(velocity)}", figsize=(7, 7), pca_space=pca_aligned_space)
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space, study_dfs=study_dfs_to_plot, title=f"ALL (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
     # --- pca histograms
     plot_pca_histogram(pca_sets=pca_aligned_dfs)
     # --- pca inverse transforms (apparently this isn't helpful)
@@ -507,7 +521,7 @@ for source in sources_to_plot:
     # --- pca
     pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
     # --- pca: plot
-    plot_study_dfs(pca_aligned_dfs, f"{source} (PCA): Aligned={True}, Velocity=All", figsize=(7, 7), pca_space=pca_aligned_space)
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space, study_dfs=study_dfs_to_plot, title=f"{source} (PCA): Aligned=True,Velocity=All", figsize=(8, 8))
     # --- histograms
     plot_pca_histogram(pca_sets=pca_aligned_dfs)
     # --- inverse transform
