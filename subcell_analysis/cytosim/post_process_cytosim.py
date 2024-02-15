@@ -10,6 +10,7 @@ from simulariumio import (
     InputFileData,
     MetaData,
     TrajectoryData,
+    CameraData,
 )
 from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
 
@@ -156,10 +157,11 @@ def cytosim_to_simularium(
     title: str,
     fiber_points_path: str,
     singles_path: Optional[str],
-    box_size: float = 2,
-    scale_factor: float = 10,
+    box_size: float = 0.6,
+    scale_factor: float = 1000.,
     exp_name: str = "",
 ) -> TrajectoryData:
+    spacer = "#" if len(exp_name) > 0 else ""
     object_info = {
         "fibers": CytosimObjectInfo(
             cytosim_file=InputFileData(
@@ -167,8 +169,8 @@ def cytosim_to_simularium(
             ),
             display_data={
                 1: DisplayData(
-                    name=f"{exp_name}#actin",
-                    radius=0.02,
+                    name=f"{exp_name}{spacer}actin",
+                    radius=0.01,
                     display_type=DISPLAY_TYPE.FIBER,
                 )
             },
@@ -181,15 +183,22 @@ def cytosim_to_simularium(
             ),
             display_data={
                 1: DisplayData(
-                    name=f"{exp_name}#anchor",
-                    radius=0.05,
+                    name=f"{exp_name}{spacer}anchor",
+                    radius=0.006,
                     display_type=DISPLAY_TYPE.SPHERE,
+                    color="#FFFFFF",
                 ),
             },
         )
     cytosim_data = CytosimData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),
+            camera_defaults=CameraData(
+                position=np.array([0.0, 0.0, 300.0]),
+                look_at_position=np.zeros(3),
+                up_vector=np.array([0.0, 1.0, 0.0]),
+                fov_degrees=120.0,
+            ),
             scale_factor=scale_factor,
             trajectory_title=title,
         ),
