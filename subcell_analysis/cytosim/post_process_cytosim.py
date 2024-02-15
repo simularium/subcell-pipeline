@@ -6,11 +6,11 @@ import numpy as np
 import pandas as pd
 from simulariumio import (
     DISPLAY_TYPE,
+    CameraData,
     DisplayData,
     InputFileData,
     MetaData,
     TrajectoryData,
-    CameraData,
 )
 from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
 
@@ -158,7 +158,7 @@ def cytosim_to_simularium(
     fiber_points_path: str,
     singles_path: Optional[str],
     box_size: float = 0.6,
-    scale_factor: float = 1000.,
+    scale_factor: float = 1000.0,
     exp_name: str = "",
 ) -> TrajectoryData:
     spacer = "#" if len(exp_name) > 0 else ""
