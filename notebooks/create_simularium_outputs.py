@@ -1,5 +1,6 @@
 import argparse
 import math
+import sys
 import os
 from typing import Dict, Tuple
 
@@ -11,7 +12,7 @@ from botocore.exceptions import ClientError
 from scipy.spatial.transform import Rotation
 from simulariumio import (DISPLAY_TYPE, AgentData, CameraData, DisplayData,
                           MetaData, ScatterPlotData, TrajectoryConverter,
-                          TrajectoryData, UnitData)
+                          TrajectoryData, UnitData, FileConverter, InputFileData)
 from simulariumio.filters import EveryNthTimestepFilter
 
 from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
@@ -42,9 +43,9 @@ READDY_CONDITIONS = [
     150,
 ]
 NUM_REPEATS = 5
-COMBINED_CSV_PATH = "combined_actin_compression_dataset_subsampled.csv"
 TOTAL_STEPS = 200
 POINTS_PER_FIBER = 200
+BENDING_ENERGY_SCALE_FACTOR = 1000.
 CYTOSIM_SCALE_FACTOR = 1000.
 BOX_SIZE = 600.
 
@@ -118,17 +119,29 @@ def download_combined_csv_data():
 def download_cytosim_trajectory_data():
     make_download_dirs()
     for condition in CYTOSIM_CONDITIONS.keys():
-        for repeat in range(NUM_REPEATS):
+        for repeat_ix in range(NUM_REPEATS):
             download_s3_file(
                 bucket_name="cytosim-working-bucket",
-                s3_path=f"vary_compress_rate{condition}/outputs/{repeat}/fiber_points.txt",
-                dest_path=f"data/aws_downloads/fiber_points_{condition}_{repeat}.txt",
+                s3_path=f"vary_compress_rate{condition}/outputs/{repeat_ix}/fiber_points.txt",
+                dest_path=f"data/aws_downloads/fiber_points_{condition}_{repeat_ix}.txt",
             )
             download_s3_file(
                 bucket_name="cytosim-working-bucket",
-                s3_path=f"vary_compress_rate{condition}/outputs/{repeat}/singles.txt",
-                dest_path=f"data/aws_downloads/singles_{condition}_{repeat}.txt",
+                s3_path=f"vary_compress_rate{condition}/outputs/{repeat_ix}/singles.txt",
+                dest_path=f"data/aws_downloads/singles_{condition}_{repeat_ix}.txt",
             )
+    # baseline trajectories
+    for repeat_ix in range(NUM_REPEATS):
+        download_s3_file(
+            bucket_name="cytosim-working-bucket",
+            s3_path=f"free_barbed_end_final/outputs/{repeat_ix}/fiber_points.txt",
+            dest_path=f"data/aws_downloads/fiber_points_baseline_{repeat_ix}.txt",
+        )
+        download_s3_file(
+            bucket_name="cytosim-working-bucket",
+            s3_path=f"free_barbed_end_final/outputs/{repeat_ix}/singles.txt",
+            dest_path=f"data/aws_downloads/singles_baseline_{repeat_ix}.txt",
+        )
 
 def empty_scatter_plots(
     total_steps: int = -1,
@@ -155,7 +168,6 @@ def empty_scatter_plots(
             ytraces={
                 "<<<": np.zeros(total_steps),
                 ">>>": 85.0 * np.ones(total_steps),
-                "filament": [],
             },
             render_mode="lines"
         ),
@@ -167,7 +179,6 @@ def empty_scatter_plots(
             ytraces={
                 "<<<": np.zeros(total_steps),
                 ">>>": 10.0 * np.ones(total_steps),
-                "filament": [],
             },
             render_mode="lines"
         ),
@@ -179,7 +190,6 @@ def empty_scatter_plots(
             ytraces={
                 "<<<": np.zeros(total_steps),
                 ">>>": 0.03 * np.ones(total_steps),
-                "filament": [],
             },
             render_mode="lines"
         ),
@@ -191,7 +201,6 @@ def empty_scatter_plots(
             ytraces={
                 "<<<": np.zeros(total_steps),
                 ">>>": 0.5 * np.ones(total_steps),
-                "filament": [],
             },
             render_mode="lines"
         ),
@@ -203,7 +212,6 @@ def empty_scatter_plots(
             ytraces={
                 "<<<": 480 * np.ones(total_steps),
                 ">>>": 505 * np.ones(total_steps),
-                "filament": [],
             },
             render_mode="lines"
         ),
@@ -270,9 +278,9 @@ def save_combined_simularium():
             "#e994fc",
         ],
     }
-    total_conditions = NUM_REPEATS * len(simulators) * len(READDY_CONDITIONS)
+    total_conditions = NUM_REPEATS * len(simulators) * len(CYTOSIM_CONDITIONS.keys())
     subpoints = np.zeros((TOTAL_STEPS, total_conditions, 3 * POINTS_PER_FIBER))
-    types_per_step = []
+    type_names = []
     display_data={}
     scatter_plots = empty_scatter_plots(total_steps=TOTAL_STEPS)
     # these metrics need to be multiplied by 1000 in cytosim because of different units
@@ -297,9 +305,9 @@ def save_combined_simularium():
                         np.array(rep_df[time_ix * TOTAL_STEPS:(time_ix + 1) * TOTAL_STEPS][["xpos", "ypos", "zpos"]]
                         ).flatten()
                     )
-                types_per_step.append(f"{simulator}#{condition} um/s {repeat_ix}")
-                display_data[types_per_step[-1]] = DisplayData(
-                    name=types_per_step[-1],
+                type_names.append(f"{simulator}#{condition} um/s {repeat_ix}")
+                display_data[type_names[-1]] = DisplayData(
+                    name=type_names[-1],
                     display_type=DISPLAY_TYPE.FIBER,
                     color=colors[simulator][condition_ix],
                 )
@@ -310,7 +318,7 @@ def save_combined_simularium():
                         (simulator == "cytosim" and metric in cytosim_metrics_to_scale) 
                         or metric == COMPRESSIONMETRIC.CALC_BENDING_ENERGY
                     ) else 1.
-                    scatter_plots[metric].ytraces[types_per_step[-1]] = (
+                    scatter_plots[metric].ytraces[type_names[-1]] = (
                         scale_factor * np.array(metrics_df[metric.value])
                     )
     traj_data = TrajectoryData(
@@ -328,7 +336,7 @@ def save_combined_simularium():
             n_agents=total_conditions * np.ones((TOTAL_STEPS)),
             viz_types=1001 * np.ones((TOTAL_STEPS, total_conditions)),  # fiber viz type = 1001
             unique_ids=np.array(TOTAL_STEPS * [list(range(total_conditions))]),
-            types=TOTAL_STEPS * [types_per_step],
+            types=TOTAL_STEPS * [type_names],
             positions=np.zeros((TOTAL_STEPS, total_conditions, 3)),
             radii=np.ones((TOTAL_STEPS, total_conditions)),
             n_subpoints=3 * POINTS_PER_FIBER * np.ones((TOTAL_STEPS, total_conditions)),
@@ -356,100 +364,126 @@ def time_increment(raw_total_steps):
     return 10 ** (magnitude - 3)
 
 ureg = UnitRegistry()
-def find_time_units(raw_time: float) -> Tuple[str, float]:
+def find_time_units(raw_time: float, units: str = "s") -> Tuple[str, float]:
     """
     Get the compact time units and a multiplier to put the times in those units
-    given a time value in seconds
     """
-    time = raw_time * ureg.second
+    time = ureg.Quantity(raw_time, units)
     time = time.to_compact()
     return "{:~}".format(time.units), time.magnitude / raw_time
 
-def save_cytosim_simularium():
+def generate_plot_data(subpoints):
+    n_points = int(subpoints.shape[2] / 3.)
+    result = {
+        COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE : [],
+        COMPRESSIONMETRIC.CALC_BENDING_ENERGY : [],
+        COMPRESSIONMETRIC.NON_COPLANARITY : [],
+        COMPRESSIONMETRIC.PEAK_ASYMMETRY : [],
+        COMPRESSIONMETRIC.CONTOUR_LENGTH : [],
+    }
+    total_steps = subpoints.shape[0]
+    for time_ix in range(total_steps):
+        points = subpoints[time_ix][0].reshape((n_points, 3))
+        result[COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE].append(
+            get_average_distance_from_end_to_end_axis(
+            polymer_trace=points,
+        ))
+        result[COMPRESSIONMETRIC.CALC_BENDING_ENERGY].append(
+            BENDING_ENERGY_SCALE_FACTOR * get_bending_energy_from_trace(
+            polymer_trace=points,
+        ))
+        result[COMPRESSIONMETRIC.NON_COPLANARITY].append(
+            get_third_component_variance(
+            polymer_trace=points,
+        ))
+        result[COMPRESSIONMETRIC.PEAK_ASYMMETRY].append(
+            get_asymmetry_of_peak(
+            polymer_trace=points,
+        ))
+        result[COMPRESSIONMETRIC.CONTOUR_LENGTH].append(
+            get_contour_length_from_trace(
+            polymer_trace=points,
+        ))
+    return result
+
+def filter_time(converter) -> TrajectoryConverter:
+    """
+    Use Simulariumio time filter
+    """
+    time_inc = int(converter._data.agent_data.times.shape[0] / 1000.)
+    if time_inc < 2:
+        return converter
+    converter._data = converter.filter_data([
+        EveryNthTimestepFilter(
+            n=time_inc,
+        ),
+    ])
+    return converter
+
+def generate_cytosim_simularium(condition, repeat_ix) -> Tuple[TrajectoryData, str]:
+    is_baseline = condition == "baseline"
+    velocity = CYTOSIM_CONDITIONS[condition] if not is_baseline else 0.
+    condition_name = f"velocity={velocity}" if not is_baseline else condition
+    fiber_points_path = f"data/aws_downloads/fiber_points_{condition}_{repeat_ix}.txt"
+    singles_path = f"data/aws_downloads/singles_{condition}_{repeat_ix}.txt"
+    output_path = f"data/cytosim_outputs/actin_compression_{condition_name}_{repeat_ix}"
+    if os.path.isfile(f"{output_path}.simularium"):
+        print(f"Skipping v={velocity} #{repeat_ix}, output file already exists")
+        return None, ""
+    if not os.path.isfile(fiber_points_path):
+        raise Exception(f"fiber_points_{condition}_{repeat_ix}.txt not found")
+    if not os.path.isfile(singles_path):
+        singles_path = None
+    print(f"Converting Cytosim {condition_name} #{repeat_ix}")
+    short_condition_name = f"v={velocity}" if not is_baseline else condition
+    traj_data = cytosim_to_simularium(
+        title=f"Actin Compression {short_condition_name} {repeat_ix}",
+        fiber_points_path=fiber_points_path,
+        singles_path=singles_path,
+        scale_factor=CYTOSIM_SCALE_FACTOR,
+    )
+    converter = filter_time(TrajectoryConverter(traj_data))
+    time_units, time_multiplier = find_time_units(converter._data.agent_data.times[-1])
+    converter._data.agent_data.times *= time_multiplier
+    converter._data.time_units = UnitData(time_units)
+    # plots
+    plot_data = generate_plot_data(converter._data.agent_data.subpoints)
+    scatter_plots = empty_scatter_plots(
+        times=converter._data.agent_data.times, 
+        time_units=time_units,
+    )
+    for metric, plot in scatter_plots.items():
+        plot.ytraces["filament"] = np.array(plot_data[metric])
+        
+        try:
+            converter.add_plot(plot, "scatter")
+        except:
+            import ipdb; ipdb.set_trace()
+        
+    return converter._data, f"{condition_name}_{repeat_ix}"
+
+def load_all_cytosim_simularium(baseline: bool = True) -> Dict[str, TrajectoryData]:
+    result = {}
+    for condition in CYTOSIM_CONDITIONS.keys():
+        for repeat_ix in range(NUM_REPEATS):
+            traj_data, condition_name = generate_cytosim_simularium(condition, repeat_ix)
+            if traj_data is not None:
+                result[condition_name] = traj_data
+    if not baseline:
+        return result
+    for repeat_ix in range(NUM_REPEATS):
+        traj_data, condition_name = generate_cytosim_simularium("baseline", repeat_ix)
+        if traj_data is not None:
+            result[condition_name] = traj_data
+    return result
+
+def save_cytosim_trajectories(cytosim_traj_data: Dict[str, TrajectoryData]):
     if not os.path.isdir("data/cytosim_outputs"):
         os.makedirs("data/cytosim_outputs")
-    for condition in CYTOSIM_CONDITIONS.keys():
-        velocity = CYTOSIM_CONDITIONS[condition]
-        for repeat_ix in range(NUM_REPEATS):
-            fiber_points_path = f"data/aws_downloads/fiber_points_{condition}_{repeat_ix}.txt"
-            singles_path = f"data/aws_downloads/singles_{condition}_{repeat_ix}.txt"
-            output_path = f"data/cytosim_outputs/actin_compression_velocity={velocity}_{repeat_ix}"
-            if os.path.isfile(f"{output_path}.simularium"):
-                print(f"Skipping v={velocity} #{repeat_ix}, output file already exists")
-                continue
-            if not os.path.isfile(fiber_points_path):
-                continue
-            if not os.path.isfile(singles_path):
-                singles_path = None
-            print(f"Converting Cytosim v={velocity} #{repeat_ix}")
-            traj_data = cytosim_to_simularium(
-                title=f"Actin Compression v={velocity} {repeat_ix}",
-                fiber_points_path=fiber_points_path,
-                singles_path=singles_path,
-                scale_factor=CYTOSIM_SCALE_FACTOR,
-            )
-            converter = TrajectoryConverter(traj_data)
-            time_inc = time_increment(converter._data.agent_data.times.shape[0])
-            if time_inc > 1:
-                converter._data = converter.filter_data([
-                    EveryNthTimestepFilter(
-                        n=time_inc,
-                    ),
-                ])
-            time_units, time_multiplier = find_time_units(converter._data.agent_data.times[-1])
-            converter._data.agent_data.times *= time_multiplier
-            converter._data.time_units = UnitData(time_units)
-            # plots
-            total_steps = converter._data.agent_data.subpoints.shape[0]
-            n_points = int(converter._data.agent_data.subpoints.shape[2] / 3.)
-            perp_dist = []
-            bending_energy = []
-            non_coplanarity = []
-            peak_asym = []
-            contour_length = []
-            for time_ix in range(total_steps):
-                points = converter._data.agent_data.subpoints[time_ix][0].reshape((n_points, 3))
-                perp_dist.append(
-                    get_average_distance_from_end_to_end_axis(
-                    polymer_trace=points,
-                ))
-                bending_energy.append(
-                    CYTOSIM_SCALE_FACTOR * get_bending_energy_from_trace(
-                    polymer_trace=points,
-                ))
-                non_coplanarity.append(
-                    get_third_component_variance(
-                    polymer_trace=points,
-                ))
-                peak_asym.append(
-                    get_asymmetry_of_peak(
-                    polymer_trace=points,
-                ))
-                contour_length.append(
-                    get_contour_length_from_trace(
-                    polymer_trace=points,
-                ))
-            scatter_plots = empty_scatter_plots(
-                times=converter._data.agent_data.times, 
-                time_units=time_units,
-            )
-            scatter_plots[COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE
-            ].ytraces["filament"] = np.array(perp_dist)
-            scatter_plots[
-                COMPRESSIONMETRIC.CALC_BENDING_ENERGY
-            ].ytraces["filament"] = np.array(bending_energy)
-            scatter_plots[
-                COMPRESSIONMETRIC.NON_COPLANARITY
-            ].ytraces["filament"] = np.array(non_coplanarity)
-            scatter_plots[
-                COMPRESSIONMETRIC.PEAK_ASYMMETRY
-            ].ytraces["filament"] = np.array(peak_asym)
-            scatter_plots[
-                COMPRESSIONMETRIC.CONTOUR_LENGTH
-            ].ytraces["filament"] = np.array(contour_length)
-            for metric, plot in scatter_plots.items():
-                converter.add_plot(plot, "scatter")
-            converter.save(output_path)
+    for condition_name, traj_data in cytosim_traj_data.items():
+        TrajectoryConverter(traj_data).save(
+            f"data/cytosim_outputs/actin_compression_{condition_name}"
+        )
 
 def upload_cytosim_trajectories():
     for condition in CYTOSIM_CONDITIONS.keys():
@@ -460,6 +494,12 @@ def upload_cytosim_trajectories():
                 src_path=f"data/cytosim_outputs/actin_compression_velocity={velocity}_{repeat}.simularium",
                 s3_path=f"simularium/actin_compression_velocity={velocity}_{repeat}.simularium",
             )
+    for repeat in range(NUM_REPEATS):
+        upload_file_to_s3(
+            bucket_name="cytosim-working-bucket",
+            src_path=f"data/cytosim_outputs/actin_compression_baseline_{repeat}.simularium",
+            s3_path=f"simularium/actin_compression_baseline_{repeat}.simularium",
+        )
 
 def main():
     args = parse_args()
@@ -478,7 +518,8 @@ def main():
     elif args.cytosim:
         # save an individual simularium file for each cytosim trajectory
         download_cytosim_trajectory_data()
-        save_cytosim_simularium()
+        cytosim_traj_data = load_all_cytosim_simularium()
+        save_cytosim_trajectories(cytosim_traj_data)
         if args.upload:
             upload_cytosim_trajectories()
 
