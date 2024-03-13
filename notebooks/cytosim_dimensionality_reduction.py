@@ -285,7 +285,7 @@ def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFr
         # --- compile flat arr of colors (feels weird but works)
         pc1_color_lists = []
         for fiber_idx in range(num_pc1_points // num_timepoints): # segment by fiber
-            pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx, c1_override="gray" if metric != "time" else None, c2_override="black" if metric != "time" else None))
+            pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx, c1_override="black" if metric != "time" else None, c2_override="black" if metric != "time" else None))
         pc1_color_list = [c for cl in pc1_color_lists for c in cl] # flattens
         # --- scatter
         for i in range(num_pc1_points):
