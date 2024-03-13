@@ -119,7 +119,7 @@ repeat_time_metrics_list = ["time", "NON_COPLANARITY", "PEAK_ASYMMETRY", "AVERAG
 # --- load in prepped CSV of subsamples (pre-processed for timepoints, monomers)
 def study_subsamples_loader(subsamples_df: pd.DataFrame):
     study_dfs = []
-    num_timepoints = 200
+    num_timepoints = 66 # 200 is the subsample size, but we want to focus PCA latent space on data seeing most transformation
     num_monomers = 200
     for sim_name, sim_df in subsamples_df.groupby("simulator"):
         for param_velocity, velocity_df in sim_df.groupby("velocity"):
@@ -129,6 +129,8 @@ def study_subsamples_loader(subsamples_df: pd.DataFrame):
                 fiber_timepoints = []
                 fiber_timepoints_metrics = []
                 for time, time_df in repeat_df.groupby("time"):
+                    if len(fiber_timepoints) >= num_timepoints:
+                        break
                     fiber_timepoints.append(time_df[["xpos", "ypos", "zpos"]].values.flatten()) # flattening to match data patterns
                     # HACK: we should do this all w/ dataframes but the refactor is painful so going to try keeping metrics in parallel
                     fiber_timepoints_metrics.append(time_df[repeat_time_metrics_list])
