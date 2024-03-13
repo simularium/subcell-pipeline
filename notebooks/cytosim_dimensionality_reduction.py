@@ -40,6 +40,13 @@ color_list = [
     "yellow",
     "pink",
 ]
+marker_list = [
+    "o",
+    "s",
+    "D",
+    "*",
+    "P",
+]
 
 def color_fader(c1, c2, mix=0) -> str:
     """Get a colour gradient to represent time"""
@@ -57,13 +64,6 @@ def color_list_generator(num_of_vals_to_make: int, idx: int = 0, c1_override: st
     return [color_fader(c1, c2, i / num_of_vals_to_make) for i in range(num_of_vals_to_make)]
 
 def marker_list_generator(num_of_vals_to_make: int, idx: int = 0) -> list[str]:
-    marker_list = [
-        "o",
-        "s",
-        "D",
-        "*",
-        "P",
-    ]
     return [marker_list[idx]] * num_of_vals_to_make
 
 # --- BLAIR'S NOTEBOOK FUNCS. TODO: REMOVE THIS
@@ -323,14 +323,21 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
             pc1_color_lists = []
             pc1_marker_lists = []
             for fiber_idx in range(num_pc1_points // num_timepoints):
-                pc1_color_lists.append(color_list_generator(num_timepoints, analysis_idx)) # all fibers for this sim will be same color, but we'll have opacity shift
-                pc1_marker_lists.append(marker_list_generator(num_timepoints, fiber_idx)) # for each fiber, fill a list of symbol tags
+                if metric == "time":
+                    pc1_color_lists.append(color_list_generator(num_timepoints, analysis_idx)) # all fibers for this sim will be same color, but we'll have opacity shift
+                    pc1_marker_lists.append(marker_list_generator(num_timepoints, fiber_idx)) # for each fiber, fill a list of symbol tags
+                else:
+                    pc1_color_lists.append(color_list_generator(num_timepoints, analysis_idx, c1_override="black" if metric != "time" else None, c2_override="black" if metric != "time" else None)) # all fibers for this sim will be same color, but we'll have opacity shift
+                    pc1_marker_lists.append(marker_list_generator(num_timepoints, analysis_idx)) # for each fiber, fill a list of symbol tags
             # --- scatter (flatten the lists so they pair with the scattered points)
             pc1_point_colors = [c for cl in pc1_color_lists for c in cl]
             pc1_point_markers = [m for ml in pc1_marker_lists for m in ml]
             for i in range(num_pc1_points):
                 if i == 0:
-                    legend_handles.append(mpatches.Patch(color=color_list[analysis_idx], label=f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+                    if metric == "time":
+                        legend_handles.append(mpatches.Patch(color=color_list[analysis_idx], label=f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+                    else:
+                        legend_handles.append(mpatches.Patch(color="white", label=f"[{marker_list[analysis_idx]}] {analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
                 ax.scatter(
                     analysis_df.loc[i, "principal component 1"],
                     analysis_df.loc[i, "principal component 2"],
