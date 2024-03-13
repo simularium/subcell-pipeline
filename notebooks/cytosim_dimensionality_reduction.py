@@ -450,7 +450,7 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str):
 def plot_pca_histogram(pca_sets: List[pd.DataFrame]):
     sources = list(set([pca_set.source[0] for pca_set in pca_sets]))
     bin_max=1.5
-    bin_size=0.1
+    bin_size=0.15
     fig, axs = plt.subplots(len(sources) * 2, figsize=(10, 10 * len(sources)))
     idx_plt = 0
     for source_idx, source in enumerate(sources):
@@ -502,10 +502,10 @@ for velocity in np.sort(subsamples_df['velocity'].unique()):
         source = st_df["source"].values[0]
         print(f"Plotting '{source}' PCA...")
         [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
-        # --- pca scatter plot
-        plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
         # --- pca histogram
         plot_pca_histogram(pca_sets=[pca_aligned_df])
+        # --- pca scatter plot
+        plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
         # --- pca inverse transforms
         pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space, pca_transform_dataframes=[pca_aligned_df])
         plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source} / {float(velocity)}")
