@@ -47,12 +47,12 @@ def color_fader(c1, c2, mix=0) -> str:
     c2 = np.array(mpl.colors.to_rgb(c2))
     return mpl.colors.to_rgb((1 - mix) * c1 + mix * c2) # dropping to rgb because alpha is being used by metrics now
 
-def color_list_generator(num_of_vals_to_make: int, idx: int = 0) -> list[str]:
+def color_list_generator(num_of_vals_to_make: int, idx: int = 0, c1_override: str = None, c2_override: str = None) -> list[str]:
     """For each fiber, we'll want a different color for intensity to differentiate when aligning"""
      # TODO: adjust the alpha on the choices above based on idx
-    c1 = "white"
+    c1 = c1_override or "white"
     # select new colors via incrementing idx so we can color fibers differently (cycling through color_list)
-    c2 = color_list[idx % len(color_list)]
+    c2 = c2_override or color_list[idx % len(color_list)]
     # return range of values
     return [color_fader(c1, c2, i / num_of_vals_to_make) for i in range(num_of_vals_to_make)]
 
@@ -283,7 +283,7 @@ def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFr
         # --- compile flat arr of colors (feels weird but works)
         pc1_color_lists = []
         for fiber_idx in range(num_pc1_points // num_timepoints): # segment by fiber
-            pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx))
+            pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx, c1_override="gray" if metric != "time" else None, c2_override="black" if metric != "time" else None))
         pc1_color_list = [c for cl in pc1_color_lists for c in cl] # flattens
         # --- scatter
         for i in range(num_pc1_points):
