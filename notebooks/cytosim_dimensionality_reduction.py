@@ -420,7 +420,7 @@ def calc_pca_component_distributions(pca_space: PCA, pca_transform_dataframes: L
             pca_sets.append(df)
     return pca_sets
 
-def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str):
+def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, color_by: str = None):
     # print(f"[plot_inverse_transform_pca] PCA Sets: {len(pca_sets)}")
     # 2D Layout
     fig, axs = plt.subplots(2, 5, sharex=True, sharey=True, figsize=(24, 12))
@@ -517,14 +517,18 @@ for velocity in np.sort(subsamples_df['velocity'].unique()):
     for st_df in study_dfs_to_plot:
         source = st_df["source"].values[0]
         print(f"Plotting '{source}' PCA...")
+        # [pca_unaligned_df], pca_unaligned_space = get_study_pca_dfs([st_df], align=False)
         [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
         # --- pca histogram
-        plot_pca_histogram(pca_sets=[pca_aligned_df])
+        # plot_pca_histogram(pca_sets=[pca_aligned_df])
         # --- pca scatter plot
         plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
-        # --- pca inverse transforms
+        # --- pca inverse transforms: unaligned
+        # pca_unaligned_component_dists = calc_pca_component_distributions(pca_space=pca_unaligned_space, pca_transform_dataframes=[pca_unaligned_df])
+        # plot_inverse_transform_pca(pca_sets=pca_unaligned_component_dists, title_prefix=f"{source} / {float(velocity)} / Unaligned")
+        # --- pca inverse transforms: aligned
         pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space, pca_transform_dataframes=[pca_aligned_df])
-        plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source} / {float(velocity)}")
+        plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source} / {float(velocity)} / Aligned")
 
     # PCA: ALL SIMS
     print(f"Plotting All PCA...")
@@ -532,7 +536,7 @@ for velocity in np.sort(subsamples_df['velocity'].unique()):
     pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
     plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space, study_dfs=study_dfs_to_plot, title=f"ALL (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
     # --- pca histograms
-    plot_pca_histogram(pca_sets=pca_aligned_dfs)
+    # plot_pca_histogram(pca_sets=pca_aligned_dfs)
     # --- pca inverse transforms (apparently this isn't helpful)
 
 
@@ -548,8 +552,23 @@ for source in sources_to_plot:
     # --- pca: plot
     plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space, study_dfs=study_dfs_to_plot, title=f"{source} (PCA): Aligned=True,Velocity=All", figsize=(8, 8))
     # --- histograms
-    plot_pca_histogram(pca_sets=pca_aligned_dfs)
+    # plot_pca_histogram(pca_sets=pca_aligned_dfs)
     # --- inverse transform
     pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space, pca_transform_dataframes=pca_aligned_dfs)
     plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source}")
+
+
+# %%
+# # PLOT PCAS BY ALL
+print(f"Plotting all {len(study_dfs)} studies...")
+# --- pca
+pca_aligned_dfs_all, pca_aligned_space_all = get_study_pca_dfs(study_dfs, align=True)
+# --- pca: plot
+# plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned=True,Velocity=All", figsize=(8, 8))
+# --- histograms
+# plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
+# --- inverse transform
+pca_component_dists_all = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs_all)
+plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL")
+plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL", color_by="source")
 
