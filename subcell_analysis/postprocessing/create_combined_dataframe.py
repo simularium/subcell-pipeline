@@ -35,7 +35,7 @@ create_dataframes_for_repeats(
 ## TODO: add code to process readdy outputs to csv files
 # %% [markdown]
 # # Start workflow to combine outputs
-# %% [markdown] 
+# %% [markdown]
 # ## set velocities
 readdy_compression_velocities = [4.7, 15, 47, 150]
 cytosim_compression_velocities = [0.15, 0.47434165, 1.5, 4.7, 15, 47, 150]
@@ -50,18 +50,22 @@ df_list = []
 simulator = "cytosim"
 for index in velocity_inds:
     for repeat in range(num_repeats):
-        print(
-            f"Calculating velocity {cytosim_compression_velocities[index]} and repeat {repeat}"
-        )
-        df_tmp = pd.read_csv(
+        file_path = (
             cytosim_df_path
             / f"cytosim_actin_compression_velocity_vary_compress_rate000{index}_repeat_{repeat}.csv"
         )
-
+        if file_path.is_file():
+            df_tmp = pd.read_csv(file_path)
+        else:
+            continue
+        print(
+            f"Processing velocity {cytosim_compression_velocities[index]} and repeat {repeat}"
+        )
         df_tmp["velocity"] = cytosim_compression_velocities[index]
         df_tmp["repeat"] = repeat
         df_tmp["simulator"] = simulator
         df_list.append(df_tmp)
+
 df_cytosim = pd.concat(df_list)
 df_cytosim.to_csv(
     cytosim_df_path / "cytosim_actin_compression_all_velocities_and_repeats.csv"
@@ -82,7 +86,7 @@ for velocity in readdy_compression_velocities:
             df_tmp = pd.read_csv(file_path)
         else:
             continue
-        print(f"Calculating velocity {velocity} and repeat {repeat}")
+        print(f"Processing velocity {velocity} and repeat {repeat}")
         df_tmp["velocity"] = velocity
         df_tmp["repeat"] = repeat
         df_tmp["simulator"] = simulator
