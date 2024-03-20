@@ -352,7 +352,7 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
                     if metric == "time":
                         legend_handles.append(mpatches.Patch(color=color_list[analysis_idx], label=f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
                     else:
-                        legend_handles.append(mpatches.Patch(color="white", label=f"[{marker_list[analysis_idx]}] {analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+                        legend_handles.append(mpatches.Patch(color="white", label=f"[{marker_list[analysis_idx % len(marker_list)]}] {analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
                 ax.scatter(
                     analysis_df.loc[i, "principal component 1"],
                     analysis_df.loc[i, "principal component 2"],
@@ -452,9 +452,10 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str):
         ax.set_title(f"[{title_prefix}] {pca_set_by_component[0]['label'][0]}", fontsize=14)
         for idx_pca, pca_set in enumerate(pca_set_by_component):
             for idx_val, val in enumerate(pca_set['values']):
-                c = color_list[idx_val % len(color_list)] # this function is confusing as shit 
+                c = color_list[source_to_idx(pca_set.source[0]) if color_by == "source" else (idx_val % len(color_list))] # this function is confusing as shit 
                 x, y, z = zip(*val['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
-                ax.plot(x, y, z, c=c, alpha=(1 / (idx_pca + 1)), label=f"[{pca_set.source[0]}] {str(val['input'][0])[0:6]}, {str(val['input'][1])[0:6]}")
+                alpha = min(max(0.1, (1 / (idx_pca + 1))), 0.8) # ensuring a floor of 0.1 and max of 0.8 to prevent dominating lines
+                ax.plot(x, y, z, c=c, alpha=alpha, label=f"[{pca_set.source[0]}] {str(val['input'][0])[0:6]}, {str(val['input'][1])[0:6]}")
         ax.legend()
     plt.tight_layout()
     plt.show()
