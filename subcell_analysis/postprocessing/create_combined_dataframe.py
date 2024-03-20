@@ -42,9 +42,12 @@ cytosim_compression_velocities = [0.15, 0.47434165, 1.5, 4.7, 15, 47, 150]
 
 # %% [markdown]
 # ## Combine all cytosim outputs
+
+# TODO: this snippet is repeated. Could be moved to a function?
 num_repeats = 5
 velocity_inds = range(3, 7)
 df_list = []
+simulator = "cytosim"
 for index in velocity_inds:
     for repeat in range(num_repeats):
         print(
@@ -57,6 +60,7 @@ for index in velocity_inds:
 
         df_tmp["velocity"] = cytosim_compression_velocities[index]
         df_tmp["repeat"] = repeat
+        df_tmp["simulator"] = simulator
         df_list.append(df_tmp)
 df_cytosim = pd.concat(df_list)
 df_cytosim.to_csv(
@@ -67,6 +71,7 @@ df_cytosim.to_csv(
 # ## Combine all readdy outputs
 num_repeats = 3
 df_list = []
+simulator = "readdy"
 for velocity in readdy_compression_velocities:
     for repeat in range(num_repeats):
         file_path = (
@@ -80,6 +85,7 @@ for velocity in readdy_compression_velocities:
         print(f"Calculating velocity {velocity} and repeat {repeat}")
         df_tmp["velocity"] = velocity
         df_tmp["repeat"] = repeat
+        df_tmp["simulator"] = simulator
         df_list.append(df_tmp)
 
 df_readdy = pd.concat(df_list)
@@ -89,8 +95,6 @@ df_readdy.to_csv(
 
 # %% [markdown]
 # ## Combine readdy output with cytosim
-df_cytosim["simulator"] = "cytosim"
-df_readdy["simulator"] = "readdy"
 df_combined = pd.concat([df_cytosim, df_readdy])
 
 # %% [markdown]
