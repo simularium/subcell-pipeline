@@ -1,31 +1,35 @@
 # %%
+from datetime import date
 import math
 from typing import List
 import numpy as np
 import os
+from pydash import snake_case
 import pacmap
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.patches as mpatches
-from mpl_toolkits.mplot3d import Axes3D  # This is necessary for 3D plotting
-import seaborn as sns
-from scipy.spatial.transform import Rotation
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import MinMaxScaler
 
 
 # %%
 # ### Init Fns/Helpers
-# --- data refs
-data_directory = "../data"
-figures_directory = "../data/figures"
+# --- directories/files
+dir_data = "../data/"
+dir_figures = "../data/figures/"
 
-# --- directory setup (if data, data/figures don't exist)
-if not os.path.exists(data_directory):
-    os.makedirs(data_directory)
-if not os.path.exists(figures_directory):
-    os.makedirs(figures_directory)
+if not os.path.exists(dir_data):
+    os.makedirs(dir_data)
+if not os.path.exists(dir_figures):
+    os.makedirs(dir_figures)
+
+def figure_filename(strs: List[str]) -> str:
+    today_str = date.today().strftime("%Y-%m-%d")
+    # create a directory for today's date
+    if not os.path.exists(dir_figures + snake_case(today_str)):
+        os.makedirs(dir_figures + snake_case(today_str))
+    return dir_figures + snake_case(today_str) + "/" + snake_case(today_str + "_" + "_".join(strs)) + ".png"
 
 # --- math funcs
 # Get RMSD between 2 curves
@@ -311,6 +315,7 @@ def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFr
                 alpha=normalize(flattened_metrics[i], metric_min, metric_max),
                 s=70,
             )
+        plt.savefig(figure_filename(["pca", title, metric]))
         plt.show()
 
 # --- for many simulations overlapping
@@ -362,6 +367,7 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
                     marker=pc1_point_markers[i],
                 )
         plt.legend(handles=legend_handles) # using handles so we can control how many legend items appear
+        plt.savefig(figure_filename(["pca", title, metric]))
         plt.show()
 
 # --- quick way to see what colors are being used for what sims
@@ -437,6 +443,7 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
             axs[idx_pca % 2, idx_val].set_title(f"[{title_prefix}] PC1={str(val['input'][0])[0:6]} PC2={str(val['input'][1])[0:6]}", fontsize=14)
             axs[idx_pca % 2, idx_val].legend()
     plt.tight_layout()
+    plt.savefig(figure_filename(["inverse_transform_2d", title_prefix]))
     plt.show()
     # 3D plot of fiber positions
     fig = plt.figure(figsize=(18, 10))
@@ -458,6 +465,7 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
                 ax.plot(x, y, z, c=c, alpha=alpha, label=f"[{pca_set.source[0]}] {str(val['input'][0])[0:6]}, {str(val['input'][1])[0:6]}")
         ax.legend()
     plt.tight_layout()
+    plt.savefig(figure_filename(["inverse_transform_3d", title_prefix]))
     plt.show()
 
 
@@ -497,13 +505,14 @@ def plot_pca_histogram(pca_sets: List[pd.DataFrame]):
             idx_plt += 1
     # --- graph
     plt.tight_layout()
+    plt.savefig(figure_filename(["histogram"]))
     plt.show()
 
 
 # %%
 # Data Loading: Combiled Subsample
 subsamples_filename = "combined_actin_compression_metrics_all_velocities_and_repeats_subsampled.csv"
-subsamples_df = pd.read_csv(f"{data_directory}/dataframes/{subsamples_filename}")
+subsamples_df = pd.read_csv(f"{dir_data}dataframes/{subsamples_filename}")
 study_dfs = study_subsamples_loader(subsamples_df)
 
 
