@@ -72,51 +72,58 @@ def color_list_generator(num_of_vals_to_make: int, idx: int = 0, c1_override: st
     return [color_fader(c1, c2, i / num_of_vals_to_make) for i in range(num_of_vals_to_make)]
 
 def marker_list_generator(num_of_vals_to_make: int, idx: int = 0) -> list[str]:
-    return [marker_list[idx]] * num_of_vals_to_make
+    return [marker_list[idx % len(marker_list)]] * num_of_vals_to_make
 
-# --- BLAIR'S NOTEBOOK FUNCS. TODO: REMOVE THIS
-def align_fibers(fibers: np.ndarray, align_to_fiber = np.ndarray) -> np.ndarray:
-    """
-    Rotationally align the given fibers around the x-axis.
+def source_to_idx(source: str) -> int:
+    return {
+        "cytosim": 0,
+        "readdy": 1,
+    }[source]
 
-    Parameters
-    ----------
-    fiber_points: np.ndarray (shape = time x fiber x (3 * points_per_fiber))
-        Array containing the flattened x,y,z positions of control points
-        for each fiber at each time.
+# --- alignments
+def find_best_fit_lines_theta_from_fibers(fiber_at_timepoint: np.ndarray) -> float:
+    """Find the best fit line for a fiber's monomers (x,y,z)."""
+    # --- fit line
+    x = fiber_at_timepoint[:, 0]
+    y = fiber_at_timepoint[:, 1]
+    z = fiber_at_timepoint[:, 2]
+    A = np.vstack([x, np.ones(len(x))]).T
+    m, c = np.linalg.lstsq(A, y, rcond=None)[0]
+    # --- get theta
+    theta = np.arctan(m)
+    return theta
 
-    Returns
-    ----------
-    aligned_data: np.ndarray
-        The given data aligned.
-    """
-    # get angle to align each fiber at the last time point
-    align_by = []
-    points_per_fiber = int(fibers.shape[2] / 3)
-    # reference fiber selected. choosing last fiber position for reference?
-    ref = (align_to_fiber if align_to_fiber is not None else fibers[-1][0]).copy().reshape((points_per_fiber, 3))
-    for fiber_ix in range(len(fibers[-1])):
-        best_rmsd = math.inf
-        for angle in np.linspace(0, 2 * np.pi, 1000):
-            rot = Rotation.from_rotvec(angle * np.array([1, 0, 0]))
-            new_vec = Rotation.apply(
-                rot, fibers[-1][fiber_ix].copy().reshape((points_per_fiber, 3))
-            )
-            test_rmsd = rmsd(new_vec, ref)
-            if test_rmsd < best_rmsd:
-                best_angle = angle
-                best_rmsd = test_rmsd
-        align_by.append(best_angle)
-    # align all the fibers to ref across all time points
-    aligned = np.zeros_like(fibers)
-    for fiber_ix in range(fibers.shape[1]):
-        rot = Rotation.from_rotvec(align_by[fiber_ix] * np.array([1, 0, 0]))
-        for time_ix in range(fibers.shape[0]):
-            fiber = fibers[time_ix][fiber_ix].copy().reshape((points_per_fiber, 3))
-            new_fiber = Rotation.apply(rot, fiber)
-            aligned[time_ix][fiber_ix] = new_fiber.flatten()
-    return aligned
 
+def align_fibers(fibers: np.ndarray) -> np.ndarray:
+    """Rotationally align the given fibers around the x-axis to the fiber with the greatest magnitude."""
+    # v1 - get angle to align each fiber at the last time point
+    # v2 - change this function so it finds highest magnitude point, gets rotation theta, and for each monomer timepoint rotates accordingly to be in same plane
+    fibers_mapped = fibers.copy()
+    # for fibers, fit a line and calculate the theta
+    # print("[align_fibers] best_fit_theta: ", best_fit_theta)
+    # for each fiber at each time point, align all monomers to that highest magnitude point
+    for fiber_idx, fiber in enumerate(fibers):
+        for fiber_timepoint_idx, fiber_timepoint in enumerate(fiber):
+            # legacy issue: data was prepped in a flattened way, so reforming 3D monomers datastructure, and will flatten again after when saving
+            fiber_timepoint_reshaped = fiber_timepoint.reshape(-1, 3)
+            best_fit_theta = find_best_fit_lines_theta_from_fibers(fiber_timepoint_reshaped)
+            # for each monomer in the timepoint's fiber, calculate the rotation and map the new position
+            for fiber_timepoint_monomer_idx, fiber_timepoint_monomer in enumerate(fiber_timepoint_reshaped):
+                # ... calc theta of this monomer
+                monomer_theta = np.arctan(fiber_timepoint_monomer[1] / fiber_timepoint_monomer[2])
+                if np.isnan(monomer_theta):
+                    monomer_theta = 0
+                # ... calc difference between highest magnitude theta and this monomer's theta
+                monomer_theta_diff = best_fit_theta - monomer_theta
+                # ... map new y/z values to this fiber_timepoint_monomer's based on rotation
+                new_monomer_y = fiber_timepoint_monomer[1] * np.cos(monomer_theta_diff) - fiber_timepoint_monomer[2] * np.sin(monomer_theta_diff)
+                new_monomer_z = fiber_timepoint_monomer[1] * np.sin(monomer_theta_diff) + fiber_timepoint_monomer[2] * np.cos(monomer_theta_diff)
+                fiber_timepoint_reshaped[fiber_timepoint_monomer_idx] = [fiber_timepoint_monomer[0], new_monomer_y, new_monomer_z]
+            # legacy: saving again as a flat array for the rest of the application
+            fiber_timepoint_reshaped_flattened = fiber_timepoint_reshaped.reshape(-1)
+            fibers_mapped[fiber_idx][fiber_timepoint_idx] = fiber_timepoint_reshaped_flattened
+    # return
+    return fibers_mapped
 
 # %%
 # ### Data Preppers
@@ -176,7 +183,7 @@ def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False, fiber_for_
     """
     num_pca_samples = int(study_df.param_fibers) * int(study_df.param_timepoints)
     num_pca_features = int(study_df.param_fiber_monomers) * 3
-    fibers = study_df.fibers[0] if align == False else align_fibers(study_df.fibers[0], align_to_fiber=fiber_for_alignment)
+    fibers = study_df.fibers[0].copy() if align == False else align_fibers(study_df.fibers[0])
     fibers_scaled = fibers * study_df.param_coordinate_scaler[0] # scale the coordinates for aligning multiple sims
     fibers_scaled_flattened = np.ravel(fibers_scaled)
     pca_dataset = fibers_scaled_flattened.reshape((num_pca_samples, num_pca_features))
