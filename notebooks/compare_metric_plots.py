@@ -54,6 +54,7 @@ color_map = {"cytosim": "C0", "readdy": "C1"}
 
 # %% plot metrics vs time
 num_velocities = df["velocity"].nunique()
+compression_distance = 0.3  # um
 for metric in metrics:
     fig, axs = plt.subplots(
         1, num_velocities, figsize=(num_velocities * 5, 5), sharey=True, dpi=300
@@ -65,7 +66,8 @@ for metric in metrics:
                     label = f"{simulator}"
                 else:
                     label = "_nolegend_"
-                xvals = np.linspace(0, 1, df_repeat["time"].nunique())
+                total_time = compression_distance / velocity  # s
+                xvals = np.linspace(0, 1, df_repeat["time"].nunique()) * total_time
                 yvals = df_repeat.groupby("time")[metric.value].mean()
                 if simulator == "cytosim" and metric.value in [
                     "CONTOUR_LENGTH",
@@ -80,11 +82,12 @@ for metric in metrics:
                     color=color_map[simulator],
                     alpha=0.7,
                 )
+                plt.setp(axs[ct].get_xticklabels(), rotation=30, horizontalalignment='right')
         axs[ct].legend()
         axs[ct].set_title(f"Velocity: {velocity}")
         if ct == 0:
             axs[ct].set_ylabel(metric.value)
-    fig.supxlabel("Normalized time")
+    fig.supxlabel(R"Time ($\mu$s)")
     fig.suptitle(f"{metric.value}")
     plt.tight_layout()
     fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time_subsampled.png")
