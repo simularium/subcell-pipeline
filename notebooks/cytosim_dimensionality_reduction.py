@@ -2,6 +2,7 @@
 import math
 from typing import List
 import numpy as np
+import os
 import pacmap
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,6 +19,13 @@ from sklearn.preprocessing import MinMaxScaler
 # ### Init Fns/Helpers
 # --- data refs
 data_directory = "../data"
+figures_directory = "../data/figures"
+
+# --- directory setup (if data, data/figures don't exist)
+if not os.path.exists(data_directory):
+    os.makedirs(data_directory)
+if not os.path.exists(figures_directory):
+    os.makedirs(figures_directory)
 
 # --- math funcs
 # Get RMSD between 2 curves
