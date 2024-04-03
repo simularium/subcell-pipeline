@@ -37,6 +37,7 @@ dependencies = [
   "container-collection",
   "boto3",
   "scikit-learn",
+  "s3fs",
   "pyarrow",
 ]
 
