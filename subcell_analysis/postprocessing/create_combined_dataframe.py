@@ -1,8 +1,12 @@
+# %% [markdown]
+# # Create combined dataframe
+# 1. Run create_dataframes_from_cytosim_outputs.py to create dataframes for all repeats of given configs for cytosim.
+# 2. Run create_dataframes_from_readdy_outputs.py to create dataframes for all repeats of given configs for readdy.
+# 3. Run create_combined_dataframe.py to combine the dataframes from cytosim and readdy.
+
 # %%
 import pandas as pd
 from pathlib import Path
-
-from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
 
 # %% [markdown]
 # ## setup output folders
@@ -11,101 +15,48 @@ base_df_path = current_folder.parents[1] / "data/dataframes"
 cytosim_df_path = base_df_path / "cytosim"
 readdy_df_path = base_df_path / "readdy"
 print(base_df_path)
-# %% [markdown]
-# # Process individual cytosim outputs to csv files
-# %% [markdown]
-# ## setup parameters for accessing data from s3
-bucket_name = "cytosim-working-bucket"
-num_repeats = 5
-num_velocities = 7
-configs = [f"vary_compress_rate000{num}" for num in range(3, num_velocities)]
-# %% [markdown]
-# ## convert individual outputs to dataframes
-create_dataframes_for_repeats(
-    bucket_name=bucket_name,
-    num_repeats=num_repeats,
-    configs=configs,
-    save_folder=cytosim_df_path,
-    file_name="cytosim_actin_compression",
-    overwrite=False,
-)
-# %% [markdown]
-# # Process individual readdy outputs to csv files
+
 # %%
-## TODO: add code to process readdy outputs to csv files
-# %% [markdown]
-# # Start workflow to combine outputs
-# %% [markdown]
-# ## set velocities
-readdy_compression_velocities = [4.7, 15, 47, 150]
-cytosim_compression_velocities = [0.15, 0.47434165, 1.5, 4.7, 15, 47, 150]
+cytosim_df = pd.read_csv(cytosim_df_path / "cytosim_actin_compression_all_velocities_and_repeats.csv")
+readdy_df = pd.read_csv(readdy_df_path / "readdy_actin_compression_all_velocities_and_repeats.csv")
+# %% convert columns to compressible types
+cytosim_df = cytosim_df.convert_dtypes()
+readdy_df = readdy_df.convert_dtypes()
+# %% save df as parquet
+cytosim_df.to_parquet(cytosim_df_path / "cytosim_actin_compression_all_velocities_and_repeats.parquet")
+readdy_df.to_parquet(readdy_df_path / "readdy_actin_compression_all_velocities_and_repeats.parquet")
+# %% merge dataframes
+combined_df = pd.concat([cytosim_df, readdy_df], ignore_index=True)
+unnamed_cols = [col for col in combined_df.columns if "Unnamed" in col]
+combined_df = combined_df.drop(columns=unnamed_cols)
+combined_df = combined_df.drop(columns=["id"])
+combined_df = combined_df.convert_dtypes()
+# %% save as csv and parquet
+combined_df.to_csv(base_df_path / "combined_actin_compression_dataset_all_velocities_and_repeats.csv")
+combined_df.to_parquet(base_df_path / "combined_actin_compression_dataset_all_velocities_and_repeats.parquet")
+# %% load subsampled dataframes
+subsampled_cytosim_df = pd.read_csv(cytosim_df_path / "cytosim_actin_compression_subsampled.csv")
+subsampled_readdy_df = pd.read_csv(readdy_df_path / "readdy_actin_compression_subsampled.csv")
+# %% convert columns to compressible types
+subsampled_cytosim_df = subsampled_cytosim_df.convert_dtypes()
+subsampled_readdy_df = subsampled_readdy_df.convert_dtypes()
+# %% save df as parquet
+subsampled_cytosim_df.to_parquet(cytosim_df_path / "cytosim_actin_compression_subsampled.parquet")
+subsampled_readdy_df.to_parquet(readdy_df_path / "readdy_actin_compression_subsampled.parquet")
+# %% combine subsampled dataframes
+subsampled_combined_df = pd.concat([subsampled_cytosim_df, subsampled_readdy_df], ignore_index=True)
+unnamed_cols = [col for col in subsampled_combined_df.columns if "Unnamed" in col]
+subsampled_combined_df = subsampled_combined_df.drop(columns=unnamed_cols)
+subsampled_combined_df = subsampled_combined_df.convert_dtypes()
+# %% save as csv and parquet
+subsampled_combined_df.to_csv(base_df_path / "combined_actin_compression_dataset_all_velocities_and_repeats_subsampled.csv")
+subsampled_combined_df.to_parquet(base_df_path / "combined_actin_compression_dataset_all_velocities_and_repeats_subsampled.parquet")
 
-# %% [markdown]
-# ## Combine all cytosim outputs
+# %% check loading times
+%%time
+df_all_csv = pd.read_csv("s3://readdy-working-bucket/dataframes/combined_actin_compression_dataset_all_velocities_and_repeats.csv")
+# %%
+%%time
+df_all_parquet = pd.read_parquet("s3://readdy-working-bucket/dataframes/combined_actin_compression_dataset_all_velocities_and_repeats.parquet")
 
-# TODO: this snippet is repeated. Could be moved to a function?
-num_repeats = 5
-velocity_inds = range(3, 7)
-df_list = []
-simulator = "cytosim"
-for index in velocity_inds:
-    for repeat in range(num_repeats):
-        file_path = (
-            cytosim_df_path
-            / f"cytosim_actin_compression_velocity_vary_compress_rate000{index}_repeat_{repeat}.csv"
-        )
-        if file_path.is_file():
-            df_tmp = pd.read_csv(file_path)
-        else:
-            continue
-        print(
-            f"Processing velocity {cytosim_compression_velocities[index]} and repeat {repeat}"
-        )
-        df_tmp["velocity"] = cytosim_compression_velocities[index]
-        df_tmp["repeat"] = repeat
-        df_tmp["simulator"] = simulator
-        df_list.append(df_tmp)
-
-df_cytosim = pd.concat(df_list)
-df_cytosim.to_csv(
-    cytosim_df_path / "cytosim_actin_compression_all_velocities_and_repeats.csv"
-)
-
-# %% [markdown]
-# ## Combine all readdy outputs
-num_repeats = 3
-df_list = []
-simulator = "readdy"
-for velocity in readdy_compression_velocities:
-    for repeat in range(num_repeats):
-        file_path = (
-            readdy_df_path
-            / f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv"
-        )
-        if file_path.is_file():
-            df_tmp = pd.read_csv(file_path)
-        else:
-            continue
-        print(f"Processing velocity {velocity} and repeat {repeat}")
-        df_tmp["velocity"] = velocity
-        df_tmp["repeat"] = repeat
-        df_tmp["simulator"] = simulator
-        df_list.append(df_tmp)
-
-df_readdy = pd.concat(df_list)
-df_readdy.to_csv(
-    readdy_df_path / "readdy_actin_compression_all_velocities_and_repeats.csv"
-)
-
-# %% [markdown]
-# ## Combine readdy output with cytosim
-df_combined = pd.concat([df_cytosim, df_readdy])
-
-# %% [markdown]
-# ### save combined df
-df_combined.to_csv(base_df_path / "combined_actin_compression_dataset.csv")
-df_combined.head()
-
-# %% [markdown]
-# # Create combined subsampled dataset
-# TODO: add code to create subsampled dataset
+# %%
