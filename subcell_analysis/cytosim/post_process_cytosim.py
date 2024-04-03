@@ -20,9 +20,12 @@ def convert_and_save_dataframe(
     fiber_energy_all: list,
     fiber_forces_all: list,
     file_name: str = "cytosim_actin_compression",
-    suffix = None,
+    suffix: str = "",
     rigidity: float = 0.041,
     save_folder: Path = save_folder_path,
+    velocity: float = 0.15,
+    repeat: int = 0,
+    simulator: str = "cytosim",
 ) -> pd.DataFrame:
     # Convert cytosim output to pandas dataframe and saves to csv.
     bending_energies = []
@@ -75,6 +78,9 @@ def convert_and_save_dataframe(
                 "yforce": float(yforce),
                 "zforce": float(zforce),
                 "segment_curvature": float(segment_curvature),
+                "velocity": velocity,
+                "repeat": repeat,
+                "simulator": simulator,
             }
 
     all_outputs = pd.concat(outputs, keys=timepoints_forces, names=["time", "id"])
@@ -88,10 +94,7 @@ def convert_and_save_dataframe(
     #  Segment bending energy, in pN nm
     all_outputs["segment_energy"] = all_outputs["segment_curvature"] * rigidity * 1000
 
-    if suffix is not None:
-        file_name += suffix
-
-    all_outputs.to_csv(save_folder / f"{file_name}.csv")
+    all_outputs.to_csv(save_folder / f"{file_name}{suffix}.csv")
 
     print(f"Saved Output to {save_folder/f'{file_name}.csv'}")
 
@@ -133,7 +136,8 @@ def create_dataframes_for_repeats(
     configs: list,
     save_folder: Path,
     file_name: str = "cytosim_actin_compression",
-    overwrite: bool = True
+    velocities: list = None,
+    overwrite: bool = True,
 ) -> None:
     """
     Create dataframes for all repeats of given configs.
@@ -143,16 +147,20 @@ def create_dataframes_for_repeats(
         num_repeats (int): The number of repeats.
         configs (list): A list of configurations.
         save_folder (Path): The path to the folder where the dataframes will be saved.
+        file_name (str, optional): The name of the file. Defaults to "cytosim_actin_compression".
+        velocities (list, optional): A list of velocities. Defaults to None.
         overwrite (bool, optional): Whether to overwrite existing dataframes. Defaults to True.
     """
     segenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergylabels = np.empty((len(configs), num_repeats), dtype=object)
     for index, config in enumerate(configs):
+        velocity = velocities[index] if velocities is not None else config
         for repeat in range(num_repeats):
-            print(f"Processing config {config} and repeat {repeat}")
-
-            suffix = f"_velocity_{config}_repeat_{repeat}"
+            print(
+                f"Processing config {config}, velocity {velocity} and repeat {repeat}"
+            )
+            suffix = f"_velocity_{velocity}_repeat_{repeat}"
             file_path = save_folder / f"{file_name}{suffix}.csv"
             if file_path.is_file() and not overwrite:
                 print(f"File {file_path.name} already exists. Skipping.")
@@ -175,6 +183,9 @@ def create_dataframes_for_repeats(
                 file_name=file_name,
                 suffix=suffix,
                 save_folder=save_folder,
+                velocity=velocity,
+                repeat=repeat,
+                simulator="cytosim",
             )
 
 
