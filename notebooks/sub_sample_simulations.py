@@ -5,13 +5,17 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 # %% load dataframes
-df_folder = Path("../data/dataframes")
+current_folder = Path(__file__).parent
+base_data_folder = current_folder.parent / "data"
+df_folder = base_data_folder / "dataframes"
+df_folder.mkdir(parents=True, exist_ok=True)
+print(df_folder)
 # %%
 cytosim_df = pd.read_csv(
-    df_folder / "cytosim_actin_compression_all_velocities_and_repeats.csv"
+    df_folder / "cytosim/cytosim_actin_compression_all_velocities_and_repeats.csv"
 )
 readdy_df = pd.read_csv(
-    df_folder / "readdy_actin_compression_all_velocities_and_repeats.csv"
+    df_folder / "readdy/readdy_actin_compression_all_velocities_and_repeats.csv"
 )
 print(cytosim_df.shape)
 print(readdy_df.shape)
@@ -62,10 +66,10 @@ for index, df in enumerate(dfs):
     df_subsampled[index] = pd.concat(df_subsample_list[index])
 # %%
 df_subsampled[0].to_csv(
-    df_folder / "cytosim_actin_compression_subsampled.csv", index=False
+    df_folder / "cytosim/cytosim_actin_compression_subsampled.csv", index=False
 )
 df_subsampled[1].to_csv(
-    df_folder / "readdy_actin_compression_subsampled.csv", index=False
+    df_folder / "readdy/readdy_actin_compression_subsampled.csv", index=False
 )
 # %% get df for given velocity and repeat
 cytosim_subsampled = df_subsampled[0]
