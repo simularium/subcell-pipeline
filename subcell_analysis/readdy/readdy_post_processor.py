@@ -4,6 +4,7 @@ import math
 from typing import Dict, List, Tuple
 
 import numpy as np
+import pandas as pd
 
 from .readdy_data import FrameData
 
@@ -483,3 +484,23 @@ class ReaddyPostProcessor:
         for frame in self.trajectory:
             edges.append(frame.edges)
         return edges
+
+
+def array_to_dataframe(arr):
+    # Reshape the array to remove the singleton dimensions
+    arr = np.squeeze(arr)
+
+    # Reshape the array to have dimensions (timepoints * 50, 3)
+    reshaped_arr = arr.reshape(-1, 3)
+
+    # Create a DataFrame with timepoint and fiber point as multi-index
+    timepoints = np.repeat(range(arr.shape[0]), 50)
+    fiber_points = np.tile(range(50), arr.shape[0])
+
+    df = pd.DataFrame(reshaped_arr)
+    df["time"] = timepoints
+    df["id"] = fiber_points
+
+    df.set_index(["time", "id"], inplace=True)
+
+    return df
