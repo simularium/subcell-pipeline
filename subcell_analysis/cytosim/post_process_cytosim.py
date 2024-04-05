@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import boto3
 import numpy as np
@@ -122,7 +122,8 @@ def get_s3_file(bucket_name: str, file_name: str) -> object:
         bucket_name (str): The name of the S3 bucket.
         file_name (str): The name of the file to retrieve.
 
-    Returns:
+    Returns
+    -------
         object: The contents of the file as a byte string.
     """
     s3 = boto3.client("s3")
@@ -136,20 +137,33 @@ def create_dataframes_for_repeats(
     configs: list,
     save_folder: Path,
     file_name: str = "cytosim_actin_compression",
-    velocities: list = None,
+    velocities: Optional[list] = None,
     overwrite: bool = True,
 ) -> None:
     """
-    Create dataframes for all repeats of given configs.
+    Create dataframes for repeated simulations in Cytosim.
 
-    Args:
-        bucket_name (str): The name of the bucket.
-        num_repeats (int): The number of repeats.
-        configs (list): A list of configurations.
-        save_folder (Path): The path to the folder where the dataframes will be saved.
-        file_name (str, optional): The name of the file. Defaults to "cytosim_actin_compression".
-        velocities (list, optional): A list of velocities. Defaults to None.
-        overwrite (bool, optional): Whether to overwrite existing dataframes. Defaults to True.
+    Parameters
+    ----------
+    bucket_name : str
+        The name of the bucket.
+    num_repeats : int
+        The number of repeats.
+    configs : list
+        The list of configurations.
+    save_folder : Path
+        The path to the save folder.
+    file_name : str, optional
+        The name of the file. Defaults to "cytosim_actin_compression".
+    velocities : list, optional
+        The list of velocities. Defaults to None.
+    overwrite : bool, optional
+        Whether to overwrite existing files. Defaults to True.
+
+    Returns
+    -------
+    None
+        This function does not return anything.
     """
     segenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergy = np.empty((len(configs), num_repeats), dtype=object)
