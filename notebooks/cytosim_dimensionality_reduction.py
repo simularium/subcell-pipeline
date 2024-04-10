@@ -85,12 +85,22 @@ def source_to_idx(source: str) -> int:
     }.get(source, 6)
 
 def velocity_to_idx(velocity: str) -> int:
+    velocitry_str = str(velocity)
     return {
         "4.7": 0,
         "15.0": 1,
         "47.0": 2,
         "150.0": 3,
-    }.get(velocity, 0)
+    }.get(velocitry_str, 0)
+
+def velocity_to_alpha(velocity: str) -> int:
+    velocitry_str = str(velocity)
+    return {
+        "4.7": 0.2,
+        "15.0": 0.4,
+        "47.0": 0.7,
+        "150.0": 1,
+    }.get(velocitry_str, 0)
 
 # --- alignments
 def find_best_fit_lines_theta_from_fiber_timepoint(fiber_at_timepoint: np.ndarray) -> float:
@@ -255,6 +265,23 @@ def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> [List[pd.Da
         pca_results.append(pca_df)
     return pca_results, pca_space
 
+def get_pca_distribution_df(dfs: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    pc1_maxs = [max(df.loc[:, "principal component 1"]) for df in dfs]
+    pc1_mins = [min(df.loc[:, "principal component 1"]) for df in dfs]
+    pc2_maxs = [max(df.loc[:, "principal component 2"]) for df in dfs]
+    pc2_mins = [min(df.loc[:, "principal component 2"]) for df in dfs]
+    pc1_mean = np.mean(pc1_maxs + pc1_mins)
+    pc2_mean = np.mean(pc2_maxs + pc2_mins)
+    pc1_std = np.std(pc1_maxs + pc1_mins)
+    pc2_std = np.std(pc1_maxs + pc1_mins)
+    pca_standards_df = [pd.DataFrame(
+        data=[[pc1_std * -2, pc2_std * -2],[pc1_std * -1, pc2_std * -1],[pc1_mean, pc2_mean],[pc1_std, pc2_std], [pc1_std * 2, pc2_std * 2]],
+        columns=["principal component 1", "principal component 2"],
+    )]
+    pca_standards_df[0]["source"] = "ALL"
+    pca_standards_df[0]["param_velocity"] = "ALL"
+    return pca_standards_df
+
 
 # %%
 # ### PACMAP: Setup
@@ -310,8 +337,8 @@ def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFr
         num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
         # --- flattened metrics (bc points are flattened when processed ex: 5 fiber x 200 timepoint becomes 1000 points)
         flattened_metrics = [repeat_time[metric].values[0] for repeat_list in study_df.fibers_metrics[0] for repeat_time in repeat_list]
-        metric_min = min(flattened_metrics)
-        metric_max = max(flattened_metrics)
+        metric_min = min(flattened_metrics) if len(flattened_metrics) > 0 else 1
+        metric_max = max(flattened_metrics) if len(flattened_metrics) > 0 else 1
         # --- compile flat arr of colors (feels weird but works)
         pc1_color_lists = []
         for fiber_idx in range(num_pc1_points // num_timepoints): # segment by fiber
@@ -323,14 +350,14 @@ def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFr
                 analysis_df.loc[i, "principal component 1"],
                 analysis_df.loc[i, "principal component 2"],
                 c=[pc1_color_list[i]],
-                alpha=normalize(flattened_metrics[i], metric_min, metric_max),
+                alpha=normalize(flattened_metrics[i], metric_min, metric_max) if len(flattened_metrics) > 0 else 1,
                 s=70,
             )
         plt.savefig(figure_filename(["pca", title, metric]))
         plt.show()
 
 # --- for many simulations overlapping
-def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: pd.DataFrame, title: str, figsize:int = 8, skip_metrics: bool = False):
+def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: pd.DataFrame, title: str, figsize:int = 8, alpha_by: str = None, color_by: str = None, skip_metrics: bool = False):
     """
     Plot multiple analysis dataframes atop each other. Increment colors by simulator count
     """
@@ -352,8 +379,8 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
             num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
             # --- flattened metrics (bc points are flattened when processed ex: 5 fiber x 200 timepoint becomes 1000 points)
             flattened_metrics = [repeat_time[metric].values[0] for repeat_list in study_dfs[analysis_idx].fibers_metrics[0] for repeat_time in repeat_list]
-            metric_min = min(flattened_metrics)
-            metric_max = max(flattened_metrics)
+            metric_min = min(flattened_metrics) if len(flattened_metrics) > 0 else 1
+            metric_max = max(flattened_metrics) if len(flattened_metrics) > 0 else 1
             # --- create a list for colors/markers
             pc1_color_lists = []
             pc1_marker_lists = []
@@ -368,18 +395,30 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
             pc1_point_colors = [c for cl in pc1_color_lists for c in cl]
             pc1_point_markers = [m for ml in pc1_marker_lists for m in ml]
             for i in range(num_pc1_points):
+                # --- per point visualizations
+                alpha = normalize(flattened_metrics[i], metric_min, metric_max) if len(flattened_metrics) > 0 else 0.8
+                color = [pc1_point_colors[i]]
+                marker = pc1_point_markers[i]
+                if color_by == "source":
+                    color = color_list[source_to_idx(analysis_df.source[0])]
+                    marker = marker_list[velocity_to_idx(analysis_df.param_velocity[0])]
+                if alpha_by == "param_velocity":
+                    alpha = velocity_to_alpha(analysis_df.param_velocity[0])
+                # --- setup legend on first point
                 if i == 0:
                     if metric == "time":
-                        legend_handles.append(mpatches.Patch(color=color_list[analysis_idx], label=f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+                        label = f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]} [{marker}]"
+                        legend_handles.append(mpatches.Patch(color=color, label=label))
                     else:
-                        legend_handles.append(mpatches.Patch(color="white", label=f"[{marker_list[analysis_idx % len(marker_list)]}] {analysis_df.source[0]}/{analysis_df.param_velocity[0]}"))
+                        label = f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]} [{metric}]"
+                        legend_handles.append(mpatches.Patch(color="white", label=label))
                 ax.scatter(
                     analysis_df.loc[i, "principal component 1"],
                     analysis_df.loc[i, "principal component 2"],
-                    c=[pc1_point_colors[i]],
-                    alpha=normalize(flattened_metrics[i], metric_min, metric_max),
-                    s=50,
-                    marker=pc1_point_markers[i],
+                    c=color,
+                    alpha=alpha,
+                    s=5,
+                    marker=marker,
                 )
         plt.legend(handles=legend_handles) # using handles so we can control how many legend items appear
         plt.savefig(figure_filename(["pca", title, metric]))
@@ -396,6 +435,7 @@ def plot_study_dfs_legend(study_dfs: List[pd.DataFrame]):
 def calc_pca_component_distributions(pca_space: PCA, pca_transform_dataframes: List[pd.DataFrame]) -> List[dict]:
     # print(f"[calc_pca_component_distributions] PCA DFs: {pca_transform_dataframes}")
     pca_sets = []
+    # grouping by 
     for pca_transform_dataframe in pca_transform_dataframes:
         for idx, label in enumerate(["principal component 1", "principal component 2"]):
             pc_mean = np.mean(pca_transform_dataframe[label].values)
@@ -441,8 +481,6 @@ def calc_pca_component_distributions(pca_space: PCA, pca_transform_dataframes: L
             pca_sets.append(df)
     return pca_sets
 
-ani = None
-
 def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, color_by: str = None, include_2d: bool = False, include_3d: bool = True):
     # print(f"[plot_inverse_transform_pca] PCA Sets: {len(pca_sets)}")
     # 2D Layout
@@ -467,7 +505,7 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
     if include_3d != False:
         # hacky, but w/e it works well enough for now
         elev=10
-        for angle in [0, 45, 90, 135]:
+        for angle in [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5]:
             fig = plt.figure(figsize=(18, 10))
             pca_sets_by_comp = [
                 list(filter(lambda pca_set: pca_set['label'][0] == "principal component 1", pca_sets)),
@@ -479,27 +517,32 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
                 ax.set_ylabel('Y')
                 ax.set_zlabel('Z')
                 ax.set_title(f"[{title_prefix},Deg={angle}] {pca_set_by_component[0]['label'][0]}", fontsize=14)
+                legend_handles = []
+                legend_labels = []
                 for idx_pca_val, pca_set_val in enumerate(pca_set_by_component):
                     for idx_inverse_val, inverse_val in enumerate(pca_set_val['values']):
                         c = color_list[idx_inverse_val % len(color_list)]
+                        x, y, z = zip(*inverse_val['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
                         if color_by == "source":
                             c = color_list[source_to_idx(inverse_val['source'])]
+                            label = f"[{pca_set_val.source[0]}]" # the pc1/2 values aren't helpful, but seeing velocity distinctions are
+                            legend_labels.append(label)
                         if color_by == "param_velocity":
                             c = color_list[velocity_to_idx(str(inverse_val['param_velocity']))]
-                        x, y, z = zip(*inverse_val['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
+                            label = f"[{pca_set_val.source[0]}] {str(inverse_val['param_velocity'])}" # the pc1/2 values aren't helpful, but seeing velocity distinctions are
+                            legend_labels.append(label)
+                        if color_by == "distribution":
+                            c = color_fader("blue", "red", mix=idx_inverse_val / 5)
+                            legend_labels = ["-2σ", "-1σ", "mean", "+1σ", "+2σ"]
                         alpha = 0.9 # min(max(0.1, (1 / (idx_pca_val + 1))), 0.8) # ensuring a floor of 0.1 and max of 0.8 to prevent dominating lines
-                        # pc1_value = val['input'][0]
-                        # pc2_value = val['input'][1]
-                        # label = f"[{pca_set_val.source[0]}] {str(pc1_value)[0:6]}, {str(pc2_value)[0:6]}"
-                        label = f"[{pca_set_val.source[0]}] {str(inverse_val['param_velocity'])}" # the pc1/2 values aren't helpful, but seeing velocity distinctions are
-                        ax.plot(x,y,z,c=c,alpha=alpha,label=label)
-                ax.legend()
+                        line, = ax.plot(x,y,z,c=c,alpha=alpha)
+                        legend_handles.append(line)
+                ax.legend(handles=legend_handles, labels=legend_labels)
                 # --- render with angle to get better sense of transform
                 ax.view_init(elev=elev, azim=angle)
             plt.tight_layout()
             plt.savefig(figure_filename(["inverse_transform_3d", title_prefix, f"{angle}deg"]))
             plt.show()
-
 
 # %%
 # # Histograms
@@ -543,8 +586,8 @@ def plot_pca_histogram(pca_sets: List[pd.DataFrame]):
 
 # %%
 # Data Loading: Combiled Subsample
-# subsamples_filename = "combined_actin_compression_metrics_all_velocities_and_repeats_subsampled.csv"
-subsamples_filename = "combined_actin_compression_dataset_all_velocities_and_repeats_subsampled.csv"
+# subsamples_filename = "combined_actin_compression_dataset_all_velocities_and_repeats_subsampled.csv"
+subsamples_filename = "combined_actin_compression_metrics_all_velocities_and_repeats_subsampled_with_metrics.csv"
 subsamples_df = pd.read_csv(f"{dir_data}dataframes/{subsamples_filename}")
 study_dfs = study_subsamples_loader(subsamples_df)
 
@@ -554,72 +597,67 @@ study_dfs = study_subsamples_loader(subsamples_df)
 print(f"Plotting all {len(study_dfs)} studies...")
 # --- pca
 pca_aligned_dfs_all, pca_aligned_space_all = get_study_pca_dfs(study_dfs, align=True)
-# --- pca: plot
-# plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned=True,Velocity=All", figsize=(8, 8), skip_metrics=True)
-# --- histograms
-# plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
-# --- inverse transform: standards
-pca_standards_df = [pd.DataFrame(
-    data=[[-1, -1],[-0.5, -0.5],[0, 0],[0.5, 0.5],[1, 1]],
-    columns=["principal component 1", "principal component 2"],
-)]
-pca_standards_df[0]["source"] = "ALL"
-pca_standards_df[0]["param_velocity"] = "ALL"
-pca_component_dists_standards = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_standards_df)
-plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix="ALL", color_by="source")
+# --- inverse transform: min/maxs
+pca_distribution_df = get_pca_distribution_df(pca_aligned_dfs_all)
+pca_component_dists_standards = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_distribution_df)
+plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix="ALL", color_by="distribution")
 # --- inverse transform: all fibers
 # pca_component_dists_all = calc_pca_compondent_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs_all)
 # plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL", color_by="source")
+# --- pca: plot
+plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", skip_metrics=True)
+# --- histograms
+# plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
 
 
 # %%
 # # PLOT PCAS: BY VELOCITY
-for velocity in np.sort(subsamples_df['velocity'].unique()):
-    study_dfs_to_plot = list(filter(lambda df: df.param_velocity.values[0] == velocity, study_dfs))
-    print(f"Plotting {len(study_dfs_to_plot)} studies with velocity = {velocity}...")
+# for velocity in np.sort(subsamples_df['velocity'].unique()):
+#     study_dfs_to_plot = list(filter(lambda df: df.param_velocity.values[0] == velocity, study_dfs))
+#     print(f"Plotting {len(study_dfs_to_plot)} studies with velocity = {velocity}...")
 
-    # PCA
-    # for st_df in study_dfs_to_plot:
-    #     source = st_df["source"].values[0]
-    #     print(f"Plotting '{source}' PCA...")
-    #     # [pca_unaligned_df], pca_unaligned_space = get_study_pca_dfs([st_df], align=False)
-    #     [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
-    #     # --- pca histogram
-    #     # plot_pca_histogram(pca_sets=[pca_aligned_df])
-    #     # --- pca scatter plot
-    #     plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space_all, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
-    #     # --- pca inverse transforms: unaligned
-    #     # pca_unaligned_component_dists = calc_pca_component_distributions(pca_space=pca_unaligned_space, pca_transform_dataframes=[pca_unaligned_df])
-    #     # plot_inverse_transform_pca(pca_sets=pca_unaligned_component_dists, title_prefix=f"{source} / {float(velocity)} / Unaligned")
-    #     # --- pca inverse transforms: aligned
-    #     pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=[pca_aligned_df])
-    #     plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source} / {float(velocity)} / Aligned")
+#     # PCA
+#     for st_df in study_dfs_to_plot:
+#         source = st_df["source"].values[0]
+#         print(f"Plotting '{source}' PCA...")
+#         # [pca_unaligned_df], pca_unaligned_space = get_study_pca_dfs([st_df], align=False)
+#         [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
+#         # --- pca histogram
+#         # plot_pca_histogram(pca_sets=[pca_aligned_df])
+#         # --- pca scatter plot
+#         plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space_all, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
+#         # --- pca inverse transforms: unaligned
+#         # pca_unaligned_component_dists = calc_pca_component_distributions(pca_space=pca_unaligned_space, pca_transform_dataframes=[pca_unaligned_df])
+#         # plot_inverse_transform_pca(pca_sets=pca_unaligned_component_dists, title_prefix=f"{source} / {float(velocity)} / Unaligned")
+#         # --- pca inverse transforms: aligned
+#         # pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=[pca_aligned_df])
+#         # plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source} / {float(velocity)} / Aligned")
 
-    # PCA: ALL SIMS
-    print(f"Plotting All PCA...")
-    # --- pca scatter plot
-    pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
-    # plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space_all, study_dfs=study_dfs_to_plot, title=f"ALL (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
-    # --- pca histograms
-    # plot_pca_histogram(pca_sets=pca_aligned_dfs)
-    # --- pca inverse transforms
-    pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs)
-    plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"Source=All,Velocity={float(velocity)}", color_by="source")
+#     # PCA: ALL SIMS
+#     print(f"Plotting All PCA...")
+#     # --- pca scatter plot
+#     # pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
+#     # plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space_all, study_dfs=study_dfs_to_plot, title=f"ALL (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
+#     # --- pca histograms
+#     # plot_pca_histogram(pca_sets=pca_aligned_dfs)
+#     # --- pca inverse transforms
+#     # pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs)
+#     # plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"Source=All,Velocity={float(velocity)}", color_by="source")
 
 
 # %%
 # # PLOT PCAS BY SIM/SOURCE
-# sources_to_plot = list(set([pca_set.source[0] for pca_set in study_dfs]))
+sources_to_plot = list(set([pca_set.source[0] for pca_set in study_dfs]))
 
-# for source in sources_to_plot:
-#     study_dfs_to_plot = list(filter(lambda pca: pca.source[0] == source, study_dfs))
-#     print(f"Plotting {len(study_dfs_to_plot)} studies with source = {source}...")
-#     # --- pca
-#     pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
-#     # --- pca: plot
-#     # plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space_all, study_dfs=study_dfs_to_plot, title=f"{source} (PCA): Aligned=True,Velocity=All", figsize=(8, 8))
-#     # --- histograms
-#     # plot_pca_histogram(pca_sets=pca_aligned_dfs)
-#     # --- inverse transform
-#     pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs)
-#     plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"Source={source},Velocity=All", color_by="param_velocity")
+for source in sources_to_plot:
+    study_dfs_to_plot = list(filter(lambda pca: pca.source[0] == source, study_dfs))
+    print(f"Plotting {len(study_dfs_to_plot)} studies with source = {source}...")
+    # --- pca
+    pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
+    # --- pca: plot
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space_all, study_dfs=study_dfs_to_plot, title=f"{source} (PCA): Aligned=True,Velocity=All", figsize=(8, 8), alpha_by="param_velocity", color_by="source", skip_metrics=True)
+    # --- histograms
+    # plot_pca_histogram(pca_sets=pca_aligned_dfs)
+    # --- inverse transform
+    # pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs)
+    # plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"Source={source},Velocity=All", color_by="param_velocity")
