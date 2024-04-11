@@ -41,8 +41,8 @@ def normalize(value, min_value, max_value):
 
 # --- color funcs
 color_list = [
-    "red",
     "blue",
+    "red",
     "green",
     "purple",
     "orange",
@@ -135,13 +135,13 @@ def align_fibers(fibers: np.ndarray) -> np.ndarray:
                 if np.isnan(monomer_theta):
                     monomer_theta = 0 # fallback value
                 # ... calc difference between highest magnitude theta and this monomer's theta
-                monomer_theta_diff = best_fit_theta - monomer_theta
+                monomer_theta_diff = monomer_theta - best_fit_theta
                 # ... map new y/z values to this fiber_timepoint_monomer's based on rotation
                 new_monomer_y = fiber_timepoint_monomer[1] * np.cos(monomer_theta_diff) - fiber_timepoint_monomer[2] * np.sin(monomer_theta_diff)
                 new_monomer_z = fiber_timepoint_monomer[1] * np.sin(monomer_theta_diff) + fiber_timepoint_monomer[2] * np.cos(monomer_theta_diff)
                 fiber_timepoint_reshaped[fiber_timepoint_monomer_idx] = [fiber_timepoint_monomer[0], new_monomer_y, new_monomer_z]
             # legacy: saving again as a flat array for the rest of the application
-            fiber_timepoint_reshaped_flattened = fiber_timepoint_reshaped.reshape(-1)
+            fiber_timepoint_reshaped_flattened = fiber_timepoint_reshaped.copy().reshape(-1)
             fibers_mapped[fiber_idx][fiber_timepoint_idx] = fiber_timepoint_reshaped_flattened
     # return
     return fibers_mapped
@@ -150,7 +150,7 @@ def align_fibers(fibers: np.ndarray) -> np.ndarray:
 # ### Data Preppers
 
 # --- metrics
-repeat_time_metrics_list = ["time", "NON_COPLANARITY", "PEAK_ASYMMETRY", "AVERAGE_PERP_DISTANCE", "TOTAL_FIBER_TWIST", "CALC_BENDING_ENERGY", "CONTOUR_LENGTH"]
+repeat_time_metrics_list = ["time", "NON_COPLANARITY", "PEAK_ASYMMETRY", "TOTAL_FIBER_TWIST", "CALC_BENDING_ENERGY", "CONTOUR_LENGTH"]
 
 # --- load in prepped CSV of subsamples (pre-processed for timepoints, monomers)
 def study_subsamples_loader(subsamples_df: pd.DataFrame):
@@ -362,7 +362,7 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
                 if color_by == "source":
                     color = color_list[source_to_idx(analysis_df.source[0])]
                     marker = marker_list[velocity_to_idx(analysis_df.param_velocity[0])]
-                if alpha_by == "param_velocity":
+                if alpha_by == "param_velocity" and metric == "time":
                     alpha = velocity_to_alpha(analysis_df.param_velocity[0])
                 # --- setup legend on first point
                 if i == 0:
@@ -508,8 +508,8 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
             plt.show()
 
 # --- visualize aligned fibers to sanity check our underlying data is right (only grab first few time points of each fiber)
-def plot_subsample_fibers_dfs(study_dfs: List[pd.DataFrame]):
-    study_fibers = align_fibers(study_dfs[0].fibers[0]) # just using the first
+def plot_subsample_fibers_dfs(study_dfs: List[pd.DataFrame], align: bool = False):
+    study_fibers = align_fibers(study_dfs[0].fibers[0]) if align == True  else study_dfs[0].fibers[0]  # just using the first
     for angle in [0, 90]:
         fig = plt.figure(figsize=(18, 10))
         ax = fig.add_subplot(1, 2, 1, projection='3d')
@@ -582,20 +582,22 @@ study_dfs = study_subsamples_loader(subsamples_df)
 # # PLOT
 
 print(f"Plotting all {len(study_dfs)} studies...")
-# --- pca
-pca_aligned_dfs_all, pca_aligned_space_all = get_study_pca_dfs(study_dfs, align=True)
-# --- fibers w/o transform
-plot_subsample_fibers_dfs(study_dfs=study_dfs)
-# --- inverse transform: min/maxs
-pca_distribution_df = get_pca_distribution_df(pca_aligned_dfs_all)
-pca_component_dists_standards = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_distribution_df)
-plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix="ALL", color_by="distribution")
-# --- inverse transform: all fibers
-# pca_component_dists_all = calc_pca_compondent_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs_all)
-# plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL", color_by="source")
-# --- pca: plot
-plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", skip_metrics=True)
-plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"cytosim (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="cytosim")
-plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"readdy (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="readdy")
-# --- histograms
-# plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
+
+for align in [True]: # [True, False]
+    # --- verify fibers alignment
+    # plot_subsample_fibers_dfs(study_dfs=study_dfs, align=align)
+    # --- pca
+    pca_aligned_dfs_all, pca_aligned_space_all = get_study_pca_dfs(study_dfs, align=align)
+    # --- inverse transform: min/maxs
+    # pca_distribution_df = get_pca_distribution_df(pca_aligned_dfs_all)
+    # pca_component_dists_standards = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_distribution_df)
+    # plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix="ALL: Aligned={align}", color_by="distribution")
+    # --- inverse transform: all fibers
+    # pca_component_dists_all = calc_pca_compondent_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs_all)
+    # plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL", color_by="source")
+    # --- pca: plot
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned={align},Velocity=All", figsize=(8, 8), color_by="source", skip_metrics=False)
+    # plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"cytosim (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="cytosim")
+    # plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"readdy (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="readdy")
+    # --- histograms
+    # plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
