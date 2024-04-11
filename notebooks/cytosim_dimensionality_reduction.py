@@ -41,8 +41,8 @@ def normalize(value, min_value, max_value):
 
 # --- color funcs
 color_list = [
-    "blue",
     "red",
+    "blue",
     "green",
     "purple",
     "orange",
@@ -120,11 +120,10 @@ def align_fibers(fibers: np.ndarray) -> np.ndarray:
     """Rotationally align the given fibers around the x-axis to the fiber with the greatest magnitude."""
     # v1 - get angle to align each fiber at the last time point
     # v2 - change this function so it finds highest magnitude point, gets rotation theta, and for each monomer timepoint rotates accordingly to be in same plane
+    fibers_copied = fibers.copy()
     fibers_mapped = fibers.copy()
-    # for fibers, fit a line and calculate the theta
-    # print("[align_fibers] best_fit_theta: ", best_fit_theta)
     # for each fiber at each time point, align all monomers to that highest magnitude point
-    for fiber_idx, fiber in enumerate(fibers):
+    for fiber_idx, fiber in enumerate(fibers_copied):
         for fiber_timepoint_idx, fiber_timepoint in enumerate(fiber):
             # legacy issue: data was prepped in a flattened way, so reforming 3D monomers datastructure, and will flatten again after when saving
             fiber_timepoint_reshaped = fiber_timepoint.reshape(-1, 3)
@@ -134,7 +133,7 @@ def align_fibers(fibers: np.ndarray) -> np.ndarray:
                 # ... calc theta of this monomer
                 monomer_theta = np.arctan(fiber_timepoint_monomer[1] / fiber_timepoint_monomer[2])
                 if np.isnan(monomer_theta):
-                    monomer_theta = 0
+                    monomer_theta = 0 # fallback value
                 # ... calc difference between highest magnitude theta and this monomer's theta
                 monomer_theta_diff = best_fit_theta - monomer_theta
                 # ... map new y/z values to this fiber_timepoint_monomer's based on rotation
@@ -196,13 +195,7 @@ def study_subsamples_loader(subsamples_df: pd.DataFrame):
 
 
 # --- reshaping datasets for analysis
-def get_study_df_ref_fiber(study_df: pd.DataFrame) -> np.ndarray:
-    """
-    Grab first fiber from the study dataset. We're not going to transfrom the fiber, that's for the fiber align function
-    """
-    return study_df.fibers[0][-1][0]
-
-def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False, fiber_for_alignment = None):
+def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False):
     """
     Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis
     """
@@ -245,12 +238,11 @@ def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> [List[pd.Da
     """
     pca_space = PCA(n_components=2)
     # --- create our embedding space by fitting the combined data (dataset func flattens/orders our monomer datapoints)
-    fiber_for_alignment = get_study_df_ref_fiber(study_dfs[0])
-    study_datasets = [prep_study_df_fibers(study_df, align, fiber_for_alignment) for study_df in study_dfs]
-    combined_prepared_data = np.vstack(study_datasets) # needing to create a 1 dim arr, but errs if I just pass in [study_datasets], TODO: better understand this
+    study_fibers = [prep_study_df_fibers(study_df, align) for study_df in study_dfs]
+    combined_prepared_data = np.vstack(study_fibers) # needing to create a 1 dim arr, but errs if I just pass in [study_fibers], TODO: better understand this
     pca_space.fit(combined_prepared_data)
     # --- transform the data
-    pca_transformed_study_data = [pca_space.transform(data) for data in study_datasets]
+    pca_transformed_study_data = [pca_space.transform(data) for data in study_fibers]
     # --- scale/normalize the data
     pca_results = []
     for study_idx, pca_transformed_study_data in enumerate(pca_transformed_study_data):
@@ -293,9 +285,8 @@ def get_study_pacmap_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.
     n_neighbors = sum(map(lambda df: df.param_fibers.values[0], study_dfs)) # per fiber? meaning, all study fiber counts?
     pacmap_space = pacmap.PaCMAP(n_components=2, n_neighbors=n_neighbors)
     # --- create the embedding space
-    fiber_for_alignment = get_study_df_ref_fiber(study_dfs[0])
-    study_datasets = [prep_study_df_fibers(study_df, align, fiber_for_alignment) for study_df in study_dfs]
-    combined_prepared_data = np.vstack(study_datasets)
+    study_fibers = [prep_study_df_fibers(study_df, align) for study_df in study_dfs]
+    combined_prepared_data = np.vstack(study_fibers)
     # --- fix+transform the data (we're using fit_trasnform, because pacmap treats "transform" as additional/new datasets and it says positions can be in different places)
     pacmap_transformed_study_data = pacmap_space.fit_transform(combined_prepared_data, init="pca")
     # --- scale/normalize the data (we have to regroup data since previous step collapsed it)
@@ -320,44 +311,8 @@ def get_study_pacmap_dfs(study_dfs: List[pd.DataFrame], align: bool) -> List[pd.
 # %%
 # ### Plotter Setup
 
-# --- for single simulation
-def plot_study_df(analysis_df: pd.DataFrame, pca_space: PCA, study_df: pd.DataFrame, title: str, figsize=8):
-    """
-    Plot a PCA analysis dataframe
-    """
-    for metric in repeat_time_metrics_list:
-        # TODO: subplot setup
-        fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
-        # --- List of parameters or conditions under which the PCA was run.
-        ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
-        ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
-        ax.set_title(title + f",Metric={metric}", fontsize=10)
-        # --- setup points + skip counter
-        num_pc1_points = int(analysis_df['principal component 1'].shape[0])
-        num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
-        # --- flattened metrics (bc points are flattened when processed ex: 5 fiber x 200 timepoint becomes 1000 points)
-        flattened_metrics = [repeat_time[metric].values[0] for repeat_list in study_df.fibers_metrics[0] for repeat_time in repeat_list]
-        metric_min = min(flattened_metrics) if len(flattened_metrics) > 0 else 1
-        metric_max = max(flattened_metrics) if len(flattened_metrics) > 0 else 1
-        # --- compile flat arr of colors (feels weird but works)
-        pc1_color_lists = []
-        for fiber_idx in range(num_pc1_points // num_timepoints): # segment by fiber
-            pc1_color_lists.append(color_list_generator(num_timepoints, fiber_idx, c1_override="black" if metric != "time" else None, c2_override="black" if metric != "time" else None))
-        pc1_color_list = [c for cl in pc1_color_lists for c in cl] # flattens
-        # --- scatter
-        for i in range(num_pc1_points):
-            ax.scatter(
-                analysis_df.loc[i, "principal component 1"],
-                analysis_df.loc[i, "principal component 2"],
-                c=[pc1_color_list[i]],
-                alpha=normalize(flattened_metrics[i], metric_min, metric_max) if len(flattened_metrics) > 0 else 1,
-                s=70,
-            )
-        plt.savefig(figure_filename(["pca", title, metric]))
-        plt.show()
-
 # --- for many simulations overlapping
-def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: pd.DataFrame, title: str, figsize:int = 8, alpha_by: str = None, color_by: str = None, skip_metrics: bool = False):
+def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: pd.DataFrame, title: str, figsize:int = 8, alpha_by: str = None, color_by: str = None, skip_metrics: bool = False, only_plot_source: str = None):
     """
     Plot multiple analysis dataframes atop each other. Increment colors by simulator count
     """
@@ -367,6 +322,8 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
             continue
         # --- setup fig
         fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
+        ax.set_xlim(-0.9, 0.9)
+        ax.set_ylim(-0.9, 0.9)
         # --- List of parameters or conditions under which the PCA was run.
         ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
         ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
@@ -374,6 +331,9 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
         legend_handles = []
         # --- for each simulation, plot..
         for analysis_idx, analysis_df in enumerate(analysis_dfs):
+            # --- check if only plotting a set number of sources
+            if only_plot_source != None and analysis_df.source[0] != only_plot_source:
+                continue
             # --- setup points + skip counter
             num_pc1_points = int(analysis_df['principal component 1'].shape[0])
             num_timepoints = analysis_df.time.iloc[-1] # this is a series. each monomer point is saved with a time position. we grab the last value to know what the last monomer timepoint is
@@ -520,8 +480,11 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
                 legend_handles = []
                 legend_labels = []
                 for idx_pca_val, pca_set_val in enumerate(pca_set_by_component):
+                    # print(f"num pca set vals: {len(pca_set_val['values'])}")
                     for idx_inverse_val, inverse_val in enumerate(pca_set_val['values']):
                         c = color_list[idx_inverse_val % len(color_list)]
+                        # print(f"fiber shape: ", inverse_val['fiber'].shape)
+                        # print(f"fiber zip shape: ", list(zip(*inverse_val['fiber'])))
                         x, y, z = zip(*inverse_val['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
                         if color_by == "source":
                             c = color_list[source_to_idx(inverse_val['source'])]
@@ -543,6 +506,29 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
             plt.tight_layout()
             plt.savefig(figure_filename(["inverse_transform_3d", title_prefix, f"{angle}deg"]))
             plt.show()
+
+# --- visualize aligned fibers to sanity check our underlying data is right (only grab first few time points of each fiber)
+def plot_subsample_fibers_dfs(study_dfs: List[pd.DataFrame]):
+    study_fibers = align_fibers(study_dfs[0].fibers[0]) # just using the first
+    for angle in [0, 90]:
+        fig = plt.figure(figsize=(18, 10))
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_title(f"[Subsamples Aligned,Deg={angle}]", fontsize=14)
+        for fiber in study_fibers:
+            for idx_fiber_timepoint, fiber_timepoint in enumerate(fiber.reshape(-1, 200, 3)): # seems to have 66 loops at 200/3
+                if idx_fiber_timepoint > 22: continue
+                x, y, z = zip(*fiber_timepoint.reshape(-1, 3))
+                ax.plot(x,y,z,alpha=0.6)
+        # --- render with angle to get better sense of transform
+        ax.set_proj_type('ortho')
+        ax.view_init(elev=0, azim=angle)
+        plt.tight_layout()
+        plt.savefig(figure_filename(["subsample_fibers_3d", f"{angle}deg"]))
+        plt.show()
+
 
 # %%
 # # Histograms
@@ -593,10 +579,13 @@ study_dfs = study_subsamples_loader(subsamples_df)
 
 
 # %%
-# # PLOT PCAS BY ALL
+# # PLOT
+
 print(f"Plotting all {len(study_dfs)} studies...")
 # --- pca
 pca_aligned_dfs_all, pca_aligned_space_all = get_study_pca_dfs(study_dfs, align=True)
+# --- fibers w/o transform
+plot_subsample_fibers_dfs(study_dfs=study_dfs)
 # --- inverse transform: min/maxs
 pca_distribution_df = get_pca_distribution_df(pca_aligned_dfs_all)
 pca_component_dists_standards = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_distribution_df)
@@ -606,58 +595,7 @@ plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix=
 # plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL", color_by="source")
 # --- pca: plot
 plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", skip_metrics=True)
+plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"cytosim (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="cytosim")
+plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"readdy (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="readdy")
 # --- histograms
 # plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
-
-
-# %%
-# # PLOT PCAS: BY VELOCITY
-# for velocity in np.sort(subsamples_df['velocity'].unique()):
-#     study_dfs_to_plot = list(filter(lambda df: df.param_velocity.values[0] == velocity, study_dfs))
-#     print(f"Plotting {len(study_dfs_to_plot)} studies with velocity = {velocity}...")
-
-#     # PCA
-#     for st_df in study_dfs_to_plot:
-#         source = st_df["source"].values[0]
-#         print(f"Plotting '{source}' PCA...")
-#         # [pca_unaligned_df], pca_unaligned_space = get_study_pca_dfs([st_df], align=False)
-#         [pca_aligned_df], pca_aligned_space = get_study_pca_dfs([st_df], align=True)
-#         # --- pca histogram
-#         # plot_pca_histogram(pca_sets=[pca_aligned_df])
-#         # --- pca scatter plot
-#         plot_study_df(analysis_df=pca_aligned_df, pca_space=pca_aligned_space_all, study_df=st_df, title=f"{source} (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
-#         # --- pca inverse transforms: unaligned
-#         # pca_unaligned_component_dists = calc_pca_component_distributions(pca_space=pca_unaligned_space, pca_transform_dataframes=[pca_unaligned_df])
-#         # plot_inverse_transform_pca(pca_sets=pca_unaligned_component_dists, title_prefix=f"{source} / {float(velocity)} / Unaligned")
-#         # --- pca inverse transforms: aligned
-#         # pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=[pca_aligned_df])
-#         # plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"{source} / {float(velocity)} / Aligned")
-
-#     # PCA: ALL SIMS
-#     print(f"Plotting All PCA...")
-#     # --- pca scatter plot
-#     # pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
-#     # plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space_all, study_dfs=study_dfs_to_plot, title=f"ALL (PCA): Aligned=True,Velocity={float(velocity)}", figsize=(8, 8))
-#     # --- pca histograms
-#     # plot_pca_histogram(pca_sets=pca_aligned_dfs)
-#     # --- pca inverse transforms
-#     # pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs)
-#     # plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"Source=All,Velocity={float(velocity)}", color_by="source")
-
-
-# %%
-# # PLOT PCAS BY SIM/SOURCE
-sources_to_plot = list(set([pca_set.source[0] for pca_set in study_dfs]))
-
-for source in sources_to_plot:
-    study_dfs_to_plot = list(filter(lambda pca: pca.source[0] == source, study_dfs))
-    print(f"Plotting {len(study_dfs_to_plot)} studies with source = {source}...")
-    # --- pca
-    pca_aligned_dfs, pca_aligned_space = get_study_pca_dfs(study_dfs_to_plot, align=True)
-    # --- pca: plot
-    plot_study_dfs(analysis_dfs=pca_aligned_dfs, pca_space=pca_aligned_space_all, study_dfs=study_dfs_to_plot, title=f"{source} (PCA): Aligned=True,Velocity=All", figsize=(8, 8), alpha_by="param_velocity", color_by="source", skip_metrics=True)
-    # --- histograms
-    # plot_pca_histogram(pca_sets=pca_aligned_dfs)
-    # --- inverse transform
-    # pca_component_dists = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs)
-    # plot_inverse_transform_pca(pca_sets=pca_component_dists, title_prefix=f"Source={source},Velocity=All", color_by="param_velocity")
