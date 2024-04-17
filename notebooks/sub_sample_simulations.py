@@ -11,11 +11,11 @@ df_folder = base_data_folder / "dataframes"
 df_folder.mkdir(parents=True, exist_ok=True)
 print(df_folder)
 # %%
-cytosim_df = pd.read_csv(
-    df_folder / "cytosim/cytosim_actin_compression_all_velocities_and_repeats.csv"
+cytosim_df = pd.read_parquet(
+    df_folder / "cytosim/cytosim_actin_compression_all_velocities_and_repeats.parquet"
 )
-readdy_df = pd.read_csv(
-    df_folder / "readdy/readdy_actin_compression_all_velocities_and_repeats.csv"
+readdy_df = pd.read_parquet(
+    df_folder / "readdy/readdy_actin_compression_all_velocities_and_repeats.parquet"
 )
 print(cytosim_df.shape)
 print(readdy_df.shape)
@@ -33,7 +33,12 @@ dfs = [cytosim_df, readdy_df]
 df_subsample_list = [[], []]
 df_subsampled = [[], []]
 # %%
-for index, df in enumerate(dfs):
+for index, (simulator, df) in enumerate(
+    zip(
+        ["cytosim", "readdy"],
+        dfs,
+    )
+):
     for velocity, df_velocity in df.groupby("velocity"):
         for repeat, df_repeat in df_velocity.groupby("repeat"):
             num_time_vals = df_repeat["time"].nunique()
@@ -55,6 +60,7 @@ for index, df in enumerate(dfs):
                 df_tmp["time"] = time
                 df_tmp["velocity"] = velocity
                 df_tmp["repeat"] = repeat
+                df_tmp["simulator"] = simulator
                 for col in cols_to_interp:
                     df_tmp[col] = np.interp(
                         np.linspace(0, 1, n_monomer_points),
@@ -70,6 +76,12 @@ df_subsampled[0].to_csv(
 )
 df_subsampled[1].to_csv(
     df_folder / "readdy/readdy_actin_compression_subsampled.csv", index=False
+)
+df_subsampled[0].to_parquet(
+    df_folder / "cytosim/cytosim_actin_compression_subsampled.parquet", index=False
+)
+df_subsampled[1].to_parquet(
+    df_folder / "readdy/readdy_actin_compression_subsampled.parquet", index=False
 )
 # %% get df for given velocity and repeat
 cytosim_subsampled = df_subsampled[0]
