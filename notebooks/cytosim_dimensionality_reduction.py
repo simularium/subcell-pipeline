@@ -102,47 +102,50 @@ def velocity_to_alpha(velocity: str) -> int:
     }.get(velocitry_str, 0)
 
 # --- alignments
-def find_best_fit_lines_theta_from_fiber_timepoint(fiber_at_timepoint: np.ndarray) -> float:
-    """Find the best fit line for a fiber's monomers (x,y,z)."""
-    # --- fit line
-    x = fiber_at_timepoint[:, 0]
-    y = fiber_at_timepoint[:, 1]
-    z = fiber_at_timepoint[:, 2]
-    A = np.vstack([x, np.ones(len(x))]).T
-    m, c = np.linalg.lstsq(A, y, rcond=None)[0]
-    # --- get theta
-    theta = np.arctan(m)
-    return theta
+def generate_fiber_to_align_to():
+    """Generate a line of monomers."""
+    line = []
+    for i in range(200):
+        line.append([i, 0, i // 2])
+    return np.array(line)
 
+def calculate_fibers_theta_diff(fiber1: np.ndarray, fiber2: np.ndarray) -> float:
+    # Extract y and z coordinates for each fiber
+    fiber1_shaped = fiber1.reshape(-1, 200, 3)
+    fiber1_shaped = fiber1_shaped[len(fiber1_shaped) // 2]
+    fiber2_shaped = fiber2.reshape(-1, 200, 3)
+    fiber2_shaped = fiber2_shaped[len(fiber2_shaped) // 2]
+    y1, z1 = fiber1[:, 1], fiber1[:, 2]
+    y2, z2 = fiber2[:, 1], fiber2[:, 2]
+    # Fit a line using least squares method for fiber1
+    A1 = np.vstack([y1, np.ones(len(y1))]).T
+    m1, c1 = np.linalg.lstsq(A1, z1, rcond=None)[0]
+    # Fit a line using least squares method for fiber2
+    A2 = np.vstack([y2, np.ones(len(y2))]).T
+    m2, c2 = np.linalg.lstsq(A2, z2, rcond=None)[0]
+    # Calculate the theta for each line
+    theta1 = np.arctan(m1)
+    theta2 = np.arctan(m2)
+    # Calculate the theta difference
+    theta_diff = theta1 - theta2
+    return theta_diff
 
-def align_fibers(fibers: np.ndarray) -> np.ndarray:
+def align_fibers(fibers: np.ndarray, fiber_to_align_to: np.ndarray) -> np.ndarray:
     """Rotationally align the given fibers around the x-axis to the fiber with the greatest magnitude."""
-    # v1 - get angle to align each fiber at the last time point
-    # v2 - change this function so it finds highest magnitude point, gets rotation theta, and for each monomer timepoint rotates accordingly to be in same plane
-    fibers_copied = fibers.copy()
     fibers_mapped = fibers.copy()
-    # for each fiber at each time point, align all monomers to that highest magnitude point
-    for fiber_idx, fiber in enumerate(fibers_copied):
+    for fiber_idx, fiber in enumerate(fibers.copy()):
         for fiber_timepoint_idx, fiber_timepoint in enumerate(fiber):
-            # legacy issue: data was prepped in a flattened way, so reforming 3D monomers datastructure, and will flatten again after when saving
             fiber_timepoint_reshaped = fiber_timepoint.reshape(-1, 3)
-            best_fit_theta = find_best_fit_lines_theta_from_fiber_timepoint(fiber_timepoint_reshaped)
-            # for each monomer in the timepoint's fiber, calculate the rotation and map the new position
+            theta_diff = calculate_fibers_theta_diff(fiber_to_align_to, fiber_timepoint_reshaped)
             for fiber_timepoint_monomer_idx, fiber_timepoint_monomer in enumerate(fiber_timepoint_reshaped):
-                # ... calc theta of this monomer
                 monomer_theta = np.arctan(fiber_timepoint_monomer[1] / fiber_timepoint_monomer[2])
                 if np.isnan(monomer_theta):
-                    monomer_theta = 0 # fallback value
-                # ... calc difference between highest magnitude theta and this monomer's theta
-                monomer_theta_diff = monomer_theta - best_fit_theta
-                # ... map new y/z values to this fiber_timepoint_monomer's based on rotation
-                new_monomer_y = fiber_timepoint_monomer[1] * np.cos(monomer_theta_diff) - fiber_timepoint_monomer[2] * np.sin(monomer_theta_diff)
-                new_monomer_z = fiber_timepoint_monomer[1] * np.sin(monomer_theta_diff) + fiber_timepoint_monomer[2] * np.cos(monomer_theta_diff)
+                    monomer_theta = 0
+                new_monomer_y = fiber_timepoint_monomer[1] * np.cos(theta_diff) - fiber_timepoint_monomer[2] * np.sin(theta_diff)
+                new_monomer_z = fiber_timepoint_monomer[1] * np.sin(theta_diff) + fiber_timepoint_monomer[2] * np.cos(theta_diff)
                 fiber_timepoint_reshaped[fiber_timepoint_monomer_idx] = [fiber_timepoint_monomer[0], new_monomer_y, new_monomer_z]
-            # legacy: saving again as a flat array for the rest of the application
             fiber_timepoint_reshaped_flattened = fiber_timepoint_reshaped.copy().reshape(-1)
-            fibers_mapped[fiber_idx][fiber_timepoint_idx] = fiber_timepoint_reshaped_flattened
-    # return
+            fibers_mapped[fiber_idx][fiber_timepoint_idx] = fiber_timepoint_reshaped_flattened    
     return fibers_mapped
 
 # %%
@@ -192,15 +195,12 @@ def study_subsamples_loader(subsamples_df: pd.DataFrame):
             study_dfs.append(df)
     return study_dfs
 
-
 # --- reshaping datasets for analysis
 def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False):
-    """
-    Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis
-    """
+    """Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis"""
     num_pca_samples = int(study_df.param_fibers) * int(study_df.param_timepoints)
     num_pca_features = int(study_df.param_fiber_monomers) * 3
-    fibers = study_df.fibers[0].copy() if align == False else align_fibers(study_df.fibers[0])
+    fibers = study_df.fibers[0].copy() if align == False else align_fibers(fibers=study_df.fibers[0], fiber_to_align_to=generate_fiber_to_align_to())
     fibers_scaled = fibers * study_df.param_coordinate_scaler[0] # scale the coordinates for aligning multiple sims
     fibers_scaled_flattened = np.ravel(fibers_scaled)
     pca_dataset = fibers_scaled_flattened.reshape((num_pca_samples, num_pca_features))
@@ -313,10 +313,10 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
                 if i == 0:
                     if metric == "time":
                         label = f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]} [{marker}]"
-                        legend_handles.append(mpatches.Patch(color=color, label=label))
+                        legend_handles.append(mpatches.Patch(color=color[0], label=label))
                     else:
                         label = f"{analysis_df.source[0]}/{analysis_df.param_velocity[0]} [{metric}]"
-                        legend_handles.append(mpatches.Patch(color="white", label=label))
+                        legend_handles.append(mpatches.Patch(color=color[0] if color_by == "source" else "white", label=label))
                 ax.scatter(
                     analysis_df.loc[i, "principal component 1"],
                     analysis_df.loc[i, "principal component 2"],
@@ -405,7 +405,7 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
     if include_3d != False:
         # hacky, but w/e it works well enough for now
         elev=10
-        for angle in [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5]:
+        for angle in [90, 60, 30, 0]:
             fig = plt.figure(figsize=(18, 10))
             pca_sets_by_comp = [
                 list(filter(lambda pca_set: pca_set['label'][0] == "principal component 1", pca_sets)),
@@ -449,26 +449,29 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
 
 # --- visualize aligned fibers to sanity check our underlying data is right (only grab first few time points of each fiber)
 def plot_subsample_fibers_dfs(study_dfs: List[pd.DataFrame], align: bool = False):
-    fig = plt.figure(figsize=(18, 10))
-    study_fibers = align_fibers(study_dfs[0].fibers[0]) if align == True  else study_dfs[0].fibers[0]  # just using the first
-    # do a subplot for each angle
-    for idx_angle, angle in enumerate([0, 90]):
-        ax = fig.add_subplot(1, 2, idx_angle + 1, projection='3d')
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_title(f"[Subsamples Aligned,Deg={angle}]", fontsize=14)
-        for fiber in study_fibers:
-            for idx_fiber_timepoint, fiber_timepoint in enumerate(fiber.reshape(-1, 200, 3)): # seems to have 66 loops at 200/3
-                if idx_fiber_timepoint > 22: continue
-                x, y, z = zip(*fiber_timepoint.reshape(-1, 3))
-                ax.plot(x,y,z,alpha=0.6)
-        # --- render with angle to get better sense of transform
-        ax.set_proj_type('ortho')
-        ax.view_init(elev=0, azim=angle)
-    plt.tight_layout()
-    plt.savefig(figure_filename(["subsample_fibers_3d", f"aligned={align}" f"{angle}deg"]))
-    plt.show()
+    # for proj_type in ["persp", "ortho"]:
+    for proj_type in ["ortho"]:
+        fig = plt.figure(figsize=(18, 10))
+        # do a subplot for each angle
+        for idx_angle, angle in enumerate([0, 90]):
+            ax = fig.add_subplot(1, 2, idx_angle + 1, projection='3d')
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            ax.set_title(f"[Subsamples Aligned={align},Deg={angle}]", fontsize=14)
+            for study_df in study_dfs:
+                study_fibers = align_fibers(fibers=study_df.fibers[0], fiber_to_align_to=generate_fiber_to_align_to()) if align == True else study_df.fibers[0]
+                for fiber in study_fibers:
+                    for idx_fiber_timepoint, fiber_timepoint in enumerate(fiber.reshape(-1, 200, 3)): # seems to have 66 loops at 200/3
+                        if idx_fiber_timepoint % 5 != 0: continue
+                        x, y, z = zip(*fiber_timepoint.reshape(-1, 3))
+                        ax.plot(x,y,z,alpha=0.6)
+            # --- render with angle to get better sense of transform
+            ax.set_proj_type(proj_type)
+            ax.view_init(elev=0 if proj_type == "ortho" else 20, azim=angle if proj_type == "ortho" else 45 + angle)
+        plt.tight_layout()
+        plt.savefig(figure_filename(["subsample_fibers_3d", f"aligned={align}" f"proj_type={proj_type}", f"{angle}deg"]))
+        plt.show()
 
 
 # %%
@@ -524,22 +527,23 @@ study_dfs = study_subsamples_loader(subsamples_df)
 
 print(f"Plotting all {len(study_dfs)} studies...")
 
-for align in [True]:
-# for align in [True, False]:
+for align in [True, False]:
     # --- verify fibers alignment
-    # plot_subsample_fibers_dfs(study_dfs=study_dfs, align=align)
+    plot_subsample_fibers_dfs(study_dfs=study_dfs, align=align)
+
+for align in [True]:
     # --- pca
     pca_aligned_dfs_all, pca_aligned_space_all = get_study_pca_dfs(study_dfs, align=align)
     # --- inverse transform: min/maxs
     pca_distribution_df = get_pca_distribution_df(pca_aligned_dfs_all)
     pca_component_dists_standards = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_distribution_df)
-    plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix="ALL: Aligned={align}", color_by="distribution")
+    plot_inverse_transform_pca(pca_sets=pca_component_dists_standards, title_prefix=f"ALL: Aligned={align}", color_by="distribution")
     # --- inverse transform: all fibers
     # pca_component_dists_all = calc_pca_component_distributions(pca_space=pca_aligned_space_all, pca_transform_dataframes=pca_aligned_dfs_all)
     # plot_inverse_transform_pca(pca_sets=pca_component_dists_all, title_prefix="ALL", color_by="source")
     # --- pca: plot
-    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned={align},Velocity=All", figsize=(8, 8), color_by="source", skip_metrics=False)
-    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"cytosim (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="cytosim")
-    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"readdy (PCA): Aligned=True,Velocity=All", figsize=(8, 8), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="readdy")
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"ALL (PCA): Aligned={align},Velocity=All", figsize=(11, 11), color_by="source", skip_metrics=False)
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"cytosim (PCA): Aligned=True,Velocity=All", figsize=(11, 11), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="cytosim")
+    plot_study_dfs(analysis_dfs=pca_aligned_dfs_all, pca_space=pca_aligned_space_all, study_dfs=study_dfs, title=f"readdy (PCA): Aligned=True,Velocity=All", figsize=(11, 11), color_by="source", alpha_by="param_velocity", skip_metrics=True, only_plot_source="readdy")
     # --- histograms
     # plot_pca_histogram(pca_sets=pca_aligned_dfs_all)
