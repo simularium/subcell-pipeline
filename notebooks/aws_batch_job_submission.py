@@ -99,18 +99,15 @@ size = 5
 # %%
 # Loop to submit our batch jobs [index * size for total number of simulations]
 for index in range(len(configs)):
-    if configs[index] != 'vary_compress_rate0005.cym':
-        continue
-    else: 
-        print(index)
-        print(f"{job_names}")
-        submit_batch_job(
-            name=f"{job_names[index]}",
-            job_definition_arn=job_definitions[index],
-            user=user,
-            queue=queue,
-            size=size,
-        )
+    print(index)
+    print(f"{job_names}")
+    submit_batch_job(
+        name=f"{job_names[index]}",
+        job_definition_arn=job_definitions[index],
+        user=user,
+        queue=queue,
+        size=size,
+    )
 
 
 # %% [markdown]

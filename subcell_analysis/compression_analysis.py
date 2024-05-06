@@ -20,6 +20,7 @@ class COMPRESSIONMETRIC(Enum):
     ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
     CALC_BENDING_ENERGY = "CALC_BENDING_ENERGY"
     CONTOUR_LENGTH = "CONTOUR_LENGTH"
+    COMPRESSION_RATIO = "COMPRESSION_RATIO"
 
 
 def get_end_to_end_unit_vector(
@@ -564,3 +565,9 @@ def get_sum_bending_energy(
     **options: dict,
 ) -> float:
     return fiber_energy[3].sum()
+
+def get_compression_ratio(
+    polymer_trace: np.ndarray,
+    **options: dict,
+) -> float:
+    return 1-get_end_to_end_unit_vector(polymer_trace)[1]/get_contour_length_from_trace(polymer_trace)
