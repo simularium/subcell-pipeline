@@ -103,28 +103,19 @@ def velocity_to_alpha(velocity: str) -> int:
     }.get(velocitry_str, 0)
 
 # --- alignments
-def get_rotation_matrix_on_x_for_theta(theta: float) -> np.ndarray:
-    """ Return the rotation matrix for a rotation around the x-axis by theta radians. """
-    c, s = np.cos(theta), np.sin(theta)
-    return np.array([
-        [1, 0, 0],
-        [0, c, -s],
-        [0, s, c]
-    ])
+def calculate_fiber_rotation(fiber: np.ndarray) -> float:
+    """Return radians needed to get to a target angle, using most distant monomer"""
+    # calculate monomer distances, and get index of furthest away
+    monomers_by_distance = np.sqrt(np.sum(fiber[:,1:] ** 2, axis=1))
+    max_distance_monomer_index = np.argmax(monomers_by_distance)
+    # get the radians of that monomer using arctan
+    angle_rad = np.arctan2(fiber[max_distance_monomer_index, 2], fiber[max_distance_monomer_index, 1])
+    # return the diff in radians from 90 deg (pi/2), so all fibers will align vertically
+    target_rotation_rad = np.pi / 2 # this is 90 deg, can use 0 to go horizontal
+    rotation_angle_rad_to_0 = target_rotation_rad - angle_rad
+    return rotation_angle_rad_to_0
 
-def calculate_optimal_rotation(fiber: np.ndarray, fiber_to_align_to: np.ndarray) -> float:
-    """Computes the optimal rotation angle around the x-axis to align an internal segment of a fiber to a reference internal segment."""
-    def cost_function(vals: np.ndarray) -> float:
-        theta = vals[0]
-        rotation_matrix = get_rotation_matrix_on_x_for_theta(theta)
-        rotated_fiber = np.dot(fiber, rotation_matrix) # multiply matrix
-        ssd = np.sum((rotated_fiber - fiber_to_align_to) ** 2) # get ssd (to be minimzed)
-        return ssd
-    # --- optimize (provide initial guess of 0)
-    result = minimize(cost_function, [1], method="BFGS")
-    return result.x[0]
-
-def align_fibers(fibers: np.ndarray, fiber_to_align_to: np.ndarray) -> np.ndarray:
+def align_fibers(fibers: np.ndarray) -> np.ndarray:
     """Rotationally align the given fibers around the x-axis to the fiber with the greatest magnitude."""
     aligned_fibers = []
     # for each fiber...
@@ -133,15 +124,17 @@ def align_fibers(fibers: np.ndarray, fiber_to_align_to: np.ndarray) -> np.ndarra
         aligned_fiber = []
         # for each timepoint...
         for fiber_timepoint_idx, fiber_timepoint in enumerate(fiber):
-            print(f"aligning fiber timepoint: {fiber_idx}/{fiber_timepoint_idx}")
+            # print(f"aligning fiber timepoint: {fiber_idx}/{fiber_timepoint_idx}")
             fiber_timepoint_shaped = np.array(fiber_timepoint).reshape(-1, 3)
-            # determine rotation angle/matrix for fiber's timepoint to apply on eacn fiber
-            rotation_angle = calculate_optimal_rotation(fiber_timepoint_shaped[1:-1], fiber_to_align_to.reshape(-1, 3)[1:-1])
-            rotation_matrix = get_rotation_matrix_on_x_for_theta(rotation_angle)
-            # rotate fiber's timepoint
-            fiber_timepoint_rotated = np.dot(fiber_timepoint_shaped, rotation_matrix)
-            fiber_timepoint_rotated_anchored_endpoints = np.vstack([fiber_timepoint_shaped[0], fiber_timepoint_rotated[1:-1], fiber_timepoint_shaped[-1]])
-            aligned_fiber.append(fiber_timepoint_rotated_anchored_endpoints.reshape(-1))
+            # determine rotation angle for fiber's timepoint (how do we get cos0/sin1?)
+            rotation_angle_rads = calculate_fiber_rotation(fiber_timepoint_shaped)
+            # get rotation matrix (we're ignorning X axis, which is why this is a 2x2)
+            c, s = np.cos(-rotation_angle_rads), np.sin(-rotation_angle_rads)
+            rotation_matrix = np.array(((c, -s), (s, c)))
+            # rotate fiber, and reshape the y/z values (index 1/2)
+            fiber_rotated = fiber_timepoint_shaped.copy()
+            fiber_rotated[:,1:] = np.dot(fiber_timepoint_shaped[:,1:], rotation_matrix)
+            aligned_fiber.append(fiber_rotated.reshape(-1))
         aligned_fibers.append(np.array(aligned_fiber))
     return np.array(aligned_fibers)
 
@@ -155,7 +148,7 @@ repeat_time_metrics_list = ["time", "NON_COPLANARITY", "PEAK_ASYMMETRY", "TOTAL_
 # --- load in prepped CSV of subsamples (pre-processed for timepoints, monomers)
 def study_subsamples_loader(subsamples_df: pd.DataFrame):
     study_dfs = []
-    num_timepoints = 66 # 200 is the subsample size, but we want to focus PCA latent space on data seeing most transformation
+    num_timepoints = 200 # 200 is the subsample size, but we want to focus PCA latent space on data seeing most transformation
     num_monomers = 200
     for sim_name, sim_df in subsamples_df.groupby("simulator"):
         for param_velocity, velocity_df in sim_df.groupby("velocity"):
@@ -194,12 +187,16 @@ def study_subsamples_loader(subsamples_df: pd.DataFrame):
     return study_dfs
 
 # --- reshaping datasets for analysis
-def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False, fiber_to_align_to: np.ndarray = None):
+def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False):
     """Function for getting a consistently (re)shaped dataset for PCA/PACMAP analysis"""
+    # calc dimensions for transformation
     num_pca_samples = int(study_df.param_fibers) * int(study_df.param_timepoints)
     num_pca_features = int(study_df.param_fiber_monomers) * 3
-    fibers = study_df.fibers[0].copy() if align == False else align_fibers(fibers=study_df.fibers[0], fiber_to_align_to=fiber_to_align_to)
+    # align or dont
+    fibers = study_df.fibers[0].copy() if align == False else align_fibers(fibers=study_df.fibers[0])
+    # normalize scale across simulators
     fibers_scaled = fibers * study_df.param_coordinate_scaler[0] # scale the coordinates for aligning multiple sims
+    # reshape
     fibers_scaled_flattened = np.ravel(fibers_scaled)
     pca_dataset = fibers_scaled_flattened.reshape((num_pca_samples, num_pca_features))
     return pca_dataset
@@ -207,15 +204,13 @@ def prep_study_df_fibers(study_df: pd.DataFrame, align: bool = False, fiber_to_a
 
 # %%
 # ### PCA: Setup
-
 def get_study_pca_dfs(study_dfs: List[pd.DataFrame], align: bool) -> [List[pd.DataFrame], PCA]:
     """
     Get a PCA analysis dataframe from a fiber study dataframe.
     """
     pca_space = PCA(n_components=2)
     # --- create our embedding space by fitting the combined data (dataset func flattens/orders our monomer datapoints)
-    fiber_timepoint_to_align_to = study_dfs[-1].fibers[0][-1][len(study_dfs[-1].fibers[0][-1]) // 2] # grab last study, last fiber, last timepoint (aka high velocity, and curviature)
-    study_fibers = [prep_study_df_fibers(study_df, align, fiber_to_align_to=fiber_timepoint_to_align_to) for study_df in study_dfs]
+    study_fibers = [prep_study_df_fibers(study_df, align) for study_df in study_dfs]
     combined_prepared_data = np.vstack(study_fibers) # needing to create a 1 dim arr, but errs if I just pass in [study_fibers], TODO: better understand this
     pca_space.fit(combined_prepared_data)
     # --- transform the data
@@ -266,8 +261,8 @@ def plot_study_dfs(analysis_dfs: List[pd.DataFrame], pca_space: PCA, study_dfs: 
             continue
         # --- setup fig
         fig, ax = plt.subplots(figsize=(figsize, figsize) if type(figsize) == int else figsize)
-        ax.set_xlim(-0.9, 0.9)
-        ax.set_ylim(-0.9, 0.9)
+        # ax.set_xlim(-0.9, 0.9)
+        # ax.set_ylim(-0.9, 0.9)
         # --- List of parameters or conditions under which the PCA was run.
         ax.set_xlabel(f"PC1{f': {pca_space.explained_variance_ratio_[0]}' if pca_space != None else ''}", loc="left")
         ax.set_ylabel(f"PC2{f': {pca_space.explained_variance_ratio_[1]}' if pca_space != None else ''}", loc="bottom")
@@ -419,11 +414,8 @@ def plot_inverse_transform_pca(pca_sets: List[pd.DataFrame], title_prefix: str, 
                 legend_handles = []
                 legend_labels = []
                 for idx_pca_val, pca_set_val in enumerate(pca_set_by_component):
-                    # print(f"num pca set vals: {len(pca_set_val['values'])}")
                     for idx_inverse_val, inverse_val in enumerate(pca_set_val['values']):
                         c = color_list[idx_inverse_val % len(color_list)]
-                        # print(f"fiber shape: ", inverse_val['fiber'].shape)
-                        # print(f"fiber zip shape: ", list(zip(*inverse_val['fiber'])))
                         x, y, z = zip(*inverse_val['fiber'])  # TIL you can pass in a tuple of values, and this resolves the legend issue + visualization
                         if color_by == "source":
                             c = color_list[source_to_idx(inverse_val['source'])]
@@ -451,10 +443,9 @@ def plot_subsample_fibers_dfs(study_dfs: List[pd.DataFrame], align: bool = False
     # DATA
     plot = []
     color_increment = 0
-    fiber_timepoint_to_align_to = study_dfs[-1].fibers[0][-1][len(study_dfs[-1].fibers[0][-1]) // 2] # fibers[dataframe value][fiber][timepoint]
     for study_df in study_dfs:
         study_df_fibers_slice = study_df.fibers[0]
-        study_df_fibers = align_fibers(fibers=study_df_fibers_slice, fiber_to_align_to=fiber_timepoint_to_align_to) if align == True else study_df_fibers_slice
+        study_df_fibers = align_fibers(fibers=study_df_fibers_slice) if align == True else study_df_fibers_slice
         for fiber_idx, fiber in enumerate(study_df_fibers):
             # if fiber_idx > 1: continue
             for idx_fiber_timepoint, fiber_timepoint in enumerate(fiber.reshape(-1, 200, 3)): # seems to have 66 loops at 200/3
@@ -536,7 +527,7 @@ study_dfs = study_subsamples_loader(subsamples_df)
 
 print(f"Plotting all {len(study_dfs)} studies...")
 
-for align in [True, False]:
+for align in [True]:
     # --- verify fibers alignment
     plot_subsample_fibers_dfs(study_dfs=study_dfs[-2:], align=align)
 
