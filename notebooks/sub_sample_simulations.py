@@ -54,10 +54,12 @@ for index, (simulator, df) in enumerate(
             for time, df_time in df_repeat.groupby("time"):
                 if time not in use_time_vals:
                     continue
+                normalized_time = df_time["normalized_time"].iloc[0]
                 print(f"velocity: {velocity}, repeat: {repeat}, time: {time}")
                 df_tmp = pd.DataFrame()
                 df_tmp["monomer_ids"] = np.arange(n_monomer_points)
                 df_tmp["time"] = time
+                df_tmp["normalized_time"] = normalized_time
                 df_tmp["velocity"] = velocity
                 df_tmp["repeat"] = repeat
                 df_tmp["simulator"] = simulator
