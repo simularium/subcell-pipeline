@@ -1,17 +1,18 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import boto3
 import numpy as np
 import pandas as pd
 from simulariumio import (
     DISPLAY_TYPE,
+    CameraData,
     DisplayData,
     InputFileData,
     MetaData,
-    ModelMetaData,
+    TrajectoryData,
 )
-from simulariumio.cytosim import CytosimData, CytosimObjectInfo
+from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
 
 save_folder_path = Path("../data/dataframes")
 
@@ -153,43 +154,54 @@ def create_dataframes_for_repeats(
 
 
 def cytosim_to_simularium(
-    path: str,
-    box_size: float = 2,
-    scale_factor: float = 10,
-    color: list = None,
-    actin_number: int = 0,
-) -> CytosimData:
-    example_data = CytosimData(
+    title: str,
+    fiber_points_path: str,
+    singles_path: Optional[str],
+    box_size: float = 0.6,
+    scale_factor: float = 1000.0,
+    exp_name: str = "",
+) -> TrajectoryData:
+    spacer = "#" if len(exp_name) > 0 else ""
+    object_info = {
+        "fibers": CytosimObjectInfo(
+            cytosim_file=InputFileData(
+                file_path=fiber_points_path,
+            ),
+            display_data={
+                1: DisplayData(
+                    name=f"{exp_name}{spacer}actin",
+                    radius=0.01,
+                    display_type=DISPLAY_TYPE.FIBER,
+                )
+            },
+        )
+    }
+    if singles_path is not None:
+        object_info["singles"] = CytosimObjectInfo(
+            cytosim_file=InputFileData(
+                file_path=singles_path,
+            ),
+            display_data={
+                1: DisplayData(
+                    name=f"{exp_name}{spacer}anchor",
+                    radius=0.006,
+                    display_type=DISPLAY_TYPE.SPHERE,
+                    color="#FFFFFF",
+                ),
+            },
+        )
+    cytosim_data = CytosimData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),
+            camera_defaults=CameraData(
+                position=np.array([0.0, 0.0, 300.0]),
+                look_at_position=np.zeros(3),
+                up_vector=np.array([0.0, 1.0, 0.0]),
+                fov_degrees=120.0,
+            ),
             scale_factor=scale_factor,
-            trajectory_title="Some parameter set",
-            model_meta_data=ModelMetaData(
-                title="Some agent-based model",
-                version="8.1",
-                authors="A Modeler",
-                description=("An agent-based model run with some parameter set"),
-                doi="10.1016/j.bpj.2016.02.002",
-                source_code_url="https://github.com/simularium/simulariumio",
-                source_code_license_url="https://github.com/simularium/simulariumio/blob/main/LICENSE",
-                input_data_url="https://allencell.org/path/to/native/engine/input/files",
-                raw_output_data_url="https://allencell.org/path/to/native/engine/output/files",
-            ),
+            trajectory_title=title,
         ),
-        object_info={
-            "fibers": CytosimObjectInfo(
-                cytosim_file=InputFileData(
-                    file_path=path,
-                ),
-                display_data={
-                    1: DisplayData(
-                        name=f"actin#{actin_number}",
-                        radius=0.02,
-                        display_type=DISPLAY_TYPE.FIBER,
-                        color=color,
-                    )
-                },
-            ),
-        },
+        object_info=object_info,
     )
-    return example_data
+    return CytosimConverter(cytosim_data)._data

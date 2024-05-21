@@ -6,9 +6,9 @@ import numpy as np
 from pacmap import PaCMAP
 from sklearn.decomposition import PCA
 
-# TODO: consider creating a fiber class?
+from .utils import ABSOLUTE_TOLERANCE, get_unit_vector
 
-ABS_TOL = 1e-6
+# TODO: consider creating a fiber class?
 
 
 class COMPRESSIONMETRIC(Enum):
@@ -18,6 +18,8 @@ class COMPRESSIONMETRIC(Enum):
     AVERAGE_PERP_DISTANCE = "AVERAGE_PERP_DISTANCE"
     TOTAL_FIBER_TWIST = "TOTAL_FIBER_TWIST"
     ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
+    CALC_BENDING_ENERGY = "CALC_BENDING_ENERGY"
+    CONTOUR_LENGTH = "CONTOUR_LENGTH"
 
 
 def get_end_to_end_unit_vector(
@@ -147,7 +149,7 @@ def get_asymmetry_of_peak(
     ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
 
     # if all perpendicular distances are zero, return 0
-    if np.all(perp_distances < ABS_TOL):
+    if np.all(perp_distances < ABSOLUTE_TOLERANCE):
         return 0
 
     projection_of_peak = scaled_projections[perp_distances == np.max(perp_distances)]
@@ -156,14 +158,6 @@ def get_asymmetry_of_peak(
     )  # max kinda handles multiple peaks
 
     return peak_asym
-
-
-def get_unit_vector(vector: np.array) -> np.array:
-    if np.linalg.norm(vector) < ABS_TOL or np.isnan(vector).any():
-        return np.array([0, 0, 0]), 0
-    else:
-        vec_length = np.linalg.norm(vector)
-        return vector / vec_length, vec_length
 
 
 def get_pca_polymer_trace_projection(
@@ -186,11 +180,65 @@ def get_pca_polymer_trace_projection(
     return pca.transform(polymer_trace)
 
 
+def get_contour_length_from_trace(
+    polymer_trace: np.ndarray,
+    **options: dict,
+) -> float:
+    """
+    Returns the sum of inter-monomer distances in the trace.
+
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+    **options: dict
+        Additional options as key-value pairs.
+
+    Returns
+    -------
+    total_distance: float
+        sum of inter-monomer distances in the trace
+    """
+    total_distance = 0
+    for i in range(len(polymer_trace) - 1):
+        total_distance += np.linalg.norm(polymer_trace[i] - polymer_trace[i + 1])
+    return total_distance
+
+
+def get_bending_energy_from_trace(
+    polymer_trace: np.ndarray,
+    **options: dict,
+) -> float:
+    """
+    Returns the bending energy per monomer of a polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace: [n x 3] numpy array
+        array containing the x,y,z positions of the polymer trace
+    **options: dict
+        Additional options as key-value pairs.
+        bending_constant: float
+            bending constant of the fiber
+    """
+    bending_constant = options.get("bending_constant", 1)
+
+    cos_angle = np.zeros(len(polymer_trace) - 2)
+    for ind in range(len(polymer_trace) - 2):
+        vec1 = polymer_trace[ind + 1] - polymer_trace[ind]
+        vec2 = polymer_trace[ind + 2] - polymer_trace[ind + 1]
+
+        cos_angle[ind] = (
+            np.dot(vec1, vec2) / np.linalg.norm(vec1) / np.linalg.norm(vec2)
+        )
+
+    energy = bending_constant * np.nanmean(1 - cos_angle)
+
+    return energy
+
+
 def get_total_fiber_twist(
     polymer_trace: np.ndarray,
-    compression_axis: int = 0,
-    signed: bool = True,
-    tolerance: float = ABS_TOL,
     **options: dict,
 ) -> float:
     """
@@ -203,29 +251,36 @@ def get_total_fiber_twist(
         array containing the x,y,z positions of the polymer trace
         at a given time
     **options: dict
-        Additional options as key-value pairs.
-    compression_axis: int
-        axis along which the polymer trace is compressed
-    signed: bool
-        whether to return the signed or unsigned total twist
-    tolerance: float
-        ABS_TOL
+        Additional options as key-value pairs:
+
+        compression_axis: int
+            axis along which the polymer trace is compressed
+        signed: bool
+            whether to return the signed or unsigned total twist
+        tolerance: float
+            ABSOLUTE_TOLERANCE
     Returns
     ----------
     total_twist: float
         sum of angles between PCA projection vectors
     """
+    compression_axis = options.get("compression_axis", 0)
+    signed = options.get("signed", True)
+    tolerance = options.get("tolerance", ABSOLUTE_TOLERANCE)
+
     trace_2d = polymer_trace[
         :, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]
     ]
     trace_2d = trace_2d - np.mean(trace_2d, axis=0)
 
-    return get_total_fiber_twist_2d(trace_2d, signed=signed, tolerance=tolerance)
+    return get_total_fiber_twist_2d(
+        trace_2d, signed=signed, tolerance=tolerance  # type: ignore
+    )
 
 
 def get_total_fiber_twist_pca(
     polymer_trace: np.ndarray,
-    tolerance: float = ABS_TOL,
+    tolerance: float = ABSOLUTE_TOLERANCE,
 ) -> float:
     """
     Calculates the total twist using PCA projections of the polymer trace
@@ -237,7 +292,7 @@ def get_total_fiber_twist_pca(
         array containing the x,y,z positions of the polymer trace
         at a given time
     tolerance: float
-        ABS_TOL
+        ABSOLUTE_TOLERANCE
     Returns
     ----------
     total_twist: float
@@ -290,7 +345,7 @@ def get_angle_between_vectors(
 def get_total_fiber_twist_2d(
     trace_2d: np.ndarray,
     signed: bool = False,
-    tolerance: float = ABS_TOL,
+    tolerance: float = ABSOLUTE_TOLERANCE,
 ) -> float:
     """
     Calculates the total twist for 2d traces.
@@ -302,7 +357,7 @@ def get_total_fiber_twist_2d(
     signed: bool
         if True, returns the signed total twist
     tolerance: float
-        ABS_TOL
+        ABSOLUTE_TOLERANCE
     Returns
     ----------
     total_twist: float
@@ -330,7 +385,7 @@ def get_total_fiber_twist_2d(
 
 def get_total_fiber_twist_bak(
     polymer_trace: np.ndarray,
-    tolerance: float = ABS_TOL,
+    tolerance: float = ABSOLUTE_TOLERANCE,
 ) -> float:
     """
     Returns the sum of angles between consecutive vectors from the
@@ -342,7 +397,7 @@ def get_total_fiber_twist_bak(
         array containing the x,y,z positions of the polymer trace
         at a given time
     tolerance: float
-        ABS_TOL
+        ABSOLUTE_TOLERANCE
 
     Returns
     -------
