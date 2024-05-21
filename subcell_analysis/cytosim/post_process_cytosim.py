@@ -20,12 +20,15 @@ save_folder_path = Path("../data/dataframes")
 def convert_and_save_dataframe(
     fiber_energy_all: list,
     fiber_forces_all: list,
-    suffix: str = None,
+    file_name: str = "cytosim_actin_compression",
+    suffix: str = "",
     rigidity: float = 0.041,
     save_folder: Path = save_folder_path,
+    velocity: float = 0.15,
+    repeat: int = 0,
+    simulator: str = "cytosim",
 ) -> pd.DataFrame:
     # Convert cytosim output to pandas dataframe and saves to csv.
-
     bending_energies = []
     for line in fiber_energy_all:
         line = line.strip()
@@ -50,7 +53,6 @@ def convert_and_save_dataframe(
                 fid = 0
                 # print 'finished parsing ' + rundir + ' timepoint ' + str(time)
         elif len(line.split()) > 0:
-            # print(line.split())
             [
                 fiber_id,
                 xpos,
@@ -61,13 +63,13 @@ def convert_and_save_dataframe(
                 zforce,
                 segment_curvature,
             ] = line.split()
-            #                 figure out if you're on the first, second fiber point etc
+            # figure out if you're on the first, second fiber point etc
             if int(fid) == int(fiber_id):
                 fiber_point += 1
             else:
                 fiber_point = 0
                 fid += 1
-            #                     print('id: '+str(fid))
+
             singles[str(fiber_id) + "_" + str(fiber_point)] = {
                 "fiber_id": int(fiber_id),
                 "xpos": float(xpos),
@@ -77,10 +79,13 @@ def convert_and_save_dataframe(
                 "yforce": float(yforce),
                 "zforce": float(zforce),
                 "segment_curvature": float(segment_curvature),
+                "velocity": velocity,
+                "repeat": repeat,
+                "simulator": simulator,
             }
 
     all_outputs = pd.concat(outputs, keys=timepoints_forces, names=["time", "id"])
-    # all_outputs = all_outputs.swaplevel('time','id',axis=0).sort_index()
+
     all_outputs["force_magnitude"] = np.sqrt(
         np.square(all_outputs["xforce"])
         + np.square(all_outputs["yforce"])
@@ -89,17 +94,11 @@ def convert_and_save_dataframe(
 
     #  Segment bending energy, in pN nm
     all_outputs["segment_energy"] = all_outputs["segment_curvature"] * rigidity * 1000
-    # fiber_forces_outputs_allruns.append(all_outputs)
 
-    file_name = "cytosim_actin_compression"
-
-    if suffix is not None:
-        file_name += suffix
-
-    all_outputs.to_csv(save_folder / f"{file_name}.csv")
+    all_outputs.to_csv(save_folder / f"{file_name}{suffix}.csv")
 
     print(f"Saved Output to {save_folder/f'{file_name}.csv'}")
-    all_outputs.tail()
+
     return all_outputs
 
 
@@ -117,22 +116,70 @@ def read_cytosim_s3_file(bucket_name: str, file_name: str) -> list:
 
 
 def get_s3_file(bucket_name: str, file_name: str) -> object:
+    """
+    Retrieves a file from an S3 bucket.
+
+    Args:
+        bucket_name (str): The name of the S3 bucket.
+        file_name (str): The name of the file to retrieve.
+
+    Returns
+    -------
+        object: The contents of the file as a byte string.
+    """
     s3 = boto3.client("s3")
     response = s3.get_object(Bucket=bucket_name, Key=file_name)
     return response["Body"].read()
 
 
 def create_dataframes_for_repeats(
-    bucket_name: str, num_repeats: int, configs: list, save_folder: Path
+    bucket_name: str,
+    num_repeats: int,
+    configs: list,
+    save_folder: Path,
+    file_name: str = "cytosim_actin_compression",
+    velocities: Optional[list] = None,
+    overwrite: bool = True,
 ) -> None:
-    # Create dataframes for all repeats of given configs.
+    """
+    Create dataframes for repeated simulations in Cytosim.
 
+    Parameters
+    ----------
+    bucket_name : str
+        The name of the bucket.
+    num_repeats : int
+        The number of repeats.
+    configs : list
+        The list of configurations.
+    save_folder : Path
+        The path to the save folder.
+    file_name : str, optional
+        The name of the file. Defaults to "cytosim_actin_compression".
+    velocities : list, optional
+        The list of velocities. Defaults to None.
+    overwrite : bool, optional
+        Whether to overwrite existing files. Defaults to True.
+
+    Returns
+    -------
+    None
+        This function does not return anything.
+    """
     segenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergy = np.empty((len(configs), num_repeats), dtype=object)
     fibenergylabels = np.empty((len(configs), num_repeats), dtype=object)
     for index, config in enumerate(configs):
+        velocity = velocities[index] if velocities is not None else config
         for repeat in range(num_repeats):
-            print(f"Processing config {config} and repeat {repeat}")
+            print(
+                f"Processing config {config}, velocity {velocity} and repeat {repeat}"
+            )
+            suffix = f"_velocity_{velocity}_repeat_{repeat}"
+            file_path = save_folder / f"{file_name}{suffix}.csv"
+            if file_path.is_file() and not overwrite:
+                print(f"File {file_path.name} already exists. Skipping.")
+                continue
 
             segenergy[index, repeat] = read_cytosim_s3_file(
                 bucket_name,
@@ -146,10 +193,14 @@ def create_dataframes_for_repeats(
                 bucket_name, f"{config}/outputs/{repeat}/fiber_energy.txt"
             )
             convert_and_save_dataframe(
-                fibenergy[index][repeat],
-                segenergy[index][repeat],
-                suffix=f"_velocity_{config}_repeat_{repeat}",
+                fiber_energy_all=fibenergy[index][repeat],
+                fiber_forces_all=segenergy[index][repeat],
+                file_name=file_name,
+                suffix=suffix,
                 save_folder=save_folder,
+                velocity=velocity,
+                repeat=repeat,
+                simulator="cytosim",
             )
 
 

@@ -36,7 +36,9 @@ dependencies = [
   "simulariumio",
   "container-collection",
   "boto3",
-  "scikit-learn"
+  "scikit-learn",
+  "s3fs",
+  "pyarrow",
 ]
 
 [project.urls]
