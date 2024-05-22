@@ -8,6 +8,7 @@ import pandas as pd
 from numpy import ndarray
 
 from .readdy_data import FrameData
+from ..compression_analysis import get_contour_length_from_trace
 
 
 class ReaddyPostProcessor:
@@ -352,11 +353,11 @@ class ReaddyPostProcessor:
     @staticmethod
     def linear_fiber_control_points(
         axis_positions: List[List[np.ndarray]],
-        segment_length: float,
+        n_points: int,
     ) -> List[List[np.ndarray]]:
         """
         Resample the fiber line defined by each array of axis positions
-        to get the requested segment length between XYZ control points
+        to get the requested number of points between XYZ control points
         for each linear fiber at each timestep.
 
 
@@ -366,9 +367,8 @@ class ReaddyPostProcessor:
             List of lists of arrays containing the x,y,z positions
             of the closest point on the fiber axis to the position
             of each particle in each fiber at each time.
-        segment_length: float
-            Length of segments (in simulation's spatial units)
-            between control points on resulting fibers.
+        n_points: int
+            Number of control points (spaced evenly) on resulting fibers.
 
         Returns
         -------
@@ -376,9 +376,13 @@ class ReaddyPostProcessor:
             Array containing the x,y,z positions
             of control points for each fiber at each time.
         """
+        if n_points < 2:
+            raise Exception("n_points must be > 1 to define a fiber.")
         result: List[List[np.ndarray]] = []
         for time_ix in range(len(axis_positions)):
             result.append([])
+            contour_length = get_contour_length_from_trace(axis_positions[time_ix])
+            segment_length = contour_length / float(n_points - 1)
             for positions in axis_positions[time_ix]:
                 control_points = [positions[0]]
                 current_position = np.copy(positions[0])
