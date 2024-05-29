@@ -12,6 +12,9 @@ from .compression_analysis import (
     get_sum_bending_energy,
     get_third_component_variance,
     get_total_fiber_twist,
+    get_bending_energy_from_trace,
+    get_contour_length_from_trace,
+    get_compression_ratio
 )
 
 
@@ -98,6 +101,12 @@ def run_metric_calculation(
             all_points.loc[
                 fiber_at_time.index, metric.value
             ] = get_bending_energy_from_trace(polymer_trace, **options)
+
+        if metric == COMPRESSIONMETRIC.COMPRESSION_RATIO:
+            polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
+            all_points.loc[
+                fiber_at_time.index, metric.value
+            ] = get_compression_ratio(polymer_trace, **options)
 
     return all_points
 

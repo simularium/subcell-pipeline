@@ -6,7 +6,6 @@ from preconfig import Preconfig
 
 # %% [markdown]
 # # 1. Upload config files to S3
-
 # %%
 # Preconfig class allows us to parse a template file and generate a list of config files.
 # Two loops puts the generated config files for a given number of repeats in S3.
@@ -19,7 +18,9 @@ num_repeats = 5
 job_names = []
 buffered = np.empty((len(configs)), dtype=object)
 for index, config in enumerate(configs):
+    # removed '.cym'
     job_name = config[:-4]
+
     job_names.append(job_name)
     for repeat in range(num_repeats):
         opened_config = open(config, "rb")
@@ -41,7 +42,7 @@ job_definition_arn = "job_definition_arn"
 from container_collection.batch.register_batch_job import register_batch_job
 from container_collection.batch.make_batch_job import make_batch_job
 
-job_definition_name = "karthikv_cytosim_varycompressrate"
+job_definition_name = "karthikv_cytosim_vary_compress_rate"
 image = "simularium/cytosim:latest"
 vcpus = 1
 memory = 7000
@@ -61,18 +62,20 @@ for index in range(len(configs)):
     simulation_name = job_names[index]
     print(simulation_name)
     job_definition = make_batch_job(
-        f"cytosim-test-varycompressrate-{str(index)}",
-        "simularium/cytosim:latest",
-        account,
-        "us-west-2",
-        "karthikv",
-        1,
-        7000,
-        "s3://cytosim-working-bucket/",
-    )
+    name=f"{str(job_names[index])}",
+    image="simularium/cytosim:latest",
+    vcpus=1,
+    memory=7000,
+    job_role_arn=f"arn:aws:iam::{account}:role/BatchJobRole",
+    environment=[
+    {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
+    {"name": "FILE_SET_NAME", "value": f"{job_names[index]}"},
+    {"name": "SIMULATION_TYPE", "value": "AWS"}
+]
+)
+
     registered_jd = register_batch_job(job_definition)
     job_definitions[index] = registered_jd
-    break
 
 
 # %% [markdown]
@@ -94,16 +97,12 @@ queue = "general_on_demand"
 size = 5
 
 # %%
-new_configs
-job_name
-
-# %%
 # Loop to submit our batch jobs [index * size for total number of simulations]
-for index in range(len(new_configs)):
+for index in range(len(configs)):
     print(index)
-    print(f"{job_name}-completerun-config{index}")
+    print(f"{job_names}")
     submit_batch_job(
-        name=f"{job_name}-completerun-config{index}",
+        name=f"{job_names[index]}",
         job_definition_arn=job_definitions[index],
         user=user,
         queue=queue,

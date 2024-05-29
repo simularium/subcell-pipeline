@@ -115,6 +115,9 @@ ENV/
 
 # data files
 *.csv
-data/**
-figures/**
+**/data/**
+**/figures/**
 **/outputs/**
+**/figures/**
+*.cym
+*.simularium
