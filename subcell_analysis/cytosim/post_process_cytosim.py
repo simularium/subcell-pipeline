@@ -13,13 +13,15 @@ from simulariumio import (
 )
 from simulariumio.cytosim import CytosimData, CytosimObjectInfo
 
+save_folder_path = Path("../data/dataframes")
+
 
 def convert_and_save_dataframe(
     fiber_energy_all: list,
     fiber_forces_all: list,
     suffix: str = None,
     rigidity: float = 0.041,
-    save_folder: Path = Path("../data/dataframes"),
+    save_folder: Path = save_folder_path,
 ) -> pd.DataFrame:
     # Convert cytosim output to pandas dataframe and saves to csv.
 
@@ -155,8 +157,8 @@ def cytosim_to_simularium(
     box_size: float = 2,
     scale_factor: float = 10,
     color: list = None,
-    actin_number: str = 0,
-):
+    actin_number: int = 0,
+) -> CytosimData:
     example_data = CytosimData(
         meta_data=MetaData(
             box_size=np.array([box_size, box_size, box_size]),

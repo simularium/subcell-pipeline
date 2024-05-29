@@ -1,4 +1,4 @@
 name: subcell_analysis
-  - conda-forge
 dependencies:
-  - readdy
+  - conda-forge::readdy
+

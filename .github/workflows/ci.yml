@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: pip install check-manifest && check-manifest
@@ -35,22 +35,22 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: extractions/setup-just@v1
+    - uses: extractions/setup-just@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Conda Deps
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         auto-update-conda: true
         python-version: ${{ matrix.python-version }}
-        activate-environment: anaconda-client-env
+        activate-environment: subcell_analysis
         environment-file: ./environment.yml
     - name: Install Dependencies
       shell: bash -l {0}
@@ -61,21 +61,21 @@ jobs:
       shell: bash -l {0}
       run: just test
     - name: Upload Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
 
   # Check linting, formating, types, etc.
   lint:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.9
-    - uses: extractions/setup-just@v1
+    - uses: extractions/setup-just@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Dependencies
@@ -92,11 +92,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.9
     - name: Install Dependencies

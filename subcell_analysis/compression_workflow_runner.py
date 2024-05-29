@@ -10,8 +10,9 @@ from .compression_analysis import (
     get_sum_bending_energy,
     get_third_component_variance,
     get_total_fiber_twist,
-    get_sum_bending_energy,
 )
+
+ABS_TOL = 1e-6
 
 
 def run_metric_calculation(
@@ -31,6 +32,8 @@ def run_metric_calculation(
         force_magnitude, segment_energy] columns and any metric columns
     metric: COMPRESSIONMETRIC enum
         metric that includes chosen compression metric
+    **options: dict
+        Additional options as key-value pairs.
 
     Returns
     -------
@@ -64,6 +67,9 @@ def run_metric_calculation(
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
             all_points.loc[fiber_at_time.index, metric.value] = get_total_fiber_twist(
                 polymer_trace,
+                compression_axis=0,
+                signed=True,
+                tolerance=ABS_TOL,
                 **options,
             )
 
@@ -87,9 +93,7 @@ def run_metric_calculation(
 
 
 def compression_metrics_workflow(
-    all_points: pd.core.frame.DataFrame,
-    metrics_to_calculate: list,
-    **options: dict,
+    all_points: pd.core.frame.DataFrame, metrics_to_calculate: list, **options: dict
 ) -> pd.core.frame.DataFrame:
     """
     Calculates chosen metrics from cytosim output of fiber positions and
@@ -105,7 +109,8 @@ def compression_metrics_workflow(
         force_magnitude, segment_energy] columns and any metric columns
     metrics_to_calculate: [n] list of CM to calculate
         list of COMPRESSIONMETRICS
-
+    **options: dict
+        Additional options as key-value pairs.
 
     Returns
     -------
