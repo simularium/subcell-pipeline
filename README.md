@@ -22,13 +22,26 @@ Analysis functionality for subcellular models
 2. `conda activate subcell_analysis`
 3. `just install`
 
-## Documentation
 
-For full package documentation please visit [Simularium.github.io/subcell-analysis](https://Simularium.github.io/subcell-analysis).
+## Usage
 
-## Development
+The subcell_analysis pipeline contains multiple steps that can be run independently. 
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to developing the code.
+### 1. Run Simulations
+The notebook aws_batch_job_submission.py can be used for configuring and executing simulations. Before this notebook can be succesfully executed, one must setup their AWSCLI credentials for submitting jobs and job definitions via the CLI. This notebook has five parts: 1a.) upload configuration files to s3, which involves generating the configuration files based on the template (vary_compress_rate.cym.tpl). Next, we have to create and register our job definition. In AWS Batch, a job definition specifies how many jobs are to be run, which docker image to use, how many CPUs to use, and the command a container should run when it is started.  We then submit our job to AWS using the submit_batch_job function. We can monitor these simulations as needed using check_batch_job. Finally, we can load in our results using the create_dataframes_for_repeats function which requires a bucket name, number of repeats, configs, and a save folder. 
+
+### 2. Metrics Calculation
+
+
+### 3. Comparative Metrics Calculation
+
+
+### 4. Comparison with Tomography Data            
+
+
+### 5. PCA/PacMAP generate_figure_data.ipynb
+
+
 
 ## Glossary of terms
 Definitions of some terms used in these analyses
