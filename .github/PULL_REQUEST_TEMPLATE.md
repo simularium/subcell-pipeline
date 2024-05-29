@@ -1,23 +1,49 @@
-<!--
-  Thank you for submitting a pull request!
+Time Estimate or Size
+=======
+How long do you expect it to take a reviewer to review this PR? 
+Alternately, is this PR xsmall, small, medium, large, or xlarge?
 
-  ⚠️⚠️ Please do the following before submitting: ⚠️⚠️
+Problem
+=======
+What is the problem this work solves, including
+[Link to story or ticket](https://my-tracking-system.url/ticket-number)
 
-  - Read the CONTRIBUTING.md guide and make sure you've followed all the steps given.
-  - Ensure that the code is up-to-date with the `main` branch.
-  - Provide or update documentation for any feature added by your pull request.
-  - Provide relevant tests for your feature or bug fix.
+Solution
+========
+What I/we did to solve this problem
 
-  ❗️ Also: ❗️
+with @pairperson1
 
-  Please name your pull request {development-type}/{short-description}.
-  For example: feature/read-tiff-files
--->
+## Type of change
+Please delete options that are not relevant.
 
-### Link to Relevant Issue
+* Bug fix (non-breaking change which fixes an issue)
+* New feature (non-breaking change which adds functionality)
+* Breaking change (fix or feature that would cause existing functionality to not work as expected)
+* This change requires a documentation update
+* This change requires updated or new tests
 
-This pull request resolves #
+Change summary:
+---------------
+* Tidy, well formulated commit message
+* Another great commit message
+* Something else I/we did
 
-### Description of Changes
+Steps to Verify:
+----------------
+1. A setup step / beginning state
+1. What to do next
+1. Any other instructions
+1. Expected behavior
+1. Suggestions for testing
 
-<!-- Include a description of the proposed changes. -->
+Screenshots (optional):
+-----------------------
+Show-n-tell images/animations here
+
+Keyfiles (delete if not relevant):
+-----------------------
+1. main file/entry point
+2. other important file
+
+Thanks for contributing!
