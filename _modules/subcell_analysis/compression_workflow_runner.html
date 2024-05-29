@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_analysis.compression_workflow_runner - subcell-analysis 0.1.dev1+g08cc569 documentation</title>
+        <title>subcell_analysis.compression_workflow_runner - subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -179,7 +179,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g08cc569 documentation</div></a>
+      <a href="../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -203,7 +203,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g08cc569 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -272,6 +272,9 @@
     <span class="n">get_sum_bending_energy</span><span class="p">,</span>
     <span class="n">get_third_component_variance</span><span class="p">,</span>
     <span class="n">get_total_fiber_twist</span><span class="p">,</span>
+    <span class="n">get_bending_energy_from_trace</span><span class="p">,</span>
+    <span class="n">get_contour_length_from_trace</span><span class="p">,</span>
+    <span class="n">get_compression_ratio</span>
 <span class="p">)</span>
 
 <span class="n">ABS_TOL</span> <span class="o">=</span> <span class="mf">1e-6</span>
@@ -331,9 +334,6 @@
             <span class="n">polymer_trace</span> <span class="o">=</span> <span class="n">fiber_at_time</span><span class="p">[[</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="s2">&quot;zpos&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
             <span class="n">all_points</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fiber_at_time</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_total_fiber_twist</span><span class="p">(</span>
                 <span class="n">polymer_trace</span><span class="p">,</span>
-                <span class="n">compression_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">signed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">tolerance</span><span class="o">=</span><span class="n">ABS_TOL</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">options</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -346,6 +346,12 @@
                 <span class="o">**</span><span class="n">options</span><span class="p">,</span>
             <span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="n">COMPRESSIONMETRIC</span><span class="o">.</span><span class="n">CONTOUR_LENGTH</span><span class="p">:</span>
+            <span class="n">polymer_trace</span> <span class="o">=</span> <span class="n">fiber_at_time</span><span class="p">[[</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="s2">&quot;zpos&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">all_points</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="n">fiber_at_time</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">metric</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="n">get_contour_length_from_trace</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="n">COMPRESSIONMETRIC</span><span class="o">.</span><span class="n">SUM_BENDING_ENERGY</span><span class="p">:</span>
             <span class="n">polymer_trace</span> <span class="o">=</span> <span class="n">fiber_at_time</span><span class="p">[</span>
                 <span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="s2">&quot;zpos&quot;</span><span class="p">,</span> <span class="s2">&quot;segment_energy&quot;</span><span class="p">]</span>
@@ -353,6 +359,19 @@
             <span class="n">all_points</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fiber_at_time</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_sum_bending_energy</span><span class="p">(</span>
                 <span class="n">polymer_trace</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
             <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="n">COMPRESSIONMETRIC</span><span class="o">.</span><span class="n">CALC_BENDING_ENERGY</span><span class="p">:</span>
+            <span class="n">polymer_trace</span> <span class="o">=</span> <span class="n">fiber_at_time</span><span class="p">[[</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="s2">&quot;zpos&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">all_points</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="n">fiber_at_time</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">metric</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="n">get_bending_energy_from_trace</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="n">COMPRESSIONMETRIC</span><span class="o">.</span><span class="n">COMPRESSION_RATIO</span><span class="p">:</span>
+            <span class="n">polymer_trace</span> <span class="o">=</span> <span class="n">fiber_at_time</span><span class="p">[[</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="s2">&quot;zpos&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">all_points</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="n">fiber_at_time</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">metric</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="n">get_compression_ratio</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">all_points</span></div>
 
 
@@ -455,7 +474,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=19674c24"></script>
+</div><script src="../../_static/documentation_options.js?v=a16c5ede"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>

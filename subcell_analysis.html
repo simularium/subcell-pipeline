@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="subcell_analysis.bin package" href="subcell_analysis.bin.html" /><link rel="prev" title="subcell_analysis" href="modules.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_analysis package - subcell-analysis 0.1.dev1+g08cc569 documentation</title>
+        <title>subcell_analysis package - subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -180,7 +180,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">subcell-analysis 0.1.dev1+g08cc569 documentation</div></a>
+      <a href="index.html"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -204,7 +204,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g08cc569 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -314,6 +314,21 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="subcell_analysis.compression_analysis.COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE">
 <span class="sig-name descname"><span class="pre">AVERAGE_PERP_DISTANCE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AVERAGE_PERP_DISTANCE'</span></em><a class="headerlink" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.compression_analysis.COMPRESSIONMETRIC.CALC_BENDING_ENERGY">
+<span class="sig-name descname"><span class="pre">CALC_BENDING_ENERGY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CALC_BENDING_ENERGY'</span></em><a class="headerlink" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.CALC_BENDING_ENERGY" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.compression_analysis.COMPRESSIONMETRIC.COMPRESSION_RATIO">
+<span class="sig-name descname"><span class="pre">COMPRESSION_RATIO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'COMPRESSION_RATIO'</span></em><a class="headerlink" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.COMPRESSION_RATIO" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.compression_analysis.COMPRESSIONMETRIC.CONTOUR_LENGTH">
+<span class="sig-name descname"><span class="pre">CONTOUR_LENGTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONTOUR_LENGTH'</span></em><a class="headerlink" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.CONTOUR_LENGTH" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -429,6 +444,53 @@ at a given time</p>
 <dd class="field-even"><dl class="simple">
 <dt>avg_perp_distance: float</dt><dd><p>average perpendicular distance of polymer trace points from the
 end-to-end axis</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_analysis.compression_analysis.get_bending_energy_from_trace">
+<span class="sig-prename descclassname"><span class="pre">subcell_analysis.compression_analysis.</span></span><span class="sig-name descname"><span class="pre">get_bending_energy_from_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/subcell_analysis/compression_analysis.html#get_bending_energy_from_trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.compression_analysis.get_bending_energy_from_trace" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the bending energy per monomer of a polymer trace.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>polymer_trace: [n x 3] numpy array</strong></dt><dd><p>array containing the x,y,z positions of the polymer trace</p>
+</dd>
+<dt><strong>**options: dict</strong></dt><dd><p>Additional options as key-value pairs.
+bending_constant: float</p>
+<blockquote>
+<div><p>bending constant of the fiber</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_analysis.compression_analysis.get_compression_ratio">
+<span class="sig-prename descclassname"><span class="pre">subcell_analysis.compression_analysis.</span></span><span class="sig-name descname"><span class="pre">get_compression_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/subcell_analysis/compression_analysis.html#get_compression_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.compression_analysis.get_compression_ratio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_analysis.compression_analysis.get_contour_length_from_trace">
+<span class="sig-prename descclassname"><span class="pre">subcell_analysis.compression_analysis.</span></span><span class="sig-name descname"><span class="pre">get_contour_length_from_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/subcell_analysis/compression_analysis.html#get_contour_length_from_trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.compression_analysis.get_contour_length_from_trace" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the sum of inter-monomer distances in the trace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>polymer_trace: [n x 3] numpy array</strong></dt><dd><p>array containing the x,y,z positions of the polymer trace</p>
+</dd>
+<dt><strong>**options: dict</strong></dt><dd><p>Additional options as key-value pairs.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>total_distance: float</dt><dd><p>sum of inter-monomer distances in the trace</p>
 </dd>
 </dl>
 </dd>
@@ -588,22 +650,24 @@ at a given time</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="subcell_analysis.compression_analysis.get_total_fiber_twist">
-<span class="sig-prename descclassname"><span class="pre">subcell_analysis.compression_analysis.</span></span><span class="sig-name descname"><span class="pre">get_total_fiber_twist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/subcell_analysis/compression_analysis.html#get_total_fiber_twist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.compression_analysis.get_total_fiber_twist" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">subcell_analysis.compression_analysis.</span></span><span class="sig-name descname"><span class="pre">get_total_fiber_twist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/subcell_analysis/compression_analysis.html#get_total_fiber_twist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.compression_analysis.get_total_fiber_twist" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates the total twist using projections of the polymer trace
 in the 2nd and 3rd dimension.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>polymer_trace: [n x 3] numpy array</strong></dt><dd><p>array containing the x,y,z positions of the polymer trace
 at a given time</p>
 </dd>
-<dt><strong>**options: dict</strong></dt><dd><p>Additional options as key-value pairs.</p>
+<dt><strong>**options: dict</strong></dt><dd><p>Additional options as key-value pairs:</p>
+<dl class="simple">
+<dt>compression_axis: int</dt><dd><p>axis along which the polymer trace is compressed</p>
 </dd>
-<dt><strong>compression_axis: int</strong></dt><dd><p>axis along which the polymer trace is compressed</p>
+<dt>signed: bool</dt><dd><p>whether to return the signed or unsigned total twist</p>
 </dd>
-<dt><strong>signed: bool</strong></dt><dd><p>whether to return the signed or unsigned total twist</p>
+<dt>tolerance: float</dt><dd><p>ABS_TOL</p>
 </dd>
-<dt><strong>tolerance: float</strong></dt><dd><p>ABS_TOL</p>
+</dl>
 </dd>
 <dt><strong>Returns</strong></dt><dd></dd>
 <dt><strong>———-</strong></dt><dd></dd>
@@ -901,6 +965,9 @@ Default: “#eaeaea”</p>
 <li><a class="reference internal" href="#module-subcell_analysis.compression_analysis">subcell_analysis.compression_analysis module</a><ul>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC</span></code></a><ul>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.CALC_BENDING_ENERGY"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.CALC_BENDING_ENERGY</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.COMPRESSION_RATIO"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.COMPRESSION_RATIO</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.CONTOUR_LENGTH"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.CONTOUR_LENGTH</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.ENERGY_ASYMMETRY"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.ENERGY_ASYMMETRY</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.NON_COPLANARITY"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.NON_COPLANARITY</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.COMPRESSIONMETRIC.PEAK_ASYMMETRY"><code class="docutils literal notranslate"><span class="pre">COMPRESSIONMETRIC.PEAK_ASYMMETRY</span></code></a></li>
@@ -912,6 +979,9 @@ Default: “#eaeaea”</p>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_angle_between_vectors"><code class="docutils literal notranslate"><span class="pre">get_angle_between_vectors()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_asymmetry_of_peak"><code class="docutils literal notranslate"><span class="pre">get_asymmetry_of_peak()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_average_distance_from_end_to_end_axis"><code class="docutils literal notranslate"><span class="pre">get_average_distance_from_end_to_end_axis()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_bending_energy_from_trace"><code class="docutils literal notranslate"><span class="pre">get_bending_energy_from_trace()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_compression_ratio"><code class="docutils literal notranslate"><span class="pre">get_compression_ratio()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_contour_length_from_trace"><code class="docutils literal notranslate"><span class="pre">get_contour_length_from_trace()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_end_to_end_axis_distances_and_projections"><code class="docutils literal notranslate"><span class="pre">get_end_to_end_axis_distances_and_projections()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_end_to_end_unit_vector"><code class="docutils literal notranslate"><span class="pre">get_end_to_end_unit_vector()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_analysis.compression_analysis.get_energy_asymmetry"><code class="docutils literal notranslate"><span class="pre">get_energy_asymmetry()</span></code></a></li>
@@ -953,7 +1023,7 @@ Default: “#eaeaea”</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=19674c24"></script>
+</div><script src="_static/documentation_options.js?v=a16c5ede"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=4e2eecee"></script>

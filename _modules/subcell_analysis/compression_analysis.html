@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_analysis.compression_analysis - subcell-analysis 0.1.dev1+g08cc569 documentation</title>
+        <title>subcell_analysis.compression_analysis - subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -179,7 +179,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g08cc569 documentation</div></a>
+      <a href="../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -203,7 +203,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g08cc569 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -281,7 +281,10 @@
     <span class="n">SUM_BENDING_ENERGY</span> <span class="o">=</span> <span class="s2">&quot;SUM_BENDING_ENERGY&quot;</span>
     <span class="n">AVERAGE_PERP_DISTANCE</span> <span class="o">=</span> <span class="s2">&quot;AVERAGE_PERP_DISTANCE&quot;</span>
     <span class="n">TOTAL_FIBER_TWIST</span> <span class="o">=</span> <span class="s2">&quot;TOTAL_FIBER_TWIST&quot;</span>
-    <span class="n">ENERGY_ASYMMETRY</span> <span class="o">=</span> <span class="s2">&quot;ENERGY_ASYMMETRY&quot;</span></div>
+    <span class="n">ENERGY_ASYMMETRY</span> <span class="o">=</span> <span class="s2">&quot;ENERGY_ASYMMETRY&quot;</span>
+    <span class="n">CALC_BENDING_ENERGY</span> <span class="o">=</span> <span class="s2">&quot;CALC_BENDING_ENERGY&quot;</span>
+    <span class="n">CONTOUR_LENGTH</span> <span class="o">=</span> <span class="s2">&quot;CONTOUR_LENGTH&quot;</span>
+    <span class="n">COMPRESSION_RATIO</span> <span class="o">=</span> <span class="s2">&quot;COMPRESSION_RATIO&quot;</span></div>
 
 
 
@@ -469,13 +472,73 @@
 
 
 
+<div class="viewcode-block" id="get_contour_length_from_trace">
+<a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_contour_length_from_trace">[docs]</a>
+<span class="k">def</span> <span class="nf">get_contour_length_from_trace</span><span class="p">(</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the sum of inter-monomer distances in the trace</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polymer_trace: [n x 3] numpy array</span>
+<span class="sd">        array containing the x,y,z positions of the polymer trace</span>
+<span class="sd">    **options: dict</span>
+<span class="sd">        Additional options as key-value pairs.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    total_distance: float</span>
+<span class="sd">        sum of inter-monomer distances in the trace</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">total_distance</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">total_distance</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">total_distance</span></div>
+
+
+
+<div class="viewcode-block" id="get_bending_energy_from_trace">
+<a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_bending_energy_from_trace">[docs]</a>
+<span class="k">def</span> <span class="nf">get_bending_energy_from_trace</span><span class="p">(</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the bending energy per monomer of a polymer trace.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polymer_trace: [n x 3] numpy array</span>
+<span class="sd">        array containing the x,y,z positions of the polymer trace</span>
+<span class="sd">    **options: dict</span>
+<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">        bending_constant: float</span>
+<span class="sd">            bending constant of the fiber</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bending_constant</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bending_constant&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">cos_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">vec1</span> <span class="o">=</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">vec2</span> <span class="o">=</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">cos_angle</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec1</span><span class="p">,</span> <span class="n">vec2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec2</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">bending_constant</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos_angle</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">energy</span></div>
+
+
+
 <div class="viewcode-block" id="get_total_fiber_twist">
 <a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_total_fiber_twist">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist</span><span class="p">(</span>
     <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">compression_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABS_TOL</span><span class="p">,</span>
     <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -488,18 +551,23 @@
 <span class="sd">        array containing the x,y,z positions of the polymer trace</span>
 <span class="sd">        at a given time</span>
 <span class="sd">    **options: dict</span>
-<span class="sd">        Additional options as key-value pairs.</span>
-<span class="sd">    compression_axis: int</span>
-<span class="sd">        axis along which the polymer trace is compressed</span>
-<span class="sd">    signed: bool</span>
-<span class="sd">        whether to return the signed or unsigned total twist</span>
-<span class="sd">    tolerance: float</span>
-<span class="sd">        ABS_TOL</span>
+<span class="sd">        Additional options as key-value pairs:</span>
+
+<span class="sd">        compression_axis: int</span>
+<span class="sd">            axis along which the polymer trace is compressed</span>
+<span class="sd">        signed: bool</span>
+<span class="sd">            whether to return the signed or unsigned total twist</span>
+<span class="sd">        tolerance: float</span>
+<span class="sd">            ABS_TOL</span>
 <span class="sd">    Returns</span>
 <span class="sd">    ----------</span>
 <span class="sd">    total_twist: float</span>
 <span class="sd">        sum of angles between PCA projection vectors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">compression_axis</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression_axis&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">signed</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;signed&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">ABS_TOL</span><span class="p">)</span>
+
     <span class="n">trace_2d</span> <span class="o">=</span> <span class="n">polymer_trace</span><span class="p">[</span>
         <span class="p">:,</span> <span class="p">[</span><span class="n">ax</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">polymer_trace</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="n">compression_axis</span><span class="p">]</span>
     <span class="p">]</span>
@@ -816,6 +884,15 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">fiber_energy</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="get_compression_ratio">
+<a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_compression_ratio">[docs]</a>
+<span class="k">def</span> <span class="nf">get_compression_ratio</span><span class="p">(</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">-</span><span class="n">get_end_to_end_unit_vector</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">get_contour_length_from_trace</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">)</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -848,7 +925,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=19674c24"></script>
+</div><script src="../../_static/documentation_options.js?v=a16c5ede"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
