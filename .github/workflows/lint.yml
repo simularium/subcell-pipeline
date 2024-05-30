@@ -55,16 +55,31 @@ jobs:
         pdm run ruff check
 
     - name: Check with black
+      shell: bash -l {0}
       run: |
         pdm run black -l 88 --check .
 
     - name: Check with isort
+      shell: bash -l {0}
       run: |
         pdm run isort -l 88 --check .
 
     - name: Check with mypy
+      shell: bash -l {0}
       run: |
         pdm run mypy .
+
+  result:
+    if: ${{ always() && github.ref == 'refs/heads/main' }}
+
+    runs-on: ubuntu-latest
+
+    needs: [lint]
+
+    steps:
+
+    - name: Checkout the repo
+      uses: actions/checkout@v3
 
     - name: Generate passing badge
       if: success()
