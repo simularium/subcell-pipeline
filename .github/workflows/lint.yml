@@ -1,12 +1,9 @@
-name: documentation
+name: lint
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
-  documentation:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -52,47 +49,29 @@ jobs:
         conda env update --file environment.yml --prune
         pdm sync
 
-    - name: Generate documentation with Sphinx
+    - name: Lint with ruff
       shell: bash -l {0}
       run: |
-        pdm run make docs
-        touch docs/_build/html/.nojekyll
+        pdm run ruff check
 
-    - name: Publish docs
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        branch: gh-pages
-        folder: docs/_build/html
-        clean-exclude: |
-          _badges
-          _coverage
+    - name: Check with black
+      run: |
+        pdm run black -l 88 --check .
 
-    - name: Generate style badge
-      uses: knightdave/anybadge-action@v1.1.0
-      with:
-        file: docs/_badges/style.svg
-        label: code style
-        value: black
-        color: black
-        template: docs/_badges/template.svg
-        overwrite: true
+    - name: Check with isort
+      run: |
+        pdm run isort -l 88 --check .
 
-    - name: Generate license badge
-      uses: knightdave/anybadge-action@v1.1.0
-      with:
-        file: docs/_badges/license.svg
-        label: license
-        value: Apache-2.0
-        color: yellowgreen
-        template: docs/_badges/template.svg
-        overwrite: true
+    - name: Check with mypy
+      run: |
+        pdm run mypy .
 
     - name: Generate passing badge
       if: success()
       uses: knightdave/anybadge-action@v1.1.0
       with:
-        file: docs/_badges/documentation.svg
-        label: docs
+        file: docs/_badges/lint.svg
+        label: lint
         value: passing
         color: green
         template: docs/_badges/template.svg
@@ -102,8 +81,8 @@ jobs:
       if: failure()
       uses: knightdave/anybadge-action@v1.1.0
       with:
-        file: docs/_badges/documentation.svg
-        label: docs
+        file: docs/_badges/lint.svg
+        label: lint
         value: failing
         color: red
         template: docs/_badges/template.svg

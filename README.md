@@ -1,7 +1,11 @@
-# subcell-analysis
+# Subcellular model simulation and analysis pipeline
 
-[![Build Status](https://github.com/Simularium/subcell-analysis/workflows/CI/badge.svg)](https://github.com/Simularium/subcell-analysis/actions)
-[![Documentation](https://github.com/Simularium/subcell-analysis/workflows/Documentation/badge.svg)](https://Simularium.github.io/subcell-analysis)
+[![Build status](https://simularium.github.io/subcell-analysis/_badges/build.svg)](https://github.com/simularium/subcell-analysis/actions?query=workflow%3Abuild)
+[![Lint status](https://simularium.github.io/subcell-analysis/_badges/lint.svg)](https://github.com/simularium/subcell-analysis/actions?query=workflow%3Alint)
+[![Documentation](https://simularium.github.io/subcell-analysis/_badges/documentation.svg)](https://simularium.github.io/subcell-analysis/)
+[![Coverage](https://simularium.github.io/subcell-analysis/_badges/coverage.svg)](https://simularium.github.io/subcell-analysis/_coverage/)
+[![Code style](https://simularium.github.io/subcell-analysis/_badges/style.svg)](https://github.com/psf/black)
+[![License](https://simularium.github.io/subcell-analysis/_badges/license.svg)](https://github.com/simularium/subcell-analysis/blob/main/LICENSE)
 
 Analysis functionality for subcellular models
 

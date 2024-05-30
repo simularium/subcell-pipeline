@@ -108,7 +108,7 @@ ignore = [
   ".pre-commit-config.yaml",
   "CODE_OF_CONDUCT.md",
   "CONTRIBUTING.md",
-  "*docs/*",
+  "*docs/**",
   "*.ipynb",
   "*notebooks/*",
   "*tests/**",
