@@ -118,6 +118,7 @@ ignore = [
   "environment.yml",
   "pdm.lock",
   "requirements.txt",
+  "Makefile",
 ]
 
 [tool.mypy]
