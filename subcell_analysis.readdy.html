@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Contributing" href="contributing.html" /><link rel="prev" title="subcell_analysis.cytosim package" href="subcell_analysis.cytosim.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_analysis.readdy package - subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
+        <title>subcell_analysis.readdy package - subcell-analysis 0.1.dev1+g3c028b1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -180,7 +180,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
+      <a href="index.html"><div class="brand">subcell-analysis 0.1.dev1+g3c028b1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -204,7 +204,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g3c028b1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -271,8 +271,129 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
-<section id="subcell-analysis-readdy-readdy-data-module">
-<h2>subcell_analysis.readdy.readdy_data module<a class="headerlink" href="#subcell-analysis-readdy-readdy-data-module" title="Link to this heading">¶</a></h2>
+<section id="module-subcell_analysis.readdy.readdy_data">
+<span id="subcell-analysis-readdy-readdy-data-module"></span><h2>subcell_analysis.readdy.readdy_data module<a class="headerlink" href="#module-subcell_analysis.readdy.readdy_data" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.FrameData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">subcell_analysis.readdy.readdy_data.</span></span><span class="sig-name descname"><span class="pre">FrameData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topologies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.TopologyData" title="subcell_analysis.readdy.readdy_data.TopologyData"><span class="pre">TopologyData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData" title="subcell_analysis.readdy.readdy_data.ParticleData"><span class="pre">ParticleData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subcell_analysis/readdy/readdy_data.html#FrameData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.FrameData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data class representing one ReaDDy timestep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>time: float</strong></dt><dd><p>Current time of the simulation for this frame.</p>
+</dd>
+<dt><strong>topologies: Dict[int, TopologyData] (optional)</strong></dt><dd><p>Mapping of topology ID to a TopologyData for each topology.
+Default: {} (added by ReaddyLoader._shape_trajectory_data())</p>
+</dd>
+<dt><strong>particles: Dict[int, ParticleData] (optional)</strong></dt><dd><p>Mapping of particle ID to a ParticleData for each particle.
+Default: {} (added by ReaddyLoader._shape_trajectory_data())</p>
+</dd>
+<dt><strong>edges: List[np.ndarray (shape = 2 x 3)] (optional)</strong></dt><dd><p>List of edges as position of each of the two particles
+connected by the edge.
+Default: [] (added by ReaddyLoader._shape_trajectory_data())</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.FrameData.edges">
+<span class="sig-name descname"><span class="pre">edges</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.FrameData.edges" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.FrameData.particles">
+<span class="sig-name descname"><span class="pre">particles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData" title="subcell_analysis.readdy.readdy_data.ParticleData"><span class="pre">ParticleData</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.FrameData.particles" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.FrameData.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.FrameData.time" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.FrameData.topologies">
+<span class="sig-name descname"><span class="pre">topologies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.TopologyData" title="subcell_analysis.readdy.readdy_data.TopologyData"><span class="pre">TopologyData</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.FrameData.topologies" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.ParticleData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">subcell_analysis.readdy.readdy_data.</span></span><span class="sig-name descname"><span class="pre">ParticleData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subcell_analysis/readdy/readdy_data.html#ParticleData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.ParticleData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data class representing a ReaDDy particle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>uid: int</strong></dt><dd><p>Unique ID of the particle from ReaDDy.</p>
+</dd>
+<dt><strong>type_name: str</strong></dt><dd><p>ReaDDy type name of the particle.</p>
+</dd>
+<dt><strong>position: np.ndarray</strong></dt><dd><p>XYZ position of the particle.</p>
+</dd>
+<dt><strong>neighbor_ids: List[int]</strong></dt><dd><p>List of unique IDs of each neighbor particle
+connected by an edge.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.ParticleData.neighbor_ids">
+<span class="sig-name descname"><span class="pre">neighbor_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.ParticleData.neighbor_ids" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.ParticleData.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.ParticleData.position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.ParticleData.type_name">
+<span class="sig-name descname"><span class="pre">type_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.ParticleData.type_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.ParticleData.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.ParticleData.uid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.TopologyData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">subcell_analysis.readdy.readdy_data.</span></span><span class="sig-name descname"><span class="pre">TopologyData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particle_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/subcell_analysis/readdy/readdy_data.html#TopologyData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.TopologyData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data class representing a ReaDDy topology of connected particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>uid: int</strong></dt><dd><p>Unique ID of the topology from ReaDDy.</p>
+</dd>
+<dt><strong>type_name: str</strong></dt><dd><p>ReaDDy type name of the topology.</p>
+</dd>
+<dt><strong>particle_ids: List[int]</strong></dt><dd><p>List of unique IDs of each particle in the topology.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.TopologyData.particle_ids">
+<span class="sig-name descname"><span class="pre">particle_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.TopologyData.particle_ids" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.TopologyData.type_name">
+<span class="sig-name descname"><span class="pre">type_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.TopologyData.type_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="subcell_analysis.readdy.readdy_data.TopologyData.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#subcell_analysis.readdy.readdy_data.TopologyData.uid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="subcell-analysis-readdy-readdy-loader-module">
 <h2>subcell_analysis.readdy.readdy_loader module<a class="headerlink" href="#subcell-analysis-readdy-readdy-loader-module" title="Link to this heading">¶</a></h2>
@@ -342,7 +463,29 @@
             <ul>
 <li><a class="reference internal" href="#">subcell_analysis.readdy package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#subcell-analysis-readdy-readdy-data-module">subcell_analysis.readdy.readdy_data module</a></li>
+<li><a class="reference internal" href="#module-subcell_analysis.readdy.readdy_data">subcell_analysis.readdy.readdy_data module</a><ul>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.FrameData"><code class="docutils literal notranslate"><span class="pre">FrameData</span></code></a><ul>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.FrameData.edges"><code class="docutils literal notranslate"><span class="pre">FrameData.edges</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.FrameData.particles"><code class="docutils literal notranslate"><span class="pre">FrameData.particles</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.FrameData.time"><code class="docutils literal notranslate"><span class="pre">FrameData.time</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.FrameData.topologies"><code class="docutils literal notranslate"><span class="pre">FrameData.topologies</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData"><code class="docutils literal notranslate"><span class="pre">ParticleData</span></code></a><ul>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData.neighbor_ids"><code class="docutils literal notranslate"><span class="pre">ParticleData.neighbor_ids</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData.position"><code class="docutils literal notranslate"><span class="pre">ParticleData.position</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData.type_name"><code class="docutils literal notranslate"><span class="pre">ParticleData.type_name</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.ParticleData.uid"><code class="docutils literal notranslate"><span class="pre">ParticleData.uid</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.TopologyData"><code class="docutils literal notranslate"><span class="pre">TopologyData</span></code></a><ul>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.TopologyData.particle_ids"><code class="docutils literal notranslate"><span class="pre">TopologyData.particle_ids</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.TopologyData.type_name"><code class="docutils literal notranslate"><span class="pre">TopologyData.type_name</span></code></a></li>
+<li><a class="reference internal" href="#subcell_analysis.readdy.readdy_data.TopologyData.uid"><code class="docutils literal notranslate"><span class="pre">TopologyData.uid</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#subcell-analysis-readdy-readdy-loader-module">subcell_analysis.readdy.readdy_loader module</a></li>
 <li><a class="reference internal" href="#subcell-analysis-readdy-readdy-post-processor-module">subcell_analysis.readdy.readdy_post_processor module</a></li>
 <li><a class="reference internal" href="#module-contents">Module contents</a></li>
@@ -357,7 +500,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=a16c5ede"></script>
+</div><script src="_static/documentation_options.js?v=142cb610"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=4e2eecee"></script>

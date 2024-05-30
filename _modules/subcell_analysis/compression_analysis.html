@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_analysis.compression_analysis - subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
+        <title>subcell_analysis.compression_analysis - subcell-analysis 0.1.dev1+g3c028b1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -179,7 +179,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
+      <a href="../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g3c028b1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -203,7 +203,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g3c028b1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -268,9 +268,9 @@
 <span class="kn">from</span> <span class="nn">pacmap</span> <span class="kn">import</span> <span class="n">PaCMAP</span>
 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 
-<span class="c1"># TODO: consider creating a fiber class?</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">,</span> <span class="n">get_unit_vector</span>
 
-<span class="n">ABS_TOL</span> <span class="o">=</span> <span class="mf">1e-6</span>
+<span class="c1"># TODO: consider creating a fiber class?</span>
 
 
 <div class="viewcode-block" id="COMPRESSIONMETRIC">
@@ -426,7 +426,7 @@
     <span class="p">)</span> <span class="o">=</span> <span class="n">get_end_to_end_axis_distances_and_projections</span><span class="p">(</span><span class="n">polymer_trace</span><span class="o">=</span><span class="n">polymer_trace</span><span class="p">)</span>
 
     <span class="c1"># if all perpendicular distances are zero, return 0</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">perp_distances</span> <span class="o">&lt;</span> <span class="n">ABS_TOL</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">perp_distances</span> <span class="o">&lt;</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="n">projection_of_peak</span> <span class="o">=</span> <span class="n">scaled_projections</span><span class="p">[</span><span class="n">perp_distances</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">perp_distances</span><span class="p">)]</span>
@@ -435,17 +435,6 @@
     <span class="p">)</span>  <span class="c1"># max kinda handles multiple peaks</span>
 
     <span class="k">return</span> <span class="n">peak_asym</span></div>
-
-
-
-<div class="viewcode-block" id="get_unit_vector">
-<a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_unit_vector">[docs]</a>
-<span class="k">def</span> <span class="nf">get_unit_vector</span><span class="p">(</span><span class="n">vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ABS_TOL</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">vec_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">vector</span> <span class="o">/</span> <span class="n">vec_length</span><span class="p">,</span> <span class="n">vec_length</span></div>
 
 
 
@@ -479,7 +468,7 @@
     <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns the sum of inter-monomer distances in the trace</span>
+<span class="sd">    Returns the sum of inter-monomer distances in the trace.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -489,7 +478,7 @@
 <span class="sd">        Additional options as key-value pairs.</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">    ----------</span>
+<span class="sd">    -------</span>
 <span class="sd">    total_distance: float</span>
 <span class="sd">        sum of inter-monomer distances in the trace</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -558,7 +547,7 @@
 <span class="sd">        signed: bool</span>
 <span class="sd">            whether to return the signed or unsigned total twist</span>
 <span class="sd">        tolerance: float</span>
-<span class="sd">            ABS_TOL</span>
+<span class="sd">            ABSOLUTE_TOLERANCE</span>
 <span class="sd">    Returns</span>
 <span class="sd">    ----------</span>
 <span class="sd">    total_twist: float</span>
@@ -566,14 +555,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">compression_axis</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression_axis&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">signed</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;signed&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">tolerance</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">ABS_TOL</span><span class="p">)</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">)</span>
 
     <span class="n">trace_2d</span> <span class="o">=</span> <span class="n">polymer_trace</span><span class="p">[</span>
         <span class="p">:,</span> <span class="p">[</span><span class="n">ax</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">polymer_trace</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="n">compression_axis</span><span class="p">]</span>
     <span class="p">]</span>
     <span class="n">trace_2d</span> <span class="o">=</span> <span class="n">trace_2d</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">trace_2d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">get_total_fiber_twist_2d</span><span class="p">(</span><span class="n">trace_2d</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">get_total_fiber_twist_2d</span><span class="p">(</span>
+        <span class="n">trace_2d</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span>  <span class="c1"># type: ignore</span>
+    <span class="p">)</span></div>
 
 
 
@@ -581,7 +572,7 @@
 <a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_total_fiber_twist_pca">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist_pca</span><span class="p">(</span>
     <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABS_TOL</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the total twist using PCA projections of the polymer trace</span>
@@ -593,7 +584,7 @@
 <span class="sd">        array containing the x,y,z positions of the polymer trace</span>
 <span class="sd">        at a given time</span>
 <span class="sd">    tolerance: float</span>
-<span class="sd">        ABS_TOL</span>
+<span class="sd">        ABSOLUTE_TOLERANCE</span>
 <span class="sd">    Returns</span>
 <span class="sd">    ----------</span>
 <span class="sd">    total_twist: float</span>
@@ -652,7 +643,7 @@
 <span class="k">def</span> <span class="nf">get_total_fiber_twist_2d</span><span class="p">(</span>
     <span class="n">trace_2d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABS_TOL</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the total twist for 2d traces.</span>
@@ -664,7 +655,7 @@
 <span class="sd">    signed: bool</span>
 <span class="sd">        if True, returns the signed total twist</span>
 <span class="sd">    tolerance: float</span>
-<span class="sd">        ABS_TOL</span>
+<span class="sd">        ABSOLUTE_TOLERANCE</span>
 <span class="sd">    Returns</span>
 <span class="sd">    ----------</span>
 <span class="sd">    total_twist: float</span>
@@ -695,7 +686,7 @@
 <a class="viewcode-back" href="../../subcell_analysis.html#subcell_analysis.compression_analysis.get_total_fiber_twist_bak">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist_bak</span><span class="p">(</span>
     <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABS_TOL</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the sum of angles between consecutive vectors from the</span>
@@ -707,7 +698,7 @@
 <span class="sd">        array containing the x,y,z positions of the polymer trace</span>
 <span class="sd">        at a given time</span>
 <span class="sd">    tolerance: float</span>
-<span class="sd">        ABS_TOL</span>
+<span class="sd">        ABSOLUTE_TOLERANCE</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -925,7 +916,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=a16c5ede"></script>
+</div><script src="../../_static/documentation_options.js?v=142cb610"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>

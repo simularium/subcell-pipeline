@@ -38,6 +38,14 @@ subcell\_analysis.spatial\_annotator module
    :undoc-members:
    :show-inheritance:
 
+subcell\_analysis.utils module
+------------------------------
+
+.. automodule:: subcell_analysis.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

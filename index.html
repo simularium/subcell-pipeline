@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
+        <title>subcell-analysis 0.1.dev1+g3c028b1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -180,7 +180,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
+      <a href="#"><div class="brand">subcell-analysis 0.1.dev1+g3c028b1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -204,7 +204,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g3c028b1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -299,22 +299,27 @@
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>The subcell_analysis pipeline contains multiple steps that can be run independently.</p>
 <section id="run-simulations">
 <h3>1. Run Simulations<a class="headerlink" href="#run-simulations" title="Link to this heading">¶</a></h3>
 <p>The notebook aws_batch_job_submission.py can be used for configuring and executing simulations. Before this notebook can be succesfully executed, one must setup their AWSCLI credentials for submitting jobs and job definitions via the CLI. This notebook has five parts: 1a.) upload configuration files to s3, which involves generating the configuration files based on the template (vary_compress_rate.cym.tpl). Next, we have to create and register our job definition. In AWS Batch, a job definition specifies how many jobs are to be run, which docker image to use, how many CPUs to use, and the command a container should run when it is started.  We then submit our job to AWS using the submit_batch_job function. We can monitor these simulations as needed using check_batch_job. Finally, we can load in our results using the create_dataframes_for_repeats function which requires a bucket name, number of repeats, configs, and a save folder.</p>
 </section>
-<section id="metrics-calculation">
-<h3>2. Metrics Calculation<a class="headerlink" href="#metrics-calculation" title="Link to this heading">¶</a></h3>
+<section id="post-process-to-create-dataframes-from-simulation-data">
+<h3>2. Post process to create dataframes from simulation data<a class="headerlink" href="#post-process-to-create-dataframes-from-simulation-data" title="Link to this heading">¶</a></h3>
+<p>Involves running scripts in <code class="docutils literal notranslate"><span class="pre">subcell_analysis/postprocessing</span></code>. This also creates subsampled dataframes for further processing and metric calculation.</p>
 </section>
-<section id="comparative-metrics-calculation">
-<h3>3. Comparative Metrics Calculation<a class="headerlink" href="#comparative-metrics-calculation" title="Link to this heading">¶</a></h3>
+<section id="tomography-data-analysis">
+<h3>3. Tomography data analysis<a class="headerlink" href="#tomography-data-analysis" title="Link to this heading">¶</a></h3>
+<p>Selecting the tomogram filaments for analysis.</p>
 </section>
-<section id="comparison-with-tomography-data">
-<h3>4. Comparison with Tomography Data<a class="headerlink" href="#comparison-with-tomography-data" title="Link to this heading">¶</a></h3>
+<section id="calculate-metrics">
+<h3>3. Calculate metrics<a class="headerlink" href="#calculate-metrics" title="Link to this heading">¶</a></h3>
 </section>
-<section id="pca-pacmap-generate-figure-data-ipynb">
-<h3>5. PCA/PacMAP generate_figure_data.ipynb<a class="headerlink" href="#pca-pacmap-generate-figure-data-ipynb" title="Link to this heading">¶</a></h3>
+<section id="visualize-in-simularium">
+<h3>4. Visualize in simularium<a class="headerlink" href="#visualize-in-simularium" title="Link to this heading">¶</a></h3>
+</section>
+<section id="dimensionality-reduction-using-pca-pacmap">
+<h3>5. Dimensionality reduction using PCA/PaCMAP<a class="headerlink" href="#dimensionality-reduction-using-pca-pacmap" title="Link to this heading">¶</a></h3>
+<p>Runs through generate_figure_data.ipynb</p>
 </section>
 </section>
 <section id="glossary-of-terms">
@@ -375,7 +380,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=a16c5ede"></script>
+</div><script src="_static/documentation_options.js?v=142cb610"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=4e2eecee"></script>

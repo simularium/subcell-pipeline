@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_analysis.cytosim.post_process_cytosim - subcell-analysis 0.1.dev1+g4ac4668 documentation</title>
+        <title>subcell_analysis.cytosim.post_process_cytosim - subcell-analysis 0.1.dev1+g3c028b1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -179,7 +179,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g4ac4668 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">subcell-analysis 0.1.dev1+g3c028b1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -203,7 +203,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g4ac4668 documentation</span>
+  <span class="sidebar-brand-text">subcell-analysis 0.1.dev1+g3c028b1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -261,19 +261,20 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for subcell_analysis.cytosim.post_process_cytosim</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">boto3</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">simulariumio</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DISPLAY_TYPE</span><span class="p">,</span>
+    <span class="n">CameraData</span><span class="p">,</span>
     <span class="n">DisplayData</span><span class="p">,</span>
     <span class="n">InputFileData</span><span class="p">,</span>
     <span class="n">MetaData</span><span class="p">,</span>
-    <span class="n">ModelMetaData</span><span class="p">,</span>
+    <span class="n">TrajectoryData</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">simulariumio.cytosim</span> <span class="kn">import</span> <span class="n">CytosimData</span><span class="p">,</span> <span class="n">CytosimObjectInfo</span>
+<span class="kn">from</span> <span class="nn">simulariumio.cytosim</span> <span class="kn">import</span> <span class="n">CytosimConverter</span><span class="p">,</span> <span class="n">CytosimData</span><span class="p">,</span> <span class="n">CytosimObjectInfo</span>
 
 <span class="n">save_folder_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../data/dataframes&quot;</span><span class="p">)</span>
 
@@ -283,12 +284,15 @@
 <span class="k">def</span> <span class="nf">convert_and_save_dataframe</span><span class="p">(</span>
     <span class="n">fiber_energy_all</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">fiber_forces_all</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-    <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cytosim_actin_compression&quot;</span><span class="p">,</span>
+    <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="n">rigidity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.041</span><span class="p">,</span>
     <span class="n">save_folder</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">save_folder_path</span><span class="p">,</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+    <span class="n">repeat</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cytosim&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="c1"># Convert cytosim output to pandas dataframe and saves to csv.</span>
-
     <span class="n">bending_energies</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fiber_energy_all</span><span class="p">:</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -313,7 +317,6 @@
                 <span class="n">fid</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="c1"># print &#39;finished parsing &#39; + rundir + &#39; timepoint &#39; + str(time)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># print(line.split())</span>
             <span class="p">[</span>
                 <span class="n">fiber_id</span><span class="p">,</span>
                 <span class="n">xpos</span><span class="p">,</span>
@@ -324,13 +327,13 @@
                 <span class="n">zforce</span><span class="p">,</span>
                 <span class="n">segment_curvature</span><span class="p">,</span>
             <span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="c1">#                 figure out if you&#39;re on the first, second fiber point etc</span>
+            <span class="c1"># figure out if you&#39;re on the first, second fiber point etc</span>
             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">):</span>
                 <span class="n">fiber_point</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fiber_point</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">fid</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="c1">#                     print(&#39;id: &#39;+str(fid))</span>
+
             <span class="n">singles</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fiber_point</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;fiber_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fiber_id</span><span class="p">),</span>
                 <span class="s2">&quot;xpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">xpos</span><span class="p">),</span>
@@ -340,10 +343,13 @@
                 <span class="s2">&quot;yforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">yforce</span><span class="p">),</span>
                 <span class="s2">&quot;zforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">zforce</span><span class="p">),</span>
                 <span class="s2">&quot;segment_curvature&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">segment_curvature</span><span class="p">),</span>
+                <span class="s2">&quot;velocity&quot;</span><span class="p">:</span> <span class="n">velocity</span><span class="p">,</span>
+                <span class="s2">&quot;repeat&quot;</span><span class="p">:</span> <span class="n">repeat</span><span class="p">,</span>
+                <span class="s2">&quot;simulator&quot;</span><span class="p">:</span> <span class="n">simulator</span><span class="p">,</span>
             <span class="p">}</span>
 
     <span class="n">all_outputs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="n">timepoints_forces</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">])</span>
-    <span class="c1"># all_outputs = all_outputs.swaplevel(&#39;time&#39;,&#39;id&#39;,axis=0).sort_index()</span>
+
     <span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;force_magnitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;xforce&quot;</span><span class="p">])</span>
         <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;yforce&quot;</span><span class="p">])</span>
@@ -352,17 +358,11 @@
 
     <span class="c1">#  Segment bending energy, in pN nm</span>
     <span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;segment_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_outputs</span><span class="p">[</span><span class="s2">&quot;segment_curvature&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rigidity</span> <span class="o">*</span> <span class="mi">1000</span>
-    <span class="c1"># fiber_forces_outputs_allruns.append(all_outputs)</span>
 
-    <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;cytosim_actin_compression&quot;</span>
-
-    <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">file_name</span> <span class="o">+=</span> <span class="n">suffix</span>
-
-    <span class="n">all_outputs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">save_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
+    <span class="n">all_outputs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">save_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved Output to </span><span class="si">{</span><span class="n">save_folder</span><span class="o">/</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">all_outputs</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
+
     <span class="k">return</span> <span class="n">all_outputs</span></div>
 
 
@@ -386,6 +386,17 @@
 <div class="viewcode-block" id="get_s3_file">
 <a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.get_s3_file">[docs]</a>
 <span class="k">def</span> <span class="nf">get_s3_file</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a file from an S3 bucket.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bucket_name (str): The name of the S3 bucket.</span>
+<span class="sd">        file_name (str): The name of the file to retrieve.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        object: The contents of the file as a byte string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">Key</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
@@ -395,16 +406,53 @@
 <div class="viewcode-block" id="create_dataframes_for_repeats">
 <a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.create_dataframes_for_repeats">[docs]</a>
 <span class="k">def</span> <span class="nf">create_dataframes_for_repeats</span><span class="p">(</span>
-    <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_repeats</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">configs</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">save_folder</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">num_repeats</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">configs</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">save_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cytosim_actin_compression&quot;</span><span class="p">,</span>
+    <span class="n">velocities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="c1"># Create dataframes for all repeats of given configs.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create dataframes for repeated simulations in Cytosim.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bucket_name : str</span>
+<span class="sd">        The name of the bucket.</span>
+<span class="sd">    num_repeats : int</span>
+<span class="sd">        The number of repeats.</span>
+<span class="sd">    configs : list</span>
+<span class="sd">        The list of configurations.</span>
+<span class="sd">    save_folder : Path</span>
+<span class="sd">        The path to the save folder.</span>
+<span class="sd">    file_name : str, optional</span>
+<span class="sd">        The name of the file. Defaults to &quot;cytosim_actin_compression&quot;.</span>
+<span class="sd">    velocities : list, optional</span>
+<span class="sd">        The list of velocities. Defaults to None.</span>
+<span class="sd">    overwrite : bool, optional</span>
+<span class="sd">        Whether to overwrite existing files. Defaults to True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        This function does not return anything.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">segenergy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span> <span class="n">num_repeats</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
     <span class="n">fibenergy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span> <span class="n">num_repeats</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
     <span class="n">fibenergylabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span> <span class="n">num_repeats</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">configs</span><span class="p">):</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">velocities</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">config</span>
         <span class="k">for</span> <span class="n">repeat</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_repeats</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing config </span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2"> and repeat </span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Processing config </span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">, velocity </span><span class="si">{</span><span class="n">velocity</span><span class="si">}</span><span class="s2"> and repeat </span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;_velocity_</span><span class="si">{</span><span class="n">velocity</span><span class="si">}</span><span class="s2">_repeat_</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">save_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+            <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> already exists. Skipping.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
 
             <span class="n">segenergy</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">repeat</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_cytosim_s3_file</span><span class="p">(</span>
                 <span class="n">bucket_name</span><span class="p">,</span>
@@ -418,10 +466,14 @@
                 <span class="n">bucket_name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">/outputs/</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">/fiber_energy.txt&quot;</span>
             <span class="p">)</span>
             <span class="n">convert_and_save_dataframe</span><span class="p">(</span>
-                <span class="n">fibenergy</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">repeat</span><span class="p">],</span>
-                <span class="n">segenergy</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">repeat</span><span class="p">],</span>
-                <span class="n">suffix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;_velocity_</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">_repeat_</span><span class="si">{</span><span class="n">repeat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">fiber_energy_all</span><span class="o">=</span><span class="n">fibenergy</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">repeat</span><span class="p">],</span>
+                <span class="n">fiber_forces_all</span><span class="o">=</span><span class="n">segenergy</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">repeat</span><span class="p">],</span>
+                <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
                 <span class="n">save_folder</span><span class="o">=</span><span class="n">save_folder</span><span class="p">,</span>
+                <span class="n">velocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span>
+                <span class="n">repeat</span><span class="o">=</span><span class="n">repeat</span><span class="p">,</span>
+                <span class="n">simulator</span><span class="o">=</span><span class="s2">&quot;cytosim&quot;</span><span class="p">,</span>
             <span class="p">)</span></div>
 
 
@@ -429,46 +481,57 @@
 <div class="viewcode-block" id="cytosim_to_simularium">
 <a class="viewcode-back" href="../../../subcell_analysis.cytosim.html#subcell_analysis.cytosim.post_process_cytosim.cytosim_to_simularium">[docs]</a>
 <span class="k">def</span> <span class="nf">cytosim_to_simularium</span><span class="p">(</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">box_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="n">scale_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">color</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">actin_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CytosimData</span><span class="p">:</span>
-    <span class="n">example_data</span> <span class="o">=</span> <span class="n">CytosimData</span><span class="p">(</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">fiber_points_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">singles_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">box_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">scale_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+    <span class="n">exp_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrajectoryData</span><span class="p">:</span>
+    <span class="n">spacer</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">object_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;fibers&quot;</span><span class="p">:</span> <span class="n">CytosimObjectInfo</span><span class="p">(</span>
+            <span class="n">cytosim_file</span><span class="o">=</span><span class="n">InputFileData</span><span class="p">(</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="n">fiber_points_path</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">display_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="mi">1</span><span class="p">:</span> <span class="n">DisplayData</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp_name</span><span class="si">}{</span><span class="n">spacer</span><span class="si">}</span><span class="s2">actin&quot;</span><span class="p">,</span>
+                    <span class="n">radius</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                    <span class="n">display_type</span><span class="o">=</span><span class="n">DISPLAY_TYPE</span><span class="o">.</span><span class="n">FIBER</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">singles_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">object_info</span><span class="p">[</span><span class="s2">&quot;singles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CytosimObjectInfo</span><span class="p">(</span>
+            <span class="n">cytosim_file</span><span class="o">=</span><span class="n">InputFileData</span><span class="p">(</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="n">singles_path</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">display_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="mi">1</span><span class="p">:</span> <span class="n">DisplayData</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp_name</span><span class="si">}{</span><span class="n">spacer</span><span class="si">}</span><span class="s2">anchor&quot;</span><span class="p">,</span>
+                    <span class="n">radius</span><span class="o">=</span><span class="mf">0.006</span><span class="p">,</span>
+                    <span class="n">display_type</span><span class="o">=</span><span class="n">DISPLAY_TYPE</span><span class="o">.</span><span class="n">SPHERE</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#FFFFFF&quot;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+    <span class="n">cytosim_data</span> <span class="o">=</span> <span class="n">CytosimData</span><span class="p">(</span>
         <span class="n">meta_data</span><span class="o">=</span><span class="n">MetaData</span><span class="p">(</span>
             <span class="n">box_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">]),</span>
+            <span class="n">camera_defaults</span><span class="o">=</span><span class="n">CameraData</span><span class="p">(</span>
+                <span class="n">position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">300.0</span><span class="p">]),</span>
+                <span class="n">look_at_position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                <span class="n">up_vector</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+                <span class="n">fov_degrees</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span>
+            <span class="p">),</span>
             <span class="n">scale_factor</span><span class="o">=</span><span class="n">scale_factor</span><span class="p">,</span>
-            <span class="n">trajectory_title</span><span class="o">=</span><span class="s2">&quot;Some parameter set&quot;</span><span class="p">,</span>
-            <span class="n">model_meta_data</span><span class="o">=</span><span class="n">ModelMetaData</span><span class="p">(</span>
-                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Some agent-based model&quot;</span><span class="p">,</span>
-                <span class="n">version</span><span class="o">=</span><span class="s2">&quot;8.1&quot;</span><span class="p">,</span>
-                <span class="n">authors</span><span class="o">=</span><span class="s2">&quot;A Modeler&quot;</span><span class="p">,</span>
-                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;An agent-based model run with some parameter set&quot;</span><span class="p">),</span>
-                <span class="n">doi</span><span class="o">=</span><span class="s2">&quot;10.1016/j.bpj.2016.02.002&quot;</span><span class="p">,</span>
-                <span class="n">source_code_url</span><span class="o">=</span><span class="s2">&quot;https://github.com/simularium/simulariumio&quot;</span><span class="p">,</span>
-                <span class="n">source_code_license_url</span><span class="o">=</span><span class="s2">&quot;https://github.com/simularium/simulariumio/blob/main/LICENSE&quot;</span><span class="p">,</span>
-                <span class="n">input_data_url</span><span class="o">=</span><span class="s2">&quot;https://allencell.org/path/to/native/engine/input/files&quot;</span><span class="p">,</span>
-                <span class="n">raw_output_data_url</span><span class="o">=</span><span class="s2">&quot;https://allencell.org/path/to/native/engine/output/files&quot;</span><span class="p">,</span>
-            <span class="p">),</span>
+            <span class="n">trajectory_title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="n">object_info</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;fibers&quot;</span><span class="p">:</span> <span class="n">CytosimObjectInfo</span><span class="p">(</span>
-                <span class="n">cytosim_file</span><span class="o">=</span><span class="n">InputFileData</span><span class="p">(</span>
-                    <span class="n">file_path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">display_data</span><span class="o">=</span><span class="p">{</span>
-                    <span class="mi">1</span><span class="p">:</span> <span class="n">DisplayData</span><span class="p">(</span>
-                        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;actin#</span><span class="si">{</span><span class="n">actin_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                        <span class="n">radius</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-                        <span class="n">display_type</span><span class="o">=</span><span class="n">DISPLAY_TYPE</span><span class="o">.</span><span class="n">FIBER</span><span class="p">,</span>
-                        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">},</span>
-            <span class="p">),</span>
-        <span class="p">},</span>
+        <span class="n">object_info</span><span class="o">=</span><span class="n">object_info</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="n">example_data</span></div>
+    <span class="k">return</span> <span class="n">CytosimConverter</span><span class="p">(</span><span class="n">cytosim_data</span><span class="p">)</span><span class="o">.</span><span class="n">_data</span></div>
 
 </pre></div>
         </article>
@@ -502,7 +565,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=a16c5ede"></script>
+</div><script src="../../../_static/documentation_options.js?v=142cb610"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
