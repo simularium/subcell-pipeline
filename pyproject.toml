@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 # package basics
 # https://peps.python.org/pep-0621/
 [project]
-name = "subcell-analysis"
+name = "subcell_analysis"
 description = "Analysis functionality for subcellular models"
 keywords = []
 readme = "README.md"
@@ -36,7 +36,9 @@ dependencies = [
   "simulariumio",
   "container-collection",
   "boto3",
-  "scikit-learn"
+  "scikit-learn",
+  "s3fs",
+  "pyarrow",
 ]
 
 [project.urls]

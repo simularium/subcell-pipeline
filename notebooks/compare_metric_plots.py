@@ -15,6 +15,7 @@ plt.rcdefaults()
 metrics = [
     COMPRESSIONMETRIC.NON_COPLANARITY,
     COMPRESSIONMETRIC.PEAK_ASYMMETRY,
+    COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
     COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
     COMPRESSIONMETRIC.CONTOUR_LENGTH,
@@ -69,6 +70,7 @@ color_map = {"cytosim": "C0", "readdy": "C1"}
 
 # %% plot metrics vs time
 num_velocities = df["velocity"].nunique()
+compression_distance = 0.3  # um
 for metric in metrics:
     fig, axs = plt.subplots(
         2, num_velocities//2, figsize=(5, 5), sharey=True, dpi=300
@@ -81,9 +83,13 @@ for metric in metrics:
                     label = f"{simulator}"
                 else:
                     label = "_nolegend_"
-                xvals = np.linspace(0, 1, df_repeat["time"].nunique())
+                total_time = compression_distance / velocity  # s
+                xvals = np.linspace(0, 1, df_repeat["time"].nunique()) * total_time
                 yvals = df_repeat.groupby("time")[metric.value].mean()
-                if simulator == "cytosim" and metric.value == "CONTOUR_LENGTH":
+                if simulator == "cytosim" and metric.value in [
+                    "CONTOUR_LENGTH",
+                    "AVERAGE_PERP_DISTANCE",
+                ]:
                     yvals = yvals * 1000
                 axs[ct].plot(
                     xvals,

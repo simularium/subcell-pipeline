@@ -6,6 +6,8 @@ from .compression_analysis import (
     COMPRESSIONMETRIC,
     get_asymmetry_of_peak,
     get_average_distance_from_end_to_end_axis,
+    get_bending_energy_from_trace,
+    get_contour_length_from_trace,
     get_energy_asymmetry,
     get_sum_bending_energy,
     get_third_component_variance,
@@ -14,8 +16,6 @@ from .compression_analysis import (
     get_contour_length_from_trace,
     get_compression_ratio
 )
-
-ABS_TOL = 1e-6
 
 
 def run_metric_calculation(

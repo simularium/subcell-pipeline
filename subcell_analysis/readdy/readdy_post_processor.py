@@ -2,10 +2,15 @@
 
 import math
 from typing import Dict, List, Tuple
+import time
 
 import numpy as np
+import pandas as pd
+from numpy import ndarray
+from tqdm import tqdm
 
 from .readdy_data import FrameData
+from ..compression_analysis import get_contour_length_from_trace
 
 
 class ReaddyPostProcessor:
@@ -347,14 +352,14 @@ class ReaddyPostProcessor:
                     )
         return result
 
+    @staticmethod
     def linear_fiber_control_points(
-        self,
         axis_positions: List[List[np.ndarray]],
-        segment_length: float,
+        n_points: int,
     ) -> List[List[np.ndarray]]:
         """
         Resample the fiber line defined by each array of axis positions
-        to get the requested segment length between XYZ control points
+        to get the requested number of points between XYZ control points
         for each linear fiber at each timestep.
 
 
@@ -364,9 +369,8 @@ class ReaddyPostProcessor:
             List of lists of arrays containing the x,y,z positions
             of the closest point on the fiber axis to the position
             of each particle in each fiber at each time.
-        segment_length: float
-            Length of segments (in simulation's spatial units)
-            between control points on resulting fibers.
+        n_points: int
+            Number of control points (spaced evenly) on resulting fibers.
 
         Returns
         -------
@@ -374,27 +378,34 @@ class ReaddyPostProcessor:
             Array containing the x,y,z positions
             of control points for each fiber at each time.
         """
+        if n_points < 2:
+            raise Exception("n_points must be > 1 to define a fiber.")
         result: List[List[np.ndarray]] = []
-        for time_ix in range(len(axis_positions)):
+        for time_ix in tqdm(range(len(axis_positions))):
             result.append([])
+            contour_length = get_contour_length_from_trace(axis_positions[time_ix][0])
+            segment_length = contour_length / float(n_points - 1)
+            pt_ix = 1
             for positions in axis_positions[time_ix]:
-                control_points = [positions[0]]
+                control_points = np.zeros((n_points, 3))
+                control_points[0] = positions[0]
                 current_position = np.copy(positions[0])
                 leftover_length = 0
-                for axis_ix in range(1, len(positions)):
-                    v_segment = positions[axis_ix] - positions[axis_ix - 1]
+                for pos_ix in range(1, len(positions)):
+                    v_segment = positions[pos_ix] - positions[pos_ix - 1]
                     direction = ReaddyPostProcessor._normalize(v_segment)
                     remaining_length = np.linalg.norm(v_segment) + leftover_length
                     while remaining_length >= segment_length:
                         current_position += (
                             segment_length - leftover_length
                         ) * direction
-                        control_points.append(np.copy(current_position))
+                        control_points[pt_ix, :] = current_position[:]
+                        pt_ix += 1
                         leftover_length = 0
                         remaining_length -= segment_length
                     current_position += (remaining_length - leftover_length) * direction
                     leftover_length = remaining_length
-                result[time_ix].append(np.array(control_points))
+                result[time_ix].append(control_points)
         return result
 
     def fiber_bond_energies(
@@ -483,3 +494,35 @@ class ReaddyPostProcessor:
         for frame in self.trajectory:
             edges.append(frame.edges)
         return edges
+
+
+def array_to_dataframe(fiber_point_array: ndarray) -> pd.DataFrame:
+    """
+    Convert a 3D array to a pandas DataFrame.
+
+    Parameters
+    ----------
+    fiber_point_array: ndarray
+        The input 3D array.
+
+    Returns
+    -------
+    DataFrame: A pandas DataFrame with timepoint and fiber point as multi-index.
+    """
+    # Reshape the array to remove the singleton dimensions
+    fiber_point_array = np.squeeze(fiber_point_array)
+
+    # Reshape the array to have dimensions (timepoints * 50, 3)
+    reshaped_arr = fiber_point_array.reshape(-1, 3)
+
+    # Create a DataFrame with timepoint and fiber point as multi-index
+    timepoints = np.repeat(range(fiber_point_array.shape[0]), 50)
+    fiber_points = np.tile(range(50), fiber_point_array.shape[0])
+
+    df = pd.DataFrame(reshaped_arr)
+    df["time"] = timepoints
+    df["id"] = fiber_points
+
+    df.set_index(["time", "id"], inplace=True)
+
+    return df
