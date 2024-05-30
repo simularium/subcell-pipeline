@@ -1,40 +1,48 @@
 import argparse
 import math
-import sys
 import os
+import sys
 from typing import Dict, Tuple
 
 import boto3
 import numpy as np
 import pandas as pd
-from pint import UnitRegistry
 from botocore.exceptions import ClientError
+from pint import UnitRegistry
 from scipy.spatial.transform import Rotation
-from simulariumio import (DISPLAY_TYPE, AgentData, CameraData, DisplayData,
-                          MetaData, ScatterPlotData, TrajectoryConverter,
-                          TrajectoryData, UnitData, FileConverter, InputFileData)
+from simulariumio import (
+    DISPLAY_TYPE,
+    AgentData,
+    CameraData,
+    DisplayData,
+    FileConverter,
+    InputFileData,
+    MetaData,
+    ScatterPlotData,
+    TrajectoryConverter,
+    TrajectoryData,
+    UnitData,
+)
 from simulariumio.filters import EveryNthTimestepFilter
 
-from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
-from subcell_analysis.compression_workflow_runner import \
-    compression_metrics_workflow
-from subcell_analysis.cytosim.post_process_cytosim import cytosim_to_simularium
 from subcell_analysis.compression_analysis import (
+    COMPRESSIONMETRIC,
+    get_asymmetry_of_peak,
     get_average_distance_from_end_to_end_axis,
     get_bending_energy_from_trace,
-    get_third_component_variance,
-    get_asymmetry_of_peak,
     get_contour_length_from_trace,
+    get_third_component_variance,
 )
-
+from subcell_analysis.compression_workflow_runner import compression_metrics_workflow
+from subcell_analysis.cytosim.post_process_cytosim import cytosim_to_simularium
 
 CYTOSIM_CONDITIONS = {
-    "0001" : 0.48,
-    "0002" : 1.5,
-    "0003" : 4.7,
-    "0004" : 15,
-    "0005" : 47,
-    "0006" : 150,
+    "0001": 0.48,
+    "0002": 1.5,
+    "0003": 4.7,
+    "0004": 15,
+    "0005": 47,
+    "0006": 150,
 }
 READDY_CONDITIONS = [
     4.7,
@@ -45,23 +53,24 @@ READDY_CONDITIONS = [
 NUM_REPEATS = 5
 TOTAL_STEPS = 200
 POINTS_PER_FIBER = 200
-BENDING_ENERGY_SCALE_FACTOR = 1000.
-CYTOSIM_SCALE_FACTOR = 1000.
-BOX_SIZE = 600.
+BENDING_ENERGY_SCALE_FACTOR = 1000.0
+CYTOSIM_SCALE_FACTOR = 1000.0
+BOX_SIZE = 600.0
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Visualizes ReaDDy and Cytosim actin simulations"
     )
-    parser.add_argument('--combined', action=argparse.BooleanOptionalAction)
+    parser.add_argument("--combined", action=argparse.BooleanOptionalAction)
     parser.set_defaults(combined=False)
-    parser.add_argument('--cytosim', action=argparse.BooleanOptionalAction)
+    parser.add_argument("--cytosim", action=argparse.BooleanOptionalAction)
     parser.set_defaults(cytosim=False)
-    parser.add_argument('--upload', action=argparse.BooleanOptionalAction)
+    parser.add_argument("--upload", action=argparse.BooleanOptionalAction)
     parser.set_defaults(upload=False)
     return parser.parse_args()
-    
+
+
 s3_client = boto3.client("s3")
 for repeat in range(num_repeats):
     s3_client.download_file(
@@ -218,6 +227,7 @@ plot_metrics = [
 #         )
 #     )
 
+
 def upload_cytosim_trajectories():
     for condition in CYTOSIM_CONDITIONS.keys():
         velocity = CYTOSIM_CONDITIONS[condition]
@@ -233,6 +243,7 @@ def upload_cytosim_trajectories():
             src_path=f"data/cytosim_outputs/actin_compression_baseline_{repeat}.simularium",
             s3_path=f"simularium/actin_compression_baseline_{repeat}.simularium",
         )
+
 
 # %%
 cytosim_converter.save(f"outputs/vary_compress_rate_0003_all_repeats")

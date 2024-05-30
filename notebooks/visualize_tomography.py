@@ -1,33 +1,29 @@
-
 import argparse
+
 import numpy as np
 import pandas as pd
 from simulariumio import (
-    TrajectoryData, 
-    TrajectoryConverter, 
-    MetaData, 
-    AgentData, 
-    UnitData,
-    DimensionData,
-    CameraData,
-    DisplayData,
     DISPLAY_TYPE,
+    AgentData,
+    CameraData,
+    DimensionData,
+    DisplayData,
     HistogramPlotData,
+    MetaData,
+    TrajectoryConverter,
+    TrajectoryData,
+    UnitData,
 )
-
 
 SCALE = 0.1
 MIN_COMPRESSION_BIN = 2
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Visualizes tomography data"
-    )
-    parser.add_argument(
-        "csv_path", help="file path for CSV tomography data"
-    )
+    parser = argparse.ArgumentParser(description="Visualizes tomography data")
+    parser.add_argument("csv_path", help="file path for CSV tomography data")
     return parser.parse_args()
+
 
 def get_spatial_center_and_size(tomo_df):
     ixs = [
@@ -46,48 +42,53 @@ def get_spatial_center_and_size(tomo_df):
     maxs = np.array(maxs)
     return mins + 0.5 * (maxs - mins), maxs - mins
 
+
 def empty_plots():
     return {
-        "CONTOUR_LENGTH" : HistogramPlotData(
+        "CONTOUR_LENGTH": HistogramPlotData(
             title="Contour Length",
             xaxis_title="filament contour length (nm)",
             traces={},
         ),
-        "COMPRESSION_RATIO" : HistogramPlotData(
+        "COMPRESSION_RATIO": HistogramPlotData(
             title="Compression Percentage",
             xaxis_title="percent (%)",
             traces={},
         ),
-        "AVERAGE_PERP_DISTANCE" : HistogramPlotData(
+        "AVERAGE_PERP_DISTANCE": HistogramPlotData(
             title="Average Perpendicular Distance",
             xaxis_title="distance (nm)",
             traces={},
         ),
-        "CALC_BENDING_ENERGY" : HistogramPlotData(
+        "CALC_BENDING_ENERGY": HistogramPlotData(
             title="Bending Energy",
             xaxis_title="energy",
             traces={},
         ),
-        "NON_COPLANARITY" : HistogramPlotData(
+        "NON_COPLANARITY": HistogramPlotData(
             title="Non-coplanarity",
             xaxis_title="3rd component variance from PCA",
             traces={},
         ),
-        "PEAK_ASYMMETRY" : HistogramPlotData(
+        "PEAK_ASYMMETRY": HistogramPlotData(
             title="Peak Asymmetry",
             xaxis_title="normalized peak distance",
             traces={},
         ),
     }
 
+
 def add_plots(tomo_df, converter):
     plots = empty_plots()
     for metric_name in plots:
         col_ix = list(tomo_df.columns).index(metric_name)
-        plots[metric_name].traces["actin"] = np.array(list(list(map(set, tomo_df.values.T))[col_ix]))
+        plots[metric_name].traces["actin"] = np.array(
+            list(list(map(set, tomo_df.values.T))[col_ix])
+        )
         if metric_name == "COMPRESSION_RATIO":
-            plots[metric_name].traces["actin"] *= 100.
+            plots[metric_name].traces["actin"] *= 100.0
         converter.add_plot(plots[metric_name], "histogram")
+
 
 def main():
     args = parse_args()
@@ -108,7 +109,7 @@ def main():
         if len(fiber_df) > max_points:
             max_points = len(fiber_df)
     n_agents = len(subpoints)
-    compression_ratios = 100. * np.array(compression_ratios)
+    compression_ratios = 100.0 * np.array(compression_ratios)
     min_compression_ratio = np.amin(compression_ratios)
     max_compression_ratio = np.amax(compression_ratios)
     bins = np.linspace(min_compression_ratio, max_compression_ratio, 100)
@@ -117,7 +118,7 @@ def main():
     display_data = {}
     type_name_min = f"actin less than {MIN_COMPRESSION_BIN}.0 percent compressed"
     for agent_ix in range(n_agents):
-        bin_percent = int(10 * bins[digitized[agent_ix] - 1]) / 10.
+        bin_percent = int(10 * bins[digitized[agent_ix] - 1]) / 10.0
         if bin_percent < MIN_COMPRESSION_BIN:
             type_name = type_name_min
         else:
@@ -133,11 +134,13 @@ def main():
         display_type=DISPLAY_TYPE.FIBER,
         color="#222222",
     )
-    agent_data = AgentData.from_dimensions(DimensionData(
-        total_steps=1,
-        max_agents=n_agents,
-        max_subpoints=3 * max_points,
-    ))
+    agent_data = AgentData.from_dimensions(
+        DimensionData(
+            total_steps=1,
+            max_agents=n_agents,
+            max_subpoints=3 * max_points,
+        )
+    )
     agent_data.n_agents[0] = n_agents
     agent_data.viz_types[0] = 1001.0 * np.ones(n_agents)
     agent_data.unique_ids[0] = np.arange(n_agents)
@@ -151,7 +154,7 @@ def main():
     traj_data = TrajectoryData(
         meta_data=MetaData(
             box_size=SCALE * box_size,
-            camera_defaults=CameraData(position=np.array([0.0, 0.0, 70.0]))
+            camera_defaults=CameraData(position=np.array([0.0, 0.0, 70.0])),
         ),
         agent_data=agent_data,
         spatial_units=UnitData("um", 0.003),

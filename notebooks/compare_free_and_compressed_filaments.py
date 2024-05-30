@@ -1,27 +1,24 @@
 # %% [markdown]
 # ### 1. Cloud Simulation Analysis
 
-# %%
-from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
+import os
+from pathlib import Path
+
+import boto3
+import numpy as np
+import pandas as pd
+from simulariumio import ScatterPlotData
+from simulariumio.cytosim import CytosimConverter
+
+from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
 from subcell_analysis.compression_workflow_runner import (
     compression_metrics_workflow,
     plot_metric,
     plot_metric_list,
 )
-from subcell_analysis.compression_analysis import (
-    COMPRESSIONMETRIC,
-)
-from simulariumio import ScatterPlotData
 
-from simulariumio.cytosim import CytosimConverter
-from pathlib import Path
-
-import os
-import pandas as pd
-import numpy as np
-
-import boto3
-
+# %%
+from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
 
 # %%
 bucket_name = "cytosim-working-bucket"
@@ -54,7 +51,7 @@ for config in configs:
                 COMPRESSIONMETRIC.NON_COPLANARITY,
                 COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
                 COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
-                COMPRESSIONMETRIC.CONTOUR_LENGTH
+                COMPRESSIONMETRIC.CONTOUR_LENGTH,
             ],
         )
 
@@ -74,7 +71,7 @@ metrics = [
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
     COMPRESSIONMETRIC.PEAK_ASYMMETRY,
     COMPRESSIONMETRIC.NON_COPLANARITY,
-    COMPRESSIONMETRIC.CONTOUR_LENGTH
+    COMPRESSIONMETRIC.CONTOUR_LENGTH,
 ]
 for metric in metrics:
     fig, ax = plt.subplots()

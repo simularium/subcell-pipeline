@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.x"
       - run: pip install check-manifest && check-manifest
-  
+
   # Check tests pass on multiple Python and OS combinations
   test:
     runs-on: ${{ matrix.os }}

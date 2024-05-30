@@ -1,6 +1,7 @@
 # %%
-import boto3
 import getpass
+
+import boto3
 import numpy as np
 from preconfig import Preconfig
 
@@ -37,10 +38,11 @@ job_definition_arn = "job_definition_arn"
 # %% [markdown]
 # # 2b. Create and register job definition
 
+from container_collection.batch.make_batch_job import make_batch_job
+
 # %%
 # Parameters for a job definition
 from container_collection.batch.register_batch_job import register_batch_job
-from container_collection.batch.make_batch_job import make_batch_job
 
 job_definition_name = "karthikv_cytosim_vary_compress_rate"
 image = "simularium/cytosim:latest"
@@ -62,17 +64,17 @@ for index in range(len(configs)):
     simulation_name = job_names[index]
     print(simulation_name)
     job_definition = make_batch_job(
-    name=f"{str(job_names[index])}",
-    image="simularium/cytosim:latest",
-    vcpus=1,
-    memory=7000,
-    job_role_arn=f"arn:aws:iam::{account}:role/BatchJobRole",
-    environment=[
-    {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
-    {"name": "FILE_SET_NAME", "value": f"{job_names[index]}"},
-    {"name": "SIMULATION_TYPE", "value": "AWS"}
-]
-)
+        name=f"{str(job_names[index])}",
+        image="simularium/cytosim:latest",
+        vcpus=1,
+        memory=7000,
+        job_role_arn=f"arn:aws:iam::{account}:role/BatchJobRole",
+        environment=[
+            {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
+            {"name": "FILE_SET_NAME", "value": f"{job_names[index]}"},
+            {"name": "SIMULATION_TYPE", "value": "AWS"},
+        ],
+    )
 
     registered_jd = register_batch_job(job_definition)
     job_definitions[index] = registered_jd
@@ -113,17 +115,18 @@ for index in range(len(configs)):
 # %% [markdown]
 # # 4. Monitor job status
 
+import pandas as pd
+
 # %%
 # TODO: check job status, print progress bar
 from container_collection.batch.check_batch_job import check_batch_job
 
+# %%
+from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
 
 # %% [markdown]
 # # 5. Load results
 
-# %%
-from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
-import pandas as pd
 
 # %%
 bucket_name = "cytosim-working-bucket"
@@ -141,14 +144,13 @@ save_folder = Path("../data/dataframes")
 # %%
 create_dataframes_for_repeats(bucket_name, num_repeats, configs, save_folder)
 
+from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
+
 # %%
 from subcell_analysis.compression_workflow_runner import (
     compression_metrics_workflow,
     plot_metric,
     plot_metric_list,
-)
-from subcell_analysis.compression_analysis import (
-    COMPRESSIONMETRIC,
 )
 
 # %%
@@ -201,9 +203,10 @@ for metric in metrics:
 # %%
 import numpy as np
 import pandas as pd
-from subcell_analysis.compression_analysis import get_pacmap_embedding
 from pacmap import PaCMAP
 from scipy import interpolate as spinterp
+
+from subcell_analysis.compression_analysis import get_pacmap_embedding
 
 # %% [markdown]
 # #### create k x t x n x 3 numpy array of fiber points

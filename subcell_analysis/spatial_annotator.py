@@ -3,12 +3,7 @@
 from typing import List
 
 import numpy as np
-from simulariumio import (
-    DISPLAY_TYPE,
-    DimensionData,
-    DisplayData,
-    TrajectoryData,
-)
+from simulariumio import DISPLAY_TYPE, DimensionData, DisplayData, TrajectoryData
 from simulariumio.constants import VIZ_TYPE
 
 

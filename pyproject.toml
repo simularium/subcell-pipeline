@@ -65,6 +65,9 @@ docs = [
 [tool.black]
 line-length = 88
 
+[tool.isort]
+profile = "black"
+
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
 line-length = 88
@@ -110,6 +113,8 @@ ignore = [
   "*notebooks/*",
   "*tests/**",
   "*templates/*",
+  "*configs/*",
+  ".editorconfig",
   "environment.yml",
   "pdm.lock",
   "requirements.txt",

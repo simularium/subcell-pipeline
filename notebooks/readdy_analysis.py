@@ -4,25 +4,22 @@
 # %% [markdown]
 # ## Download Readdy Files and postprocess them
 
+import argparse
+
 # %%
 # import readdy
 import boto3
 import numpy as np
-import argparse
-from subcell_analysis.readdy import (
-    ReaddyLoader,
-    ReaddyPostProcessor,
-)
+import pandas as pd
+
+from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
 from subcell_analysis.compression_workflow_runner import (
     compression_metrics_workflow,
     plot_metric,
     plot_metric_list,
 )
-from subcell_analysis.compression_analysis import (
-    COMPRESSIONMETRIC,
-)
 from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
-import pandas as pd
+from subcell_analysis.readdy import ReaddyLoader, ReaddyPostProcessor
 
 # %%
 save_folder = "../data/readdy_h5_files"
@@ -81,18 +78,17 @@ fiber_points = post_processor.linear_fiber_control_points(
 print(fiber_points)
 
 
+import pandas as pd
+
+from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
+
 # %%
 from subcell_analysis.compression_workflow_runner import (
     compression_metrics_workflow,
     plot_metric,
     plot_metric_list,
 )
-from subcell_analysis.compression_analysis import (
-    COMPRESSIONMETRIC,
-)
 from subcell_analysis.cytosim.post_process_cytosim import create_dataframes_for_repeats
-import pandas as pd
-
 
 # %%
 arr = np.array(fiber_points[0][0])
@@ -135,11 +131,12 @@ df_points.to_csv("../dataframes/readdy_processed_data.csv", index=False)
 df_points = pd.read_csv("../dataframes/readdy_processed_data.csv")
 
 
+import matplotlib.pyplot as plt
+
 # %%
 import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
+from mpl_toolkits.mplot3d import Axes3D
 
 # Assuming you have a DataFrame named 'df_points' with columns 'time', 'id', 'x', 'y', and 'z'
 # df_points = pd.DataFrame(...)  # Your data goes here
@@ -413,11 +410,12 @@ for metric in metrics:
     plt.show()
     fig.savefig(f"{figure_path}/actin_compression_all_velocities_{metric.value}.png")
 
+import matplotlib.pyplot as plt
+
 # %%
 import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
+from mpl_toolkits.mplot3d import Axes3D
 
 # Assuming you have a DataFrame named 'df_points' with columns 'time', 'id', 'x', 'y', and 'z'
 # df_points = pd.DataFrame(...)  # Your data goes here

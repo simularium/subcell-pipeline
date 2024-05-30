@@ -1,6 +1,7 @@
 # %%
-import boto3
 import getpass
+
+import boto3
 import numpy as np
 from preconfig import Preconfig
 
@@ -14,16 +15,16 @@ num_repeats = 5
 job_names = []
 # %%
 for repeat in range(num_repeats):
-    opened_config = open (path_to_config, "rb")
+    opened_config = open(path_to_config, "rb")
     job_name = config[:-4]
     config_name = f"{job_name}/config/{job_name}_{repeat}.cym"
     s3_client.put_object(Bucket=bucket, Key=config_name, Body=opened_config)
 # %%
 job_definition_arn = "job_definition_arn"
-from container_collection.batch.register_batch_job import register_batch_job
 from container_collection.batch.make_batch_job import make_batch_job
+from container_collection.batch.register_batch_job import register_batch_job
 
-job_definition_name = "karthikv_cytosim"+config[:-4]
+job_definition_name = "karthikv_cytosim" + config[:-4]
 image = "simularium/cytosim:latest"
 vcpus = 1
 memory = 7000
@@ -39,11 +40,10 @@ job_definition = make_batch_job(
     memory=7000,
     job_role_arn=f"arn:aws:iam::{account}:role/BatchJobRole",
     environment=[
-    {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
-    {"name": "FILE_SET_NAME", "value": f"{config[:-4]}"},
-    {"name": "SIMULATION_TYPE", "value": "AWS"}
-    
-]
+        {"name": "BATCH_WORKING_URL", "value": "s3://cytosim-working-bucket/"},
+        {"name": "FILE_SET_NAME", "value": f"{config[:-4]}"},
+        {"name": "SIMULATION_TYPE", "value": "AWS"},
+    ],
 )
 
 registered_jd = register_batch_job(job_definition)
@@ -51,6 +51,7 @@ registered_jd = register_batch_job(job_definition)
 # %%
 # Submit batch job allows us to submit a batch job with a given job definition and job name.
 from container_collection.batch.submit_batch_job import submit_batch_job
+
 # %%
 # Parameters for our batch job [size indicates our desired number of repeats]
 job_name = "free_barbed_end_final"

@@ -4,12 +4,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from subcell_analysis.readdy import (
-    ReaddyLoader,
-    ReaddyPostProcessor,
-)
+from subcell_analysis.readdy import ReaddyLoader, ReaddyPostProcessor
 from subcell_analysis.readdy.readdy_post_processor import array_to_dataframe
-
 
 IDEAL_ACTIN_POSITIONS = np.array(
     [
@@ -55,7 +51,7 @@ def _load_readdy_fiber_points(h5_file_path, box_size, n_points_per_fiber):
         n_points=n_points_per_fiber,
     )
     return np.array(fiber_points)
-    
+
 
 def generate_readdy_df(
     input_h5_file_dir: str = "data/aws_downloads/",
@@ -73,7 +69,7 @@ def generate_readdy_df(
             file_name = f"actin_compression_velocity={velocity}_{repeat}.h5"
             df_save_path = os.path.join(
                 output_dir,
-                f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv"
+                f"readdy_actin_compression_velocity_{velocity}_repeat_{repeat}.csv",
             )
             if os.path.exists(df_save_path) and not reprocess:
                 print(f"{file_name} already processed")
@@ -85,16 +81,18 @@ def generate_readdy_df(
                 print(f"{file_name} not found")
                 continue
             print(f"Processing {file_name}")
-            fiber_points = _load_readdy_fiber_points(str(h5_file_path), box_size, n_points_per_fiber)
+            fiber_points = _load_readdy_fiber_points(
+                str(h5_file_path), box_size, n_points_per_fiber
+            )
             df_points = array_to_dataframe(fiber_points)
             df_points.reset_index(inplace=True)
             df_points.rename(columns={0: "xpos", 1: "ypos", 2: "zpos"}, inplace=True)
             df_points["velocity"] = velocity
             df_points["repeat"] = repeat
             df_points["simulator"] = "readdy"
-            df_points["normalized_time"] = (df_points["time"] - df_points["time"].min()) / (
-                df_points["time"].max() - df_points["time"].min()
-            )
+            df_points["normalized_time"] = (
+                df_points["time"] - df_points["time"].min()
+            ) / (df_points["time"].max() - df_points["time"].min())
             df_points.to_csv(
                 df_save_path,
                 index=False,
