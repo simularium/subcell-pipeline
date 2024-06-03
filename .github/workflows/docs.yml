@@ -36,7 +36,7 @@ jobs:
 
     - name: Cache environment
       id: cached-dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       env:
         CACHE_NUMBER: 0 # Increment this number if you wish to hard-refresh the cache.
       with:
