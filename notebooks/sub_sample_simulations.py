@@ -1,8 +1,9 @@
 # %% imports
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import matplotlib.pyplot as plt
 
 # %% load dataframes
 current_folder = Path(__file__).parent
@@ -106,4 +107,3 @@ axs[1].plot(df_time["xpos"], df_time["ypos"], "ko-", ms=3, label="original")
 # ax.legend()
 plt.show()
 # %%
-

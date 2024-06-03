@@ -10,7 +10,7 @@
 # SYNOPSIS
 
    Preconfig generates files from a template by evaluating doubly-bracketed Python code.
-   
+
 # Article:
 
    preconfig: A Versatile Configuration File Generator for Varying Parameters
@@ -62,7 +62,7 @@
 
    - if the path to an existing directory is specified, files will be created
    in this directory, for example: `preconfig dir config.cym.tpl`
-   
+
    - if 'path=FILENAME' is specified, Preconfig will use this name for the first
    file that it generates. If this file already exists, it will be overwritten.
 
@@ -78,11 +78,11 @@
    line for each file created, containing the substitutions operated for this file.
 
    - if '--help' is specified, this documentation will be printed.
-   
+
 # DEFINITIONS
 
-   Variables can be defined on the command line as 'name=value', with no space 
-   around the '='. They are added to the dictionary used to evaluate the code 
+   Variables can be defined on the command line as 'name=value', with no space
+   around the '='. They are added to the dictionary used to evaluate the code
    snippets found inside the template file.
    example: `preconfig rate=100 config.cym.tpl`
 
@@ -218,7 +218,10 @@ Preconfig is distributed under GPL3.0 Licence (see LICENCE)
 import sys
 
 try:
-    import os, io, re, time
+    import io
+    import os
+    import re
+    import time
 
     GLOBALS = {"random": __import__("random"), "math": __import__("math")}
 except ImportError as e:

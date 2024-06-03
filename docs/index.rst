@@ -1,14 +1,25 @@
-Welcome to subcell-analysis's documentation!
-======================================
+|
+
+.. include:: ../README.md
+   :parser: myst_parser.sphinx_
 
 .. toctree::
    :hidden:
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Contents
 
    Overview <self>
-   installation
-   Package modules <modules>
-   contributing
 
-.. mdinclude:: ../README.md
+.. autosummary::
+   :toctree: _summary
+   :caption: API reference
+   :recursive:
+
+   subcell_analysis
+
+
+.. toctree::
+   :hidden:
+   :caption: Project links
+
+   GitHub <https://github.com/simularium/subcell-analysis>

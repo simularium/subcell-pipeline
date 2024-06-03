@@ -19,7 +19,7 @@ metrics = [
     COMPRESSIONMETRIC.TOTAL_FIBER_TWIST,
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
     COMPRESSIONMETRIC.CONTOUR_LENGTH,
-    COMPRESSIONMETRIC.COMPRESSION_RATIO
+    COMPRESSIONMETRIC.COMPRESSION_RATIO,
 ]
 # %%
 metric_label_map = {
@@ -28,7 +28,7 @@ metric_label_map = {
     COMPRESSIONMETRIC.TOTAL_FIBER_TWIST: "Total fiber twist",
     COMPRESSIONMETRIC.CALC_BENDING_ENERGY: "Calculated bending energy",
     COMPRESSIONMETRIC.CONTOUR_LENGTH: "Contour length",
-    COMPRESSIONMETRIC.COMPRESSION_RATIO: "Compression ratio"
+    COMPRESSIONMETRIC.COMPRESSION_RATIO: "Compression ratio",
 }
 
 # %% Process cytosim data
@@ -73,7 +73,7 @@ num_velocities = df["velocity"].nunique()
 compression_distance = 0.3  # um
 for metric in metrics:
     fig, axs = plt.subplots(
-        2, num_velocities//2, figsize=(5, 5), sharey=True, dpi=300
+        2, num_velocities // 2, figsize=(5, 5), sharey=True, dpi=300
     )
     axs = axs.ravel()
     for ct, (velocity, df_velocity) in enumerate(df.groupby("velocity")):
@@ -111,7 +111,7 @@ compression_distance = 150
 num_velocities = df["velocity"].nunique()
 for metric in metrics:
     fig, axs = plt.subplots(
-        2, num_velocities//2, figsize=(6, 6), sharey=True, dpi=300
+        2, num_velocities // 2, figsize=(6, 6), sharey=True, dpi=300
     )
     axs = axs.ravel()
     for ct, (velocity, df_velocity) in enumerate(df.groupby("velocity")):
@@ -159,8 +159,12 @@ for metric in metrics:
     fig.supxlabel("Time (s)")
     fig.supylabel(metric_label_map[metric])
     plt.tight_layout()
-    fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time_subsampled_averaged.png")
-    fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time_subsampled_averaged.svg")
+    fig.savefig(
+        figure_path / f"all_simulators_{metric.value}_vs_time_subsampled_averaged.png"
+    )
+    fig.savefig(
+        figure_path / f"all_simulators_{metric.value}_vs_time_subsampled_averaged.svg"
+    )
 # # %%
 # import numpy as np
 # import matplotlib.pyplot as plt
@@ -199,13 +203,13 @@ for metric in metrics:
 #                     color=color_map[simulator],
 #                     alpha=0.7,
 #                 )
-        
+
 #         # Overlay the mean and standard deviation for the experimental data
 #         # This will add a horizontal line for the mean and shaded area for the SD
 #         axs[ct].axhline(exp_mean, color='red', linestyle='-', linewidth=2, label='Exp. Mean')
 #         axs[ct].fill_between(xvals, exp_mean - exp_std, exp_mean + exp_std, color='red', alpha=0.2, label='Exp. SD')
 
-        
+
 #         # axs[ct].set_title(f"Velocity: {velocity}")
 #         if ct == 0:
 #             axs[ct].legend(loc='upper left')
@@ -229,7 +233,7 @@ for metric in metrics:
 #     ax.set_xlabel('X')
 #     ax.set_ylabel('Y')
 #     ax.set_zlabel('Z')
-    
+
 #     return fig
 
 # plot_filaments(df_exp[df_exp['COMPRESSION_RATIO']>0.2])

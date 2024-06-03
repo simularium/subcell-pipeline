@@ -7,14 +7,12 @@ from .compression_analysis import (
     get_asymmetry_of_peak,
     get_average_distance_from_end_to_end_axis,
     get_bending_energy_from_trace,
+    get_compression_ratio,
     get_contour_length_from_trace,
     get_energy_asymmetry,
     get_sum_bending_energy,
     get_third_component_variance,
     get_total_fiber_twist,
-    get_bending_energy_from_trace,
-    get_contour_length_from_trace,
-    get_compression_ratio
 )
 
 
@@ -53,18 +51,18 @@ def run_metric_calculation(
 
         if metric == COMPRESSIONMETRIC.NON_COPLANARITY:
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[
-                fiber_at_time.index, metric.value
-            ] = get_third_component_variance(
-                polymer_trace,
-                **options,
+            all_points.loc[fiber_at_time.index, metric.value] = (
+                get_third_component_variance(
+                    polymer_trace,
+                    **options,
+                )
             )
 
         if metric == COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE:
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[
-                fiber_at_time.index, metric.value
-            ] = get_average_distance_from_end_to_end_axis(polymer_trace, **options)
+            all_points.loc[fiber_at_time.index, metric.value] = (
+                get_average_distance_from_end_to_end_axis(polymer_trace, **options)
+            )
 
         if metric == COMPRESSIONMETRIC.TOTAL_FIBER_TWIST:
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
@@ -84,9 +82,9 @@ def run_metric_calculation(
 
         if metric == COMPRESSIONMETRIC.CONTOUR_LENGTH:
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[
-                fiber_at_time.index, metric.value
-            ] = get_contour_length_from_trace(polymer_trace, **options)
+            all_points.loc[fiber_at_time.index, metric.value] = (
+                get_contour_length_from_trace(polymer_trace, **options)
+            )
 
         if metric == COMPRESSIONMETRIC.SUM_BENDING_ENERGY:
             polymer_trace = fiber_at_time[
@@ -98,15 +96,15 @@ def run_metric_calculation(
 
         if metric == COMPRESSIONMETRIC.CALC_BENDING_ENERGY:
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[
-                fiber_at_time.index, metric.value
-            ] = get_bending_energy_from_trace(polymer_trace, **options)
+            all_points.loc[fiber_at_time.index, metric.value] = (
+                get_bending_energy_from_trace(polymer_trace, **options)
+            )
 
         if metric == COMPRESSIONMETRIC.COMPRESSION_RATIO:
             polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
-            all_points.loc[
-                fiber_at_time.index, metric.value
-            ] = get_compression_ratio(polymer_trace, **options)
+            all_points.loc[fiber_at_time.index, metric.value] = get_compression_ratio(
+                polymer_trace, **options
+            )
 
     return all_points
 

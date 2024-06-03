@@ -1,44 +1,31 @@
-# package build
-# https://peps.python.org/pep-0517/
-[build-system]
-requires = ["setuptools>=65", "wheel", "setuptools_scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-
-# package basics
-# https://peps.python.org/pep-0621/
 [project]
 name = "subcell_analysis"
 description = "Analysis functionality for subcellular models"
-keywords = []
-readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "Apache Software License 2.0" }
 authors = [
-  { email = "blair208@gmail.com", name = "Blair Lyons" },
+    { name = "Blair Lyons", email = "blairl@alleninstitute.org" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
-  "Natural Language :: English",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+    "Development Status :: 4 - Beta",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["version"]
+license = { file = "LICENSE" }
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
 dependencies = [
-  "numpy",
-  "pandas",
-  "matplotlib",
-  "tqdm",
-  "pacmap",
-  "simulariumio",
-  "container-collection",
-  "boto3",
-  "scikit-learn",
-  "s3fs",
-  "pyarrow",
+    "numpy>=1.26.4",
+    "pandas>=1.5.3",
+    "matplotlib>=3.9.0",
+    "tqdm>=4.66.4",
+    "pacmap>=0.7.2",
+    "simulariumio>=1.11.0",
+    "container-collection>=0.6.1",
+    "scikit-learn>=1.5.0",
+    "s3fs>=2024.5.0",
+    "ipykernel>=6.29.4",
+    "setuptools>=70.0.0",
 ]
 
 [project.urls]
@@ -47,63 +34,47 @@ Homepage = "https://github.com/Simularium/subcell-analysis"
 Documentation = "https://Simularium.github.io/subcell-analysis"
 "User Support" = "https://github.com/Simularium/subcell-analysis/issues"
 
-# extra dependencies
-# https://peps.python.org/pep-0621/#dependencies-optional-dependencies
-[project.optional-dependencies]
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "check-manifest>=0.49",
+    "pre-commit>=3.7.1",
+    "isort>=5.13.2",
+]
 lint = [
-  "black>=22.3.0",
-  "check-manifest>=0.48",
-  "ruff>=0.0.216",
-  "mypy>=0.790",
-  "pre-commit>=2.20.0",
+    "black>=24.4.2",
+    "ruff>=0.4.6",
+    "mypy>=1.10.0",
 ]
 test = [
-  "coverage>=5.1",
-  "pytest>=5.4.3",
-  "pytest-cov>=2.9.0",
-  "pytest-raises>=0.11",
+    "pytest>=8.2.1",
+    "pytest-cov>=5.0.0",
+    "pytest-raises>=0.11",
+    "coverage>=7.5.3",
 ]
 docs = [
-  # Sphinx + Doc Gen + Styling
-  "m2r2>=0.2.7",
-  "Sphinx>=4.0.0",
-  "furo>=2022.4.7",
-  # Extensions
-  "numpydoc",
-  "sphinx-copybutton",
-  # TODO: Pins
-  "docutils>=0.18,<0.19",
-]
-dev = [
-  "ipython>=8.4.0",
-  "ipykernel",
+    "sphinx>=7.3.7",
+    "furo>=2024.5.6",
+    "myst-parser>=3.0.1",
+    "sphinx-copybutton>=0.5.2",
 ]
 
-# entry points
-# https://peps.python.org/pep-0621/#entry-points
-[project.entry-points."console_scripts"]
-calc-string-length = "subcell_analysis.bin.str_len:main"
-
-# build settings
-# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
-[tool.setuptools]
-zip-safe = false
-include-package-data = true
-
-[tool.setuptools.packages.find]
-exclude = ["*docs/*", "*tests/*"]
-
-[tool.setuptools.package-data]
-"*" = ["*.yaml", "py.typed"]
-
-# tools
 [tool.black]
 line-length = 88
+
+[tool.isort]
+line_length = 88
+profile = "black"
 
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
 line-length = 88
 target-version = "py38"
+
+[tool.ruff.lint]
 extend-select = [
     "E",      # style errors
     "F",      # flakes
@@ -131,28 +102,29 @@ extend-ignore = [
     "D416", # Section name should end with a colon
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*.py" = ["D"]
 
 # https://github.com/mgedmin/check-manifest#configuration
 [tool.check-manifest]
 ignore = [
-  ".editorconfig",
   ".pre-commit-config.yaml",
   "CODE_OF_CONDUCT.md",
   "CONTRIBUTING.md",
-  "Justfile",
-  ".cookiecutter.yaml",
-  "*docs/*",
+  "*docs/**",
   "*.ipynb",
   "*notebooks/*",
   "*tests/**",
   "*templates/*",
+  "*configs/*",
+  ".editorconfig",
   "environment.yml",
+  "pdm.lock",
+  "requirements.txt",
+  "Makefile",
 ]
 
 [tool.mypy]
-files = "subcell_analysis/*.py"
 ignore_missing_imports = true
 disallow_untyped_defs = true
 check_untyped_defs = true

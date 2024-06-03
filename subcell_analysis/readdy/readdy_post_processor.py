@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 import math
-from typing import Dict, List, Tuple
 import time
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
 from numpy import ndarray
 from tqdm import tqdm
 
-from .readdy_data import FrameData
 from ..compression_analysis import get_contour_length_from_trace
+from .readdy_data import FrameData
 
 
 class ReaddyPostProcessor:

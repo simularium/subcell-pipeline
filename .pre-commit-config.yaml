@@ -1,18 +1,31 @@
-files: subcell_analysis
 repos:
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.216
-    hooks:
-      - id: ruff
-        args: ["--fix"]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: check-yaml
+  - id: check-toml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
 
-  - repo: https://github.com/psf/black
-    rev: 22.6.0
-    hooks:
-      - id: black
+- repo: https://github.com/psf/black
+  rev: 24.4.2
+  hooks:
+  - id: black
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.971
-    hooks:
-      - id: mypy
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+
+- repo: https://github.com/mgedmin/check-manifest
+  rev: "0.49"
+  hooks:
+  - id: check-manifest
+
+- repo: https://github.com/pdm-project/pdm
+  rev: 2.15.4
+  hooks:
+  - id: pdm-export
+    args: ['-o', 'requirements.txt']
+    files: ^pdm.lock$

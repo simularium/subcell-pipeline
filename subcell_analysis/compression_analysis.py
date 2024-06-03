@@ -560,8 +560,11 @@ def get_sum_bending_energy(
 ) -> float:
     return fiber_energy[3].sum()
 
+
 def get_compression_ratio(
     polymer_trace: np.ndarray,
     **options: dict,
 ) -> float:
-    return 1-get_end_to_end_unit_vector(polymer_trace)[1]/get_contour_length_from_trace(polymer_trace)
+    return 1 - get_end_to_end_unit_vector(polymer_trace)[
+        1
+    ] / get_contour_length_from_trace(polymer_trace)

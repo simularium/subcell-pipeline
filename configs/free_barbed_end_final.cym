@@ -22,7 +22,7 @@
 
 
 
-% total compression amount 
+% total compression amount
 
 
 % total simulation time (s)
@@ -68,7 +68,7 @@ set hand binder
 
     unbinding = 0, inf
     bind_also_end = 1
- 
+
     display = ( width=3; size=12; color=green )
 }
 
@@ -86,11 +86,11 @@ new filament
     position = 0 0 0
     orientation = 1 0 0
     % attach1 = linker, 0, minus_end
-    % attach2 = linker, 0, plus_end 
+    % attach2 = linker, 0, plus_end
 
 }
 
-new linker 
+new linker
 {
     position = -0.25 0 0
     attach = filament, 0, minus_end
@@ -99,7 +99,7 @@ new linker
 
 % make a second linker 5 nm from the first, to keep minus end rotationally fixed
 
-new linker 
+new linker
 {
     position = -0.24 0 0
     attach = filament, 0.01, minus_end
