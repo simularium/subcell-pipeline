@@ -1,0 +1,29 @@
+subcell\_analysis.spatial\_annotator
+====================================
+
+.. automodule:: subcell_analysis.spatial_annotator
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SpatialAnnotator
+   
+   
+
+   
+   
+   
+
+
+

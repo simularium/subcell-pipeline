@@ -1,0 +1,29 @@
+subcell\_analysis.utils
+=======================
+
+.. automodule:: subcell_analysis.utils
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_unit_vector
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
