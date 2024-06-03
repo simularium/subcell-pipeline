@@ -113,7 +113,6 @@ ignore = [
   "CONTRIBUTING.md",
   "*docs/**",
   "*.ipynb",
-  "*notebooks/*",
   "*tests/**",
   "*templates/*",
   "*configs/*",
