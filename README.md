@@ -20,6 +20,12 @@ Note that with the installation, you cannot add/remove/update dependencies.
 
 1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
 2. Activate the environment: `conda activate subcell_analysis`
+3. Install all dependencies: `make install`
+
+Or,
+
+1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
+2. Activate the environment: `conda activate subcell_analysis`
 3. Install conda-specific dependencies: `conda env update --file environment.yml --prune`
 4. Install dependencies: `pip install -r requirements.txt`
 5. Install the project in editable mode: `pip install -e .`
@@ -27,6 +33,12 @@ Note that with the installation, you cannot add/remove/update dependencies.
 ### Install with `conda` and `pdm`
 
 Use this installation method for a complete development environment.
+
+1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
+2. Activate the environment: `conda activate subcell_analysis`
+3. Install all dependencies: `make install DEV=1`
+
+Or,
 
 1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
 2. Activate the environment: `conda activate subcell_analysis`

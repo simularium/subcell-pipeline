@@ -1,4 +1,4 @@
-.PHONY: clean build lint docs
+.PHONY: clean build lint docs install
 
 clean: # clean all build, python, and testing files
 	rm -fr build/
@@ -28,3 +28,13 @@ lint: # run formatting and linting
 
 docs: # generates documentation
 	make -C docs html
+
+install: # installs dependencies
+ifdef DEV
+	conda env update --file environment.yml --prune
+	pdm sync
+else
+	conda env update --file environment.yml --prune
+	pip install -r requirements.txt
+	pip install -e .
+endif
