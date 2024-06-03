@@ -21,10 +21,13 @@ build: # run tests
 	pytest
 
 lint: # run formatting and linting
-	black -l 88 .
-	isort -l 88 .
-	ruff .
-	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs .
+	black subcell_analysis
+	black notebooks
+	isort subcell_analysis
+	isort notebooks
+	ruff check subcell_analysis
+	ruff check notebooks
+	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs subcell_analysis
 
 docs: # generates documentation
 	make -C docs html
