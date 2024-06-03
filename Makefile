@@ -22,11 +22,8 @@ build: # run tests
 
 lint: # run formatting and linting
 	black subcell_analysis
-	black notebooks
 	isort subcell_analysis
-	isort notebooks
 	ruff check subcell_analysis
-	ruff check notebooks
 	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs subcell_analysis
 
 docs: # generates documentation
