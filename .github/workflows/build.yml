@@ -25,7 +25,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: ${{ matrix.python-version }}
-        activate-environment: subcell_analysis
+        activate-environment: subcell_pipeline
         environment-file: ./environment.yml
 
     - name: Set up PDM
@@ -41,15 +41,15 @@ jobs:
       env:
         CACHE_NUMBER: 0 # Increment this number if you wish to hard-refresh the cache.
       with:
-        path: /usr/share/miniconda/envs/subcell_analysis
+        path: /usr/share/miniconda/envs/subcell_pipeline
         key: ${{ runner.os }}-${{ hashFiles('**/pdm.lock', '**/environment.yml') }}-${{ env.CACHE_NUMBER }}
 
     - name: Install dependencies
       if: steps.cached-dependencies.outputs.cache-hit != 'true'
       shell: bash -l {0}
       run: |
-        conda create -n subcell_analysis python=3.10
-        conda activate subcell_analysis
+        conda create -n subcell_pipeline python=3.10
+        conda activate subcell_pipeline
         conda env update --file environment.yml --prune
         pdm sync
 
