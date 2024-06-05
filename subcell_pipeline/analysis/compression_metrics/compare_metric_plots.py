@@ -4,7 +4,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
 from subcell_analysis.compression_workflow_runner import compression_metrics_workflow
 

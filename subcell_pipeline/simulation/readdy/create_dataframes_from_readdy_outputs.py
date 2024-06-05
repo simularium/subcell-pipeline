@@ -3,7 +3,6 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-
 from subcell_analysis.readdy import ReaddyLoader, ReaddyPostProcessor
 from subcell_analysis.readdy.readdy_post_processor import array_to_dataframe
 

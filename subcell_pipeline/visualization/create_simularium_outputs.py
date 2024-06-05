@@ -24,7 +24,6 @@ from simulariumio import (
     UnitData,
 )
 from simulariumio.filters import EveryNthTimestepFilter
-
 from subcell_analysis.compression_analysis import (
     COMPRESSIONMETRIC,
     get_asymmetry_of_peak,

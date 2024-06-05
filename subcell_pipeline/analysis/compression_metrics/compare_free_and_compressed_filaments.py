@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 from simulariumio import ScatterPlotData
 from simulariumio.cytosim import CytosimConverter
-
 from subcell_analysis.compression_analysis import COMPRESSIONMETRIC
 from subcell_analysis.compression_workflow_runner import (
     compression_metrics_workflow,

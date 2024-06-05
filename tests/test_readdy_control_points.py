@@ -4,7 +4,6 @@ from typing import List
 
 import numpy as np
 import pytest
-
 from subcell_analysis.readdy import ReaddyLoader, ReaddyPostProcessor
 
 
