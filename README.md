@@ -1,11 +1,11 @@
 # Subcellular model simulation and analysis pipeline
 
-[![Build status](https://simularium.github.io/subcell-analysis/_badges/build.svg)](https://github.com/simularium/subcell-analysis/actions?query=workflow%3Abuild)
-[![Lint status](https://simularium.github.io/subcell-analysis/_badges/lint.svg)](https://github.com/simularium/subcell-analysis/actions?query=workflow%3Alint)
-[![Documentation](https://simularium.github.io/subcell-analysis/_badges/documentation.svg)](https://simularium.github.io/subcell-analysis/)
-[![Coverage](https://simularium.github.io/subcell-analysis/_badges/coverage.svg)](https://simularium.github.io/subcell-analysis/_coverage/)
-[![Code style](https://simularium.github.io/subcell-analysis/_badges/style.svg)](https://github.com/psf/black)
-[![License](https://simularium.github.io/subcell-analysis/_badges/license.svg)](https://github.com/simularium/subcell-analysis/blob/main/LICENSE)
+[![Build status](https://simularium.github.io/subcell-pipeline/_badges/build.svg)](https://github.com/simularium/subcell-pipeline/actions?query=workflow%3Abuild)
+[![Lint status](https://simularium.github.io/subcell-pipeline/_badges/lint.svg)](https://github.com/simularium/subcell-pipeline/actions?query=workflow%3Alint)
+[![Documentation](https://simularium.github.io/subcell-pipeline/_badges/documentation.svg)](https://simularium.github.io/subcell-pipeline/)
+[![Coverage](https://simularium.github.io/subcell-pipeline/_badges/coverage.svg)](https://simularium.github.io/subcell-pipeline/_coverage/)
+[![Code style](https://simularium.github.io/subcell-pipeline/_badges/style.svg)](https://github.com/psf/black)
+[![License](https://simularium.github.io/subcell-pipeline/_badges/license.svg)](https://github.com/simularium/subcell-pipeline/blob/main/LICENSE)
 
 Analysis functionality for subcellular models
 
@@ -18,14 +18,14 @@ Analysis functionality for subcellular models
 Use this installation method for a general user environment.
 Note that with the installation, you cannot add/remove/update dependencies.
 
-1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
-2. Activate the environment: `conda activate subcell_analysis`
+1. Create a virtual environment: `conda create -n subcell_pipeline python=3.10`
+2. Activate the environment: `conda activate subcell_pipeline`
 3. Install all dependencies: `make install`
 
 Or,
 
-1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
-2. Activate the environment: `conda activate subcell_analysis`
+1. Create a virtual environment: `conda create -n subcell_pipeline python=3.10`
+2. Activate the environment: `conda activate subcell_pipeline`
 3. Install conda-specific dependencies: `conda env update --file environment.yml --prune`
 4. Install dependencies: `pip install -r requirements.txt`
 5. Install the project in editable mode: `pip install -e .`
@@ -34,14 +34,14 @@ Or,
 
 Use this installation method for a complete development environment.
 
-1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
-2. Activate the environment: `conda activate subcell_analysis`
+1. Create a virtual environment: `conda create -n subcell_pipeline python=3.10`
+2. Activate the environment: `conda activate subcell_pipeline`
 3. Install all dependencies: `make install DEV=1`
 
 Or,
 
-1. Create a virtual environment: `conda create -n subcell_analysis python=3.10`
-2. Activate the environment: `conda activate subcell_analysis`
+1. Create a virtual environment: `conda create -n subcell_pipeline python=3.10`
+2. Activate the environment: `conda activate subcell_pipeline`
 3. Install conda-specific dependencies: `conda env update --file environment.yml --prune`
 4. Install dependencies: `pdm sync`
 
