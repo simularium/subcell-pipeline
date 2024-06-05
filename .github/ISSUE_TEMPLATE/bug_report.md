@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve subcell-analysis
+about: Create a report to help us improve subcell-pipeline
 labels: bug
 ---
 
@@ -28,4 +28,4 @@ labels: bug
 <!-- Any additional information about your environment. -->
 
 -   OS Version: _[e.g. macOS 11.3.1]_
--   subcell-analysis Version: _[e.g. 0.5.0]_
+-   subcell-pipeline Version: _[e.g. 0.5.0]_

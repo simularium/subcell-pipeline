@@ -67,7 +67,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
-docs/subcell_analysis.*rst
+docs/_summary/
+docs/subcell_pipline.*rst
 docs/modules.rst
 
 # PyBuilder

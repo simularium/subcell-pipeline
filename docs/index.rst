@@ -15,11 +15,11 @@
    :caption: API reference
    :recursive:
 
-   subcell_analysis
+   subcell_pipeline
 
 
 .. toctree::
    :hidden:
    :caption: Project links
 
-   GitHub <https://github.com/simularium/subcell-analysis>
+   GitHub <https://github.com/simularium/subcell-pipeline>
