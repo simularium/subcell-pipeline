@@ -2,7 +2,7 @@
 
 
 % how fast the end gets compressed (µm/s) 150 nm / 10 µs
-[[compression_velocity = [0.15, 0.47434165, 1.5, 4.73413649, 15, 47.4341649, 150]]]
+[[compression_velocity = [4.73413649, 15, 47.4341649, 150]]]
 % fast: 1.5e2, 1.5e3, 1.5e4
 % slow: 0.0015, 0.015, 0.15, 1.5, 15
 
@@ -39,6 +39,7 @@ set simul system
 {
     time_step = [[timestep]]
     viscosity = 0.01
+    random_seed = {{RANDOM_SEED}}
 }
 
 set space cell
