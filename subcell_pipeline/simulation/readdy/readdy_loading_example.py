@@ -3,7 +3,6 @@
 import argparse
 
 import numpy as np
-
 from subcell_analysis.readdy import ReaddyLoader, ReaddyPostProcessor
 
 

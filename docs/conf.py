@@ -15,13 +15,13 @@ import os
 import sys
 from datetime import datetime
 
-sys.path.insert(0, os.path.abspath("../subcell_anlysis"))
+sys.path.insert(0, os.path.abspath("../subcell_pipeline"))
 
 # -- Project information -----------------------------------------------------
 
-project = "Subcell analysis"
+project = "Subcellular modeling pipeline"
 copyright = f"{datetime.now().year}, Allen Institute for Cell Science"
-release = importlib.metadata.version("subcell-analysis")
+release = importlib.metadata.version("subcell-pipeline")
 
 # -- General configuration ---------------------------------------------------
 

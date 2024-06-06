@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from pacmap import PaCMAP
 from scipy import interpolate as spinterp
-
 from subcell_analysis.compression_analysis import get_pacmap_embedding
 
 # %%

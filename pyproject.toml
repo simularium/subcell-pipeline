@@ -1,6 +1,6 @@
 [project]
-name = "subcell_analysis"
-description = "Analysis functionality for subcellular models"
+name = "subcell_pipeline"
+description = "Simulation, analysis, and visualization for subcellular models"
 authors = [
     { name = "Blair Lyons", email = "blairl@alleninstitute.org" },
 ]
@@ -29,10 +29,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Simularium/subcell-analysis"
-"Bug Tracker" = "https://github.com/Simularium/subcell-analysis/issues"
-Documentation = "https://Simularium.github.io/subcell-analysis"
-"User Support" = "https://github.com/Simularium/subcell-analysis/issues"
+Homepage = "https://github.com/Simularium/subcell-pipeline"
+"Bug Tracker" = "https://github.com/Simularium/subcell-pipeline/issues"
+Documentation = "https://Simularium.github.io/subcell-pipeline"
+"User Support" = "https://github.com/Simularium/subcell-pipeline/issues"
 
 [build-system]
 requires = ["pdm-backend"]

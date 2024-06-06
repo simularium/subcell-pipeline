@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a feature for subcell-analysis
+about: Suggest a feature for subcell-pipeline
 labels: enhancement
 ---
 
