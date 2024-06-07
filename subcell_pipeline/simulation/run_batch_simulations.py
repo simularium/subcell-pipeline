@@ -15,6 +15,23 @@ def generate_configs_from_file(
     random_seeds: list[int],
     config_file: str,
 ) -> None:
+    """
+    Generate configs from given file for each seed and save to S3 bucket.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    timestamp
+        Current timestamp used to organize input and outfile files.
+    random_seeds
+        Random seeds for simulations.
+    config_file
+       Path to the config file.
+    """
+
     s3_client = boto3.client("s3")
 
     with open(config_file) as f:
@@ -39,6 +56,32 @@ def generate_configs_from_template(
     pattern: str,
     key_map: dict[str, str],
 ) -> list[str]:
+    """
+    Generate configs for each given file for each seed and save to S3 bucket.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    timestamp
+        Current timestamp used to organize input and outfile files.
+    random_seeds
+        Random seeds for simulations.
+    config_files
+        Path to the config files.
+    pattern
+        Regex pattern to find config condition value.
+    key_map
+        Map of condition values to file keys.
+
+    Returns
+    -------
+    :
+        List of config groups.
+    """
+
     group_keys = []
     s3_client = boto3.client("s3")
 
@@ -80,6 +123,42 @@ def register_and_run_simulations(
     job_queue: str,
     job_size: int,
 ) -> list[str]:
+    """
+    Register job definitions and submit jobs to AWS Batch.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    timestamp
+        Current timestamp used to organize input and outfile files.
+    group_keys
+        List of config group keys.
+    aws_account : str
+        AWS account number.
+    aws_region : str
+        AWS region.
+    aws_user : str
+        User name prefix for job name and image.
+    image : str
+        Image name and version.
+    vcpus : int
+        Number of vCPUs for each job.
+    memory : int
+        Memory for each job.
+    job_queue : str
+        Job queue.
+    job_size : int
+        Job array size.
+
+    Returns
+    -------
+    :
+        List of job ARNs.
+    """
+
     boto3.setup_default_session(region_name=aws_region)
 
     all_job_arns: list[str] = []
@@ -123,6 +202,21 @@ def register_and_run_simulations(
 def check_and_save_job_logs(
     bucket: str, series_name: str, job_arns: list[str], aws_region: str
 ):
+    """
+    Check job status and save CloudWatch logs for successfully completed jobs.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    job_arns
+        List of job ARNs.
+    aws_region : str
+        AWS region.
+    """
+
     boto3.setup_default_session(region_name=aws_region)
 
     s3_client = boto3.client("s3")

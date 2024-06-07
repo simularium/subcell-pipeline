@@ -126,7 +126,7 @@ memory: int = 7000
 # Job queue
 job_queue: str = "general_on_demand"
 
-# Job size
+# Job array size
 job_size: int = len(random_seeds)
 
 # %% [markdown]
