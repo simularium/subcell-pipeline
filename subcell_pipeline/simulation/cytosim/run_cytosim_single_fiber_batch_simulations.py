@@ -28,7 +28,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from subcell_pipeline.simulation.run_batch_simulations import (
+from subcell_pipeline.simulation.batch_simulations import (
     check_and_save_job_logs,
     generate_configs_from_file,
     register_and_run_simulations,
