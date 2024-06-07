@@ -22,6 +22,7 @@ import sys
 from datetime import datetime
 
 from subcell_pipeline.simulation.run_batch_simulations import (
+    check_and_save_job_logs,
     generate_configs_from_template,
     register_and_run_simulations,
 )
@@ -140,7 +141,7 @@ a job array. Job status can be monitored via the AWS Console.
 """
 
 # %%
-register_and_run_simulations(
+job_arns = register_and_run_simulations(
     bucket,
     series_name,
     timestamp,
@@ -154,3 +155,17 @@ register_and_run_simulations(
     job_queue,
     job_size,
 )
+
+# %% [markdown]
+"""
+## Check and save job logs
+
+Iterates through the list of submitted job ARNs to check job status. If job does
+not have the "SUCCEEDED" status, print the current status. If job does have the
+"SUCCEEDED" status, then save a copy of the CloudWatch logs. The list of job
+ARNs can be manually adjusted to limit which jobs are checks or avoid saving
+logs that have already been saved.
+"""
+
+# %%
+check_and_save_job_logs(bucket, series_name, job_arns, aws_region)
