@@ -5,6 +5,10 @@
 Notebook contains steps for running Cytosim simulations in which a single actin
 fiber is compressed at different compression velocities.
 
+This notebook uses [Cytosim](https://github.com/simularium/Cytosim) templates
+and scripts. Clone a copy and set the environment variable
+`CYTOSIM=/path/to/Cytosim/`.
+
 This notebook provides an example of running a simulation series in which there
 are multiple conditions, each of which need to be run for multiple replicates.
 For an example of running a simulation series for a single condition for
@@ -18,14 +22,21 @@ multiple replicates, see `run_cytosim_single_fiber_batch_simulations.py`.
 
 # %%
 import getpass
+import os
 import sys
 from datetime import datetime
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 from subcell_pipeline.simulation.run_batch_simulations import (
     check_and_save_job_logs,
     generate_configs_from_template,
     register_and_run_simulations,
 )
+
+# %%
+load_dotenv()
 
 # %% [markdown]
 """
@@ -35,7 +46,7 @@ this location.
 """
 
 # %%
-sys.path.append("/home/jessica/Documents/Cytosim/python/run/")
+sys.path.append(str(Path(os.getenv("CYTOSIM")) / "python" / "run"))
 from preconfig import Preconfig  # noqa: E402
 
 # %% [markdown]
@@ -58,7 +69,9 @@ bucket: str = "s3://cytosim-working-bucket"
 random_seeds: list[int] = [1, 2, 3, 4, 5]
 
 # Path to the config template file
-path_to_template: str = "../../../templates/vary_compress_rate.cym.tpl"
+path_to_template: str = str(
+    Path(os.getenv("CYTOSIM")) / "templates" / "vary_compress_rate.cym.tpl"
+)
 
 # Current timestamp used to organize input and outfile files
 timestamp: str = datetime.now().strftime("%Y-%m-%d")

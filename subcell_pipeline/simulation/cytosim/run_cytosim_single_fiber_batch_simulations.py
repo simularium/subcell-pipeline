@@ -5,6 +5,10 @@
 Notebook contains steps for running Cytosim simulations for a baseline single
 actin fiber.
 
+This notebook uses [Cytosim](https://github.com/simularium/Cytosim) configs and
+scripts. Clone a copy and set the environment variable
+`CYTOSIM=/path/to/Cytosim/`.
+
 This notebook provides an example of running a simulation series for a single
 condition for multiple replicates. For an example of running a simulation series
 for multiple conditions, each of which need to be run for multiple replicates,
@@ -18,13 +22,20 @@ see `run_cytosim_compression_batch_simulations.py`.
 
 # %%
 import getpass
+import os
 from datetime import datetime
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 from subcell_pipeline.simulation.run_batch_simulations import (
     check_and_save_job_logs,
     generate_configs_from_file,
     register_and_run_simulations,
 )
+
+# %%
+load_dotenv()
 
 # %% [markdown]
 """
@@ -46,7 +57,9 @@ bucket: str = "s3://cytosim-working-bucket"
 random_seeds: list[int] = [1, 2, 3, 4, 5]
 
 # Path to the config file
-config_file: str = "../../../configs/free_barbed_end_final.cym"
+config_file: str = str(
+    Path(os.getenv("CYTOSIM")) / "configs" / "free_barbed_end_final.cym"
+)
 
 # Current timestamp used to organize input and outfile files
 timestamp: str = datetime.now().strftime("%Y-%m-%d")
