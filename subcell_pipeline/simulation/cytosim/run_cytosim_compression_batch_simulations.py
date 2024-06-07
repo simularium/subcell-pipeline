@@ -52,7 +52,7 @@ with five replicates each (random seeds 1, 2, 3, 4, and 5).
 series_name: str = "COMPRESSION_VELOCITY"
 
 # S3 bucket for input and output files
-bucket: str = "cytosim-working-bucket"
+bucket: str = "s3://cytosim-working-bucket"
 
 # Random seeds for simulations
 random_seeds: list[int] = [1, 2, 3, 4, 5]

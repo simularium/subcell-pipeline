@@ -1,4 +1,3 @@
-import io
 import re
 
 import boto3
@@ -6,6 +5,7 @@ from container_collection.batch.get_batch_logs import get_batch_logs
 from container_collection.batch.make_batch_job import make_batch_job
 from container_collection.batch.register_batch_job import register_batch_job
 from container_collection.batch.submit_batch_job import submit_batch_job
+from io_collection.save.save_text import save_text
 
 
 def generate_configs_from_file(
@@ -32,8 +32,6 @@ def generate_configs_from_file(
        Path to the config file.
     """
 
-    s3_client = boto3.client("s3")
-
     with open(config_file) as f:
         contents = f.read()
 
@@ -41,10 +39,7 @@ def generate_configs_from_file(
         config_key = f"{series_name}/{timestamp}/configs/{series_name}_{index}.cym"
         config_contents = contents.replace("{{RANDOM_SEED}}", str(seed))
         print(f"Saving config for for seed {seed} to [ {config_key}]")
-
-        with io.BytesIO() as buffer:
-            buffer.write(config_contents.encode("utf-8"))
-            s3_client.put_object(Bucket=bucket, Key=config_key, Body=buffer.getvalue())
+        save_text(bucket, config_key, config_contents)
 
 
 def generate_configs_from_template(
@@ -83,7 +78,6 @@ def generate_configs_from_template(
     """
 
     group_keys = []
-    s3_client = boto3.client("s3")
 
     for config_file in config_files:
         with open(config_file) as f:
@@ -99,12 +93,7 @@ def generate_configs_from_template(
             config_key = f"{series_name}/{timestamp}/configs/{group_key}_{index}.cym"
             config_contents = contents.replace("{{RANDOM_SEED}}", str(seed))
             print(f"Saving config for [ {match} ] for seed {seed} to [ {config_key}]")
-
-            with io.BytesIO() as buffer:
-                buffer.write(config_contents.encode("utf-8"))
-                s3_client.put_object(
-                    Bucket=bucket, Key=config_key, Body=buffer.getvalue()
-                )
+            save_text(bucket, config_key, config_contents)
 
     return group_keys
 
@@ -163,7 +152,7 @@ def register_and_run_simulations(
 
     all_job_arns: list[str] = []
     registry = f"{aws_account}.dkr.ecr.{aws_region}.amazonaws.com"
-    job_key = f"s3://{bucket}/{series_name}/{timestamp}/"
+    job_key = f"{bucket}/{series_name}/{timestamp}/"
 
     for group_key in group_keys:
         job_definition = make_batch_job(
@@ -219,9 +208,7 @@ def check_and_save_job_logs(
 
     boto3.setup_default_session(region_name=aws_region)
 
-    s3_client = boto3.client("s3")
     batch_client = boto3.client("batch")
-
     responses = batch_client.describe_jobs(jobs=job_arns)["jobs"]
 
     for response in responses:
@@ -240,7 +227,4 @@ def check_and_save_job_logs(
             print(f"Saving logs for job [ {response['jobId']} ] to [ {log_key}]")
 
             logs = get_batch_logs(response["jobArn"], ".")
-
-            with io.BytesIO() as buffer:
-                buffer.write(logs.encode("utf-8"))
-                s3_client.put_object(Bucket=bucket, Key=log_key, Body=buffer.getvalue())
+            save_text(bucket, log_key, logs)
