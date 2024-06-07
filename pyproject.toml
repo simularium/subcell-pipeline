@@ -26,6 +26,7 @@ dependencies = [
     "ipykernel>=6.29.4",
     "setuptools>=70.0.0",
     "io-collection>=0.10.2",
+    "python-dotenv>=1.0.1",
 ]
 
 [project.urls]
