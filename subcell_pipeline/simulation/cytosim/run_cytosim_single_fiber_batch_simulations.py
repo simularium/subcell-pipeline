@@ -36,6 +36,7 @@ from subcell_pipeline.simulation.batch_simulations import (
 
 # %%
 load_dotenv()
+cytosim_path: Path = Path(os.getenv("CYTOSIM", "."))
 
 # %% [markdown]
 """
@@ -57,9 +58,7 @@ bucket: str = "s3://cytosim-working-bucket"
 random_seeds: list[int] = [1, 2, 3, 4, 5]
 
 # Path to the config file
-config_file: str = str(
-    Path(os.getenv("CYTOSIM")) / "configs" / "free_barbed_end_final.cym"
-)
+config_file: str = str(cytosim_path / "configs" / "free_barbed_end_final.cym")
 
 # Current timestamp used to organize input and outfile files
 timestamp: str = datetime.now().strftime("%Y-%m-%d")

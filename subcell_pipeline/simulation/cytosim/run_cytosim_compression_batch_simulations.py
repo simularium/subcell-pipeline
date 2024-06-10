@@ -37,6 +37,7 @@ from subcell_pipeline.simulation.batch_simulations import (
 
 # %%
 load_dotenv()
+cytosim_path: Path = Path(os.getenv("CYTOSIM", "."))
 
 # %% [markdown]
 """
@@ -46,7 +47,7 @@ this location.
 """
 
 # %%
-sys.path.append(str(Path(os.getenv("CYTOSIM")) / "python" / "run"))
+sys.path.append(str(cytosim_path / "python" / "run"))
 from preconfig import Preconfig  # noqa: E402
 
 # %% [markdown]
@@ -69,9 +70,7 @@ bucket: str = "s3://cytosim-working-bucket"
 random_seeds: list[int] = [1, 2, 3, 4, 5]
 
 # Path to the config template file
-path_to_template: str = str(
-    Path(os.getenv("CYTOSIM")) / "templates" / "vary_compress_rate.cym.tpl"
-)
+path_to_template: Path = cytosim_path / "templates" / "vary_compress_rate.cym.tpl"
 
 # Current timestamp used to organize input and outfile files
 timestamp: str = datetime.now().strftime("%Y-%m-%d")
@@ -95,7 +94,7 @@ use as the simulation condition key. Save all config files to S3 bucket.
 
 # %%
 preconfig = Preconfig()
-config_files = preconfig.parse(path_to_template, {})
+config_files = preconfig.parse(path_to_template, {}, path=cytosim_path / "configs")
 
 # %%
 pattern = r"compression_velocity:([\s0-9\.]+)"
