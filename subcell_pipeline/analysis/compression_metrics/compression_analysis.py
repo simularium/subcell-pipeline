@@ -1,31 +1,82 @@
-#!/usr/bin/env python
 from enum import Enum
-from typing import Tuple
+from typing import Any, Tuple, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from pacmap import PaCMAP
 from sklearn.decomposition import PCA
 
-from .utils import ABSOLUTE_TOLERANCE, get_unit_vector
-
-# TODO: consider creating a fiber class?
+ABSOLUTE_TOLERANCE = 1e-6
 
 
 class COMPRESSIONMETRIC(Enum):
-    NON_COPLANARITY = "NON_COPLANARITY"
-    PEAK_ASYMMETRY = "PEAK_ASYMMETRY"
-    SUM_BENDING_ENERGY = "SUM_BENDING_ENERGY"
-    AVERAGE_PERP_DISTANCE = "AVERAGE_PERP_DISTANCE"
-    TOTAL_FIBER_TWIST = "TOTAL_FIBER_TWIST"
-    ENERGY_ASYMMETRY = "ENERGY_ASYMMETRY"
-    CALC_BENDING_ENERGY = "CALC_BENDING_ENERGY"
-    CONTOUR_LENGTH = "CONTOUR_LENGTH"
-    COMPRESSION_RATIO = "COMPRESSION_RATIO"
+    # Enum class for compression metrics
+
+    NON_COPLANARITY = "non_coplanarity"
+    PEAK_ASYMMETRY = "peak_asymmetry"
+    SUM_BENDING_ENERGY = "sum_bending_energy"
+    AVERAGE_PERP_DISTANCE = "average_perp_distance"
+    TOTAL_FIBER_TWIST = "total_fiber_twist"
+    ENERGY_ASYMMETRY = "energy_asymmetry"
+    CALC_BENDING_ENERGY = "calc_bending_energy"
+    CONTOUR_LENGTH = "contour_length"
+    COMPRESSION_RATIO = "compression_ratio"
+
+    def label(self):
+        # Returns the label for the compression metric
+        labels = {
+            COMPRESSIONMETRIC.NON_COPLANARITY: "Non-coplanarity",
+            COMPRESSIONMETRIC.PEAK_ASYMMETRY: "Peak asymmetry",
+            COMPRESSIONMETRIC.SUM_BENDING_ENERGY: "Bending energy",
+            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: "Average perpendicular distance",
+            COMPRESSIONMETRIC.TOTAL_FIBER_TWIST: "Total fiber twist",
+            COMPRESSIONMETRIC.ENERGY_ASYMMETRY: "Energy asymmetry",
+            COMPRESSIONMETRIC.CALC_BENDING_ENERGY: "Calculated bending energy",
+            COMPRESSIONMETRIC.CONTOUR_LENGTH: "Contour length",
+            COMPRESSIONMETRIC.COMPRESSION_RATIO: "Compression ratio",
+        }
+        return labels[self]
+
+    def calculate_metric(self, polymer_trace: np.ndarray, **options: dict):
+        # Returns the calculated metric value
+        functions = {
+            COMPRESSIONMETRIC.NON_COPLANARITY: get_third_component_variance,
+            COMPRESSIONMETRIC.PEAK_ASYMMETRY: get_asymmetry_of_peak,
+            COMPRESSIONMETRIC.SUM_BENDING_ENERGY: get_sum_bending_energy,
+            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: get_average_distance_from_end_to_end_axis,
+            COMPRESSIONMETRIC.TOTAL_FIBER_TWIST: get_total_fiber_twist,
+            COMPRESSIONMETRIC.ENERGY_ASYMMETRY: get_energy_asymmetry,
+            COMPRESSIONMETRIC.CALC_BENDING_ENERGY: get_bending_energy_from_trace,
+            COMPRESSIONMETRIC.CONTOUR_LENGTH: get_contour_length_from_trace,
+            COMPRESSIONMETRIC.COMPRESSION_RATIO: get_compression_ratio,
+        }
+        return functions[self](polymer_trace, **options)
+
+
+def get_unit_vector(
+    vector: np.array,
+) -> Tuple[np.array, Union[float, np.floating[Any]]]:
+    """
+    Calculates the unit vector and length of a given vector.
+
+    Parameters:
+        vector (np.array): The input vector.
+
+    Returns:
+        Tuple[np.array, Union[float, np.floating[Any]]]: A tuple containing the unit vector
+        and length of the input vector.
+    """
+    if np.linalg.norm(vector) < ABSOLUTE_TOLERANCE or np.isnan(vector).any():
+        return np.array([0, 0, 0]), 0.0
+    else:
+        vec_length = np.linalg.norm(vector)
+        return vector / vec_length, vec_length
 
 
 def get_end_to_end_unit_vector(
     polymer_trace: np.ndarray,
-) -> Tuple[np.ndarray, float]:
+) -> Tuple[np.array, Union[float, np.floating[Any]]]:
     """
     Returns the unit vector of the end-to-end axis of a polymer trace.
 
@@ -41,6 +92,9 @@ def get_end_to_end_unit_vector(
     end_to_end_axis_length: float
         length of the end-to-end axis of the polymer trace
     """
+    assert len(polymer_trace) > 1, "Polymer trace must have at least 2 points"
+    assert polymer_trace.shape[1] == 3, "Polymer trace must have 3 columns"
+
     end_to_end_axis = polymer_trace[-1] - polymer_trace[0]
 
     return get_unit_vector(end_to_end_axis)
@@ -94,7 +148,7 @@ def get_end_to_end_axis_distances_and_projections(
 def get_average_distance_from_end_to_end_axis(
     polymer_trace: np.ndarray,
     **options: dict,
-) -> float:
+) -> Union[float, np.floating[Any]]:
     """
     Returns the average perpendicular distance of polymer trace points from
     the end-to-end axis.
@@ -184,7 +238,7 @@ def get_pca_polymer_trace_projection(
 def get_contour_length_from_trace(
     polymer_trace: np.ndarray,
     **options: dict,
-) -> float:
+) -> Union[float, np.floating[Any]]:
     """
     Returns the sum of inter-monomer distances in the trace.
 
@@ -208,8 +262,8 @@ def get_contour_length_from_trace(
 
 def get_bending_energy_from_trace(
     polymer_trace: np.ndarray,
-    **options: dict,
-) -> float:
+    **options: dict[str, Any],
+) -> Union[float, np.floating[Any]]:
     """
     Returns the bending energy per monomer of a polymer trace.
 
@@ -222,7 +276,7 @@ def get_bending_energy_from_trace(
         bending_constant: float
             bending constant of the fiber
     """
-    bending_constant = options.get("bending_constant", 1)
+    bending_constant = float(options.get("bending_constant", 1))
 
     cos_angle = np.zeros(len(polymer_trace) - 2)
     for ind in range(len(polymer_trace) - 2):
@@ -568,3 +622,96 @@ def get_compression_ratio(
     return 1 - get_end_to_end_unit_vector(polymer_trace)[
         1
     ] / get_contour_length_from_trace(polymer_trace)
+
+
+def run_single_metric_calculation(
+    df_repeat: pd.DataFrame, metric: COMPRESSIONMETRIC, **options: dict
+) -> pd.DataFrame:
+    """
+    Given cytosim output, run_metric_calculation calculates a chosen metric over
+    all points in a fiber.
+
+    Parameters
+    ----------
+    df_repeat: [(num_timepoints * num_points) x n columns] pandas dataframe
+        df_repeat is a dataframe of cytosim outputs that is generated after
+        some post-processing.
+        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce,
+        segment_curvature,
+        force_magnitude, segment_energy] columns and any metric columns
+    metric: COMPRESSIONMETRIC enum
+        metric that includes chosen compression metric
+    **options: dict
+        Additional options as key-value pairs.
+
+    Returns
+    -------
+    df_repeat dataframe with calculated metric appended
+    """
+    df_repeat[metric.value] = np.nan
+    for _ct, (_time, fiber_at_time) in enumerate(df_repeat.groupby("time")):
+        polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
+        df_repeat.loc[fiber_at_time.index, metric.value] = metric.calculate_metric(
+            polymer_trace=polymer_trace, **options
+        )
+
+    return df_repeat
+
+
+def compression_metrics_workflow(
+    df_repeat: pd.DataFrame, metrics_to_calculate: list, **options: dict
+) -> pd.DataFrame:
+    """
+    Calculates chosen metrics from cytosim output of fiber positions and
+    properties across timesteps.
+
+    Parameters
+    ----------
+    df_repeat: [(num_timepoints * num_points) x n columns] pandas dataframe
+        df_repeat is a dataframe of cytosim outputs that is generated
+        after some post-processing.
+        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce,
+        segment_curvature,
+        force_magnitude, segment_energy] columns and any metric columns
+    metrics_to_calculate: [n] list of CM to calculate
+        list of COMPRESSIONMETRICS
+    **options: dict
+        Additional options as key-value pairs.
+
+    Returns
+    -------
+    df_repeat dataframe with chosen metrics appended as columns
+
+    """
+    for metric in metrics_to_calculate:
+        df_repeat = run_single_metric_calculation(df_repeat, metric, **options)
+    return df_repeat
+
+
+def plot_metric(df_repeat: pd.DataFrame, metric: COMPRESSIONMETRIC) -> None:
+    """
+    Plots and saves metric values over time.
+    gi
+    Parameters
+    ----------
+    df_repeat: [(num_timepoints * num_points) x n columns] pandas dataframe
+        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce,
+        segment_curvature,
+        force_magnitude, segment_energy] columns and any metric columns
+    metric: metric name to be plotted
+        chosen COMPRESSIONMETRIC.
+
+    """
+    metric_by_time = df_repeat.groupby(["time"])[metric].mean()
+    plt.plot(metric_by_time)
+    plt.xlabel("Time")
+    plt.ylabel(metric.label())
+    # Save files if needed.
+    # plt.savefig(str(metric) + "-time.pdf")
+    # plt.savefig(str(metric) + "-time.png")
+
+
+def plot_metric_list(df_repeat: pd.DataFrame, metrics: list) -> None:
+    # docs
+    for metric in metrics:
+        plot_metric(df_repeat, metric)
