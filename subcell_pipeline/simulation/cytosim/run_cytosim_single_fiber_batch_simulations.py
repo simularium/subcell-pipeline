@@ -17,7 +17,8 @@ see `run_cytosim_compression_batch_simulations.py`.
 - [Define simulation conditions](#define-simulation-conditions)
 - [Generate configs from template](#generate-configs-from-template)
 - [Define simulation settings](#define-simulation-settings)
-- [Create and run jobs](#create-and-run-jobs)
+- [Register and run jobs](#register-and-run-jobs)
+- [Check and save job logs](#check-and-save-job-logs)
 """  # noqa: D400, D415
 
 # %%
