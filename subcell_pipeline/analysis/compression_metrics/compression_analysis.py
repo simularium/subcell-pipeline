@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -715,3 +715,29 @@ def plot_metric_list(df_repeat: pd.DataFrame, metrics: list) -> None:
     # docs
     for metric in metrics:
         plot_metric(df_repeat, metric)
+
+
+def calculate_compression_metrics(
+    df: pd.DataFrame, metrics: List[Any], **options: Dict[str, Any]
+) -> pd.DataFrame:
+    """
+    Calculate compression metrics for each group in the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        metrics (List[Any]): The list of metrics to calculate.
+        **options (Dict[str, Any]): Additional options for the calculation.
+
+    Returns:
+        pd.DataFrame: The DataFrame with the calculated metrics.
+    """
+    for simulator, df_sim in df.groupby("simulator"):
+        for velocity, df_velocity in df_sim.groupby("velocity"):
+            for repeat, df_repeat in df_velocity.groupby("repeat"):
+                print(f"simulator: {simulator}, velocity: {velocity}, repeat: {repeat}")
+                df_repeat = compression_metrics_workflow(
+                    df_repeat, metrics_to_calculate=metrics, **options
+                )
+                for metric in metrics:
+                    df.loc[df_repeat.index, metric.value] = df_repeat[metric.value]
+    return df

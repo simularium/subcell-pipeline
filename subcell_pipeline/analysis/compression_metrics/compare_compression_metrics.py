@@ -18,7 +18,7 @@ import pandas as pd
 
 from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
     COMPRESSIONMETRIC,
-    compression_metrics_workflow,
+    calculate_compression_metrics,
 )
 
 plt.rcdefaults()
@@ -32,6 +32,7 @@ print(datadir)
 
 Available metrics are defined in the `COMPRESSIONMETRIC` enum.
 """
+# TODO: only use subsampled dataframe
 metrics = [
     COMPRESSIONMETRIC.NON_COPLANARITY,
     COMPRESSIONMETRIC.PEAK_ASYMMETRY,
@@ -40,11 +41,8 @@ metrics = [
     COMPRESSIONMETRIC.CONTOUR_LENGTH,
     COMPRESSIONMETRIC.COMPRESSION_RATIO,
 ]
-options = {
-    "signed": True,
-}
 
-subsampled = False
+subsampled = True
 suffix = "_subsampled" if subsampled else ""
 
 # %% [markdown]
@@ -52,6 +50,7 @@ suffix = "_subsampled" if subsampled else ""
 ## Load combined dataframe
 
 """
+# TODO: load combined dataframe from S3
 df_path = (
     datadir
     / f"combined_actin_compression_dataset_all_velocities_and_repeats{suffix}.parquet"
@@ -63,20 +62,16 @@ df = pd.read_parquet(df_path)
 ## Calculate metrics and add to dataframe
 
 """
-for simulator, df_sim in df.groupby("simulator"):
-    for velocity, df_velocity in df_sim.groupby("velocity"):
-        for repeat, df_repeat in df_velocity.groupby("repeat"):
-            print(f"simulator: {simulator}, velocity: {velocity}, repeat: {repeat}")
-            df_repeat = compression_metrics_workflow(
-                df_repeat, metrics_to_calculate=metrics, **options
-            )
-            for metric in metrics:
-                df.loc[df_repeat.index, metric.value] = df_repeat[metric.value]
+df = calculate_compression_metrics(df, metrics)
+
 # %% [markdown]
 """
 ## Save dataframe with metrics
 
 """
+# TODO: save dataframe to S3
+# TODO: use iocollection package to save the dataframe, may need to wrap in buffer
+# to save as parquet
 df.to_csv(
     f"{datadir}/combined_actin_compression_metrics_all_velocities_and_repeats{suffix}.csv"
 )
