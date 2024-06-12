@@ -190,7 +190,7 @@ def register_and_run_simulations(
 
 def check_and_save_job_logs(
     bucket: str, series_name: str, job_arns: list[str], aws_region: str
-):
+) -> None:
     """
     Check job status and save CloudWatch logs for successfully completed jobs.
 
