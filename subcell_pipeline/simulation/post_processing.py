@@ -35,13 +35,11 @@ def sample_simulation_data(
     """
 
     for condition_key in condition_keys:
+        series_key = f"{series_name}_{condition_key}" if condition_key else series_name
+
         for seed in random_seeds:
-            data_key = (
-                f"{series_name}/data/{series_name}_{condition_key}_{seed:06d}.csv"
-            )
-            sampled_key = (
-                f"{series_name}/samples/{series_name}_{condition_key}_{seed:06d}.csv"
-            )
+            data_key = f"{series_name}/data/{series_key}_{seed:06d}.csv"
+            sampled_key = f"{series_name}/samples/{series_key}_{seed:06d}.csv"
 
             # Skip if dataframe file already exists.
             if check_key(bucket, sampled_key):

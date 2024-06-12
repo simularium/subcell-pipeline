@@ -56,10 +56,10 @@ def parse_cytosim_simulation_data(
     """
 
     for condition_key in condition_keys:
+        series_key = f"{series_name}_{condition_key}" if condition_key else series_name
+
         for index, seed in enumerate(random_seeds):
-            dataframe_key = (
-                f"{series_name}/data/{series_name}_{condition_key}_{seed:06d}.csv"
-            )
+            dataframe_key = f"{series_name}/data/{series_key}_{seed:06d}.csv"
 
             # Skip if dataframe file already exists.
             if check_key(bucket, dataframe_key):
@@ -68,9 +68,7 @@ def parse_cytosim_simulation_data(
 
             print(f"Parsing data for [ {condition_key} ] seed [ {seed} ]")
 
-            output_key_template = (
-                f"{series_name}/outputs/{series_name}_{condition_key}_{index}/%s"
-            )
+            output_key_template = f"{series_name}/outputs/{series_key}_{index}/%s"
             segment_curvature = load_text(
                 bucket, output_key_template % "fiber_segment_curvature.txt"
             )

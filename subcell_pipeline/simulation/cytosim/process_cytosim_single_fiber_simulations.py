@@ -1,15 +1,15 @@
 # %% [markdown]
-# # Process Cytosim compression simulations
+# # Process Cytosim single fiber simulations
 
 # %% [markdown]
 """
-Notebook contains steps for post processing of Cytosim simulations in which a
-single actin fiber is compressed at different compression velocities.
+Notebook contains steps for post processing of Cytosim simulations for a
+baseline single actin fiber.
 
-This notebook provides an example of processing a simulation series in which
-there are multiple conditions, each of which were run with multiple replicates.
-For an example of processing a simulation series with a single condition with
-multiple replicates, see `process_cytosim_single_fiber_simulations.py`.
+This notebook provides an example of processing a simulation series for a single
+condition with multiple replicates. For an example of processing a simulation
+series with multiple conditions, each of which have multiple replicates, see
+`process_cytosim_compression_simulations.py`.
 
 - [Define simulation conditions](#define-simulation-conditions)
 - [Parse simulation data](#parse-simulation-data)
@@ -27,23 +27,20 @@ from subcell_pipeline.simulation.post_processing import sample_simulation_data
 """
 ## Define simulation conditions
 
-Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 $\mu m$/s)
-with five replicates each (random seeds 1, 2, 3, 4, and 5).
+Defines the `SINGLE_FIBER` simulation series, which simulates a single actin
+fiber with a free barbed end across five replicates (random seeds 1, 2, 3, 4,
+and 5).
 """
 
 # %%
 # Name of the simulation series
-series_name: str = "COMPRESSION_VELOCITY"
+series_name: str = "SINGLE_FIBER"
 
 # S3 bucket for input and output files
 bucket: str = "s3://cytosim-working-bucket"
 
 # Random seeds for simulations
 random_seeds: list[int] = [1, 2, 3, 4, 5]
-
-# List of condition file keys for each velocity
-condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
 # %% [markdown]
 """
@@ -58,7 +55,7 @@ condition key and random seed already exists, parsing is skipped.
 """
 
 # %%
-parse_cytosim_simulation_data(bucket, series_name, condition_keys, random_seeds)
+parse_cytosim_simulation_data(bucket, series_name, [""], random_seeds)
 
 # %% [markdown]
 """
@@ -88,7 +85,7 @@ condition key and random seed already exists, sampling is skipped.
 
 # %%
 sample_simulation_data(
-    bucket, series_name, condition_keys, random_seeds, n_timepoints, n_monomer_points
+    bucket, series_name, [""], random_seeds, n_timepoints, n_monomer_points
 )
 
 # %%
