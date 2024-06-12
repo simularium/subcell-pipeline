@@ -472,9 +472,6 @@ iniconfig==2.0.0 \
 io-collection==0.10.2 \
     --hash=sha256:40faa2fe94e8049dd900c42c09fbb4b1b5da2a226a2cd1618a1ffb89a636ea18 \
     --hash=sha256:66b5e5ae887fe532fbcfcfa75a6f09ee9afa27ad2480cf74ec0d1c2aabfacab9
-ipdb==0.13.13 \
-    --hash=sha256:45529994741c4ab6d2388bfa5d7b725c2cf7fe9deffabdb8a6113aa5ed449ed4 \
-    --hash=sha256:e3ac6018ef05126d442af680aad863006ec19d02290561ac88b8b1c0b0cfc726
 ipykernel==6.29.4 \
     --hash=sha256:1181e653d95c6808039c509ef8e67c4126b3b3af7781496c7cbfb5ed938a27da \
     --hash=sha256:3d44070060f9475ac2092b760123fadf105d2e2493c24848b6691a7c4f42af5c

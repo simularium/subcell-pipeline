@@ -27,7 +27,6 @@ dependencies = [
     "setuptools>=70.0.0",
     "io-collection>=0.10.2",
     "python-dotenv>=1.0.1",
-    "pyarrow>=16.1.0",
 ]
 
 [project.urls]
