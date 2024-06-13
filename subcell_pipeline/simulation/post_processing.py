@@ -1,3 +1,7 @@
+"""
+Methods for processing simulations.
+"""
+
 import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
@@ -24,7 +28,7 @@ def sample_simulation_data(
         Name of S3 bucket for input and output files.
     series_name
         Name of simulation series.
-    condition_keys : list[str]
+    condition_keys
         List of condition keys.
     random_seeds
         Random seeds for simulations.

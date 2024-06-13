@@ -1,3 +1,7 @@
+"""
+Methods for running simulations on AWS Batch.
+"""
+
 import re
 
 import boto3
@@ -125,21 +129,21 @@ def register_and_run_simulations(
         Current timestamp used to organize input and outfile files.
     group_keys
         List of config group keys.
-    aws_account : str
+    aws_account
         AWS account number.
-    aws_region : str
+    aws_region
         AWS region.
-    aws_user : str
+    aws_user
         User name prefix for job name and image.
-    image : str
+    image
         Image name and version.
-    vcpus : int
+    vcpus
         Number of vCPUs for each job.
-    memory : int
+    memory
         Memory for each job.
-    job_queue : str
+    job_queue
         Job queue.
-    job_size : int
+    job_size
         Job array size.
 
     Returns
@@ -202,7 +206,7 @@ def check_and_save_job_logs(
         Name of simulation series.
     job_arns
         List of job ARNs.
-    aws_region : str
+    aws_region
         AWS region.
     """
 
