@@ -23,9 +23,11 @@ if __name__ != "__main__":
 # %%
 import pandas as pd
 
-from subcell_pipeline.analysis.dimensionality_reduction import (
+from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import (
     get_merged_data,
     plot_fibers_by_key_and_seed,
+)
+from subcell_pipeline.analysis.dimensionality_reduction.pca import (
     plot_pca_feature_scatter,
     plot_pca_inverse_transform,
     run_pca,
@@ -116,7 +118,7 @@ features = {
     "REPEAT": "viridis",
 }
 
-plot_pca_feature_scatter(pca_results, features)
+plot_pca_feature_scatter(pca_results, features, pca)
 
 # %% [markdown]
 """
