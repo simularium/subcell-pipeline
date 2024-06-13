@@ -13,10 +13,10 @@
 .. autosummary::
    :toctree: _summary
    :caption: API reference
+   :template: custom_summary.rst
    :recursive:
 
-   subcell_pipeline
-
+   subcell_pipeline.simulation
 
 .. toctree::
    :hidden:
