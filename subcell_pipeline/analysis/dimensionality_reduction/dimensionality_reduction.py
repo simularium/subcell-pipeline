@@ -7,6 +7,7 @@ from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
 from matplotlib.axes import Axes
+from pacmap import PaCMAP
 from sklearn.decomposition import PCA
 
 
@@ -198,6 +199,38 @@ def run_pca(data: pd.DataFrame) -> tuple[pd.DataFrame, PCA]:
     return pca_results, pca
 
 
+def run_pacmap(data: pd.DataFrame) -> tuple[pd.DataFrame, PaCMAP]:
+    """
+    Run Pairwise Controlled Manifold Approximation (PaCMAP) on simulation data.
+
+    Parameters
+    ----------
+    data
+        Simulated fiber data.
+
+    Returns
+    -------
+    :
+        Dataframe with PaCMAP emebdding appended and the PaCMAP object.
+    """
+
+    all_fibers, all_features = reshape_fibers(data)
+
+    pacmap = PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0)
+    transform = pacmap.fit_transform(all_fibers)
+
+    pacmap_results = pd.concat(
+        [
+            pd.DataFrame(transform, columns=["PACMAP1", "PACMAP2"]),
+            pd.DataFrame(all_features),
+        ],
+        axis=1,
+    )
+    pacmap_results = pacmap_results.sample(frac=1, random_state=1)
+
+    return pacmap_results
+
+
 def plot_fibers_by_key_and_seed(data: pd.DataFrame) -> None:
     """
     Plot simulated fiber data for each condition key and random seed.
@@ -295,6 +328,27 @@ def plot_pca_feature_scatter(pca_results: pd.DataFrame, features: dict) -> None:
 
     for index, (feature, colors) in enumerate(features.items()):
         plot_feature_scatter(ax[index], pca_results, "PC", feature, colors)
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_pacmap_feature_scatter(pacmap_results: pd.DataFrame, features: dict) -> None:
+    """
+    Plot scatter of PaCMAP embedding colored by the given features.
+
+    Parameters
+    ----------
+    pacmap_results : pd.DataFrame
+        PaCMAP results data.
+    features : dict
+        Map of feature name to coloring.
+    """
+
+    _, ax = plt.subplots(1, len(features), figsize=(10, 3), sharey=True, sharex=True)
+
+    for index, (feature, colors) in enumerate(features.items()):
+        plot_feature_scatter(ax[index], pacmap_results, "PACMAP", feature, colors)
 
     plt.tight_layout()
     plt.show()
