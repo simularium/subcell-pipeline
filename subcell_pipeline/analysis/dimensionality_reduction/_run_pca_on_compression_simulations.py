@@ -44,10 +44,10 @@ five replicates each (random seeds 1, 2, 3, 4, and 5).
 # Name of the simulation series
 series_name: str = "COMPRESSION_VELOCITY"
 
-# S3 buckets for input and output files
+# S3 bucket Cytosim for input and output files
 cytosim_bucket: str = "s3://cytosim-working-bucket"
 
-# S3 buckets for input and output files
+# S3 bucket ReaDDy for input and output files
 readdy_bucket: str = "s3://readdy-working-bucket"
 
 # Random seeds for simulations

@@ -228,7 +228,7 @@ def run_pacmap(data: pd.DataFrame) -> tuple[pd.DataFrame, PaCMAP]:
     )
     pacmap_results = pacmap_results.sample(frac=1, random_state=1)
 
-    return pacmap_results
+    return pacmap_results, pacmap
 
 
 def plot_fibers_by_key_and_seed(data: pd.DataFrame) -> None:
@@ -327,7 +327,7 @@ def plot_pca_feature_scatter(pca_results: pd.DataFrame, features: dict) -> None:
     _, ax = plt.subplots(1, len(features), figsize=(10, 3), sharey=True, sharex=True)
 
     for index, (feature, colors) in enumerate(features.items()):
-        plot_feature_scatter(ax[index], pca_results, "PC", feature, colors)
+        plot_feature_scatter(ax[index], pca_results, "PCA", feature, colors)
 
     plt.tight_layout()
     plt.show()
