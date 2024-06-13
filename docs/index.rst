@@ -10,6 +10,12 @@
 
    Overview <self>
 
+.. toctree::
+   :hidden:
+   :caption: Workflow notebooks
+
+   Simulations <simulation>
+
 .. autosummary::
    :toctree: _summary
    :caption: API reference
