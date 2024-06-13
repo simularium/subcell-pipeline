@@ -1,6 +1,4 @@
-"""
-Methods for running simulations on AWS Batch.
-"""
+"""Methods for running simulations on AWS Batch."""
 
 import re
 

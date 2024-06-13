@@ -1,6 +1,4 @@
-"""
-Methods for processing Cytosim simulations.
-"""
+"""Methods for processing Cytosim simulations."""
 
 from typing import Union
 

@@ -1,6 +1,4 @@
-"""
-Methods for processing simulations.
-"""
+"""Methods for processing simulations."""
 
 import numpy as np
 import pandas as pd
