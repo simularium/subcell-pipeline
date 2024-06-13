@@ -79,9 +79,9 @@ def plot_pca_feature_scatter(data: pd.DataFrame, features: dict, pca: PCA) -> No
                 cmap=colors,
             )
 
-        ax.set_title(feature)
-        ax.set_xlabel(f"PCA1 ({(pca.explained_variance_ratio_[0] * 100):.1f} %)")
-        ax.set_ylabel(f"PCA2 ({(pca.explained_variance_ratio_[1] * 100):.1f} %)")
+        ax[index].set_title(feature)
+        ax[index].set_xlabel(f"PCA1 ({(pca.explained_variance_ratio_[0] * 100):.1f} %)")
+        ax[index].set_ylabel(f"PCA2 ({(pca.explained_variance_ratio_[1] * 100):.1f} %)")
 
     plt.tight_layout()
     plt.show()

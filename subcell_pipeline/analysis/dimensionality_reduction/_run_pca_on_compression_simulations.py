@@ -27,7 +27,7 @@ from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import (
     get_merged_data,
     plot_fibers_by_key_and_seed,
 )
-from subcell_pipeline.analysis.dimensionality_reduction.pca import (
+from subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction import (
     plot_pca_feature_scatter,
     plot_pca_inverse_transform,
     run_pca,
