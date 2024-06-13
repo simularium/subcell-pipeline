@@ -1,7 +1,8 @@
 # %% [markdown]
-"""
-# Run Cytosim no compression simulations
+# # Run Cytosim no compression simulations
 
+# %% [markdown]
+"""
 Notebook contains steps for running Cytosim simulations for a baseline single
 actin fiber with no compression.
 
@@ -19,7 +20,11 @@ see `run_cytosim_compression_batch_simulations.py`.
 - [Define simulation settings](#define-simulation-settings)
 - [Register and run jobs](#register-and-run-jobs)
 - [Check and save job logs](#check-and-save-job-logs)
-"""  # noqa: D400, D415
+"""
+
+# %%
+if __name__ != "__main__":
+    raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
 import getpass

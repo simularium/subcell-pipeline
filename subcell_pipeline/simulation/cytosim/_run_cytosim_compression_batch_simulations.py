@@ -1,7 +1,8 @@
 # %% [markdown]
-"""
-# Run Cytosim compression simulations
+# # Run Cytosim compression simulations
 
+# %% [markdown]
+"""
 Notebook contains steps for running Cytosim simulations in which a single actin
 fiber is compressed at different compression velocities.
 
@@ -19,7 +20,11 @@ multiple replicates, see `run_cytosim_no_compression_batch_simulations.py`.
 - [Define simulation settings](#define-simulation-settings)
 - [Register and run jobs](#register-and-run-jobs)
 - [Check and save job logs](#check-and-save-job-logs)
-"""  # noqa: D400, D415
+"""
+
+# %%
+if __name__ != "__main__":
+    raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
 import getpass
@@ -56,8 +61,8 @@ from preconfig import Preconfig  # noqa: E402
 ## Define simulation conditions
 
 Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 $\mu m$/s)
-with five replicates each (random seeds 1, 2, 3, 4, and 5).
+500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
+five replicates each (random seeds 1, 2, 3, 4, and 5).
 """
 
 # %%

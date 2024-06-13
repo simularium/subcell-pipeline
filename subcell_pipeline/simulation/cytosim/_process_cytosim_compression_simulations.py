@@ -18,6 +18,10 @@ multiple replicates, see `process_cytosim_no_compression_simulations.py`.
 """
 
 # %%
+if __name__ != "__main__":
+    raise ImportError("This module is a notebook and is not meant to be imported")
+
+# %%
 from subcell_pipeline.simulation.cytosim.post_processing import (
     parse_cytosim_simulation_data,
 )
@@ -28,8 +32,8 @@ from subcell_pipeline.simulation.post_processing import sample_simulation_data
 ## Define simulation conditions
 
 Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 $\mu m$/s)
-with five replicates each (random seeds 1, 2, 3, 4, and 5).
+500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
+five replicates each (random seeds 1, 2, 3, 4, and 5).
 """
 
 # %%
@@ -90,5 +94,3 @@ condition key and random seed already exists, sampling is skipped.
 sample_simulation_data(
     bucket, series_name, condition_keys, random_seeds, n_timepoints, n_monomer_points
 )
-
-# %%
