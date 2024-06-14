@@ -1,3 +1,5 @@
+"""Methods for processing Cytosim simulations."""
+
 from typing import Union
 
 import numpy as np
@@ -53,7 +55,7 @@ def parse_cytosim_simulation_data(
         Name of S3 bucket for input and output files.
     series_name
         Name of simulation series.
-    condition_keys : list[str]
+    condition_keys
         List of condition keys.
     random_seeds
         Random seeds for simulations.

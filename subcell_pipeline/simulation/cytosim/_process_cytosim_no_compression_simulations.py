@@ -18,6 +18,10 @@ series with multiple conditions, each of which have multiple replicates, see
 """
 
 # %%
+if __name__ != "__main__":
+    raise ImportError("This module is a notebook and is not meant to be imported")
+
+# %%
 from subcell_pipeline.simulation.cytosim.post_processing import (
     parse_cytosim_simulation_data,
 )
@@ -87,5 +91,3 @@ condition key and random seed already exists, sampling is skipped.
 sample_simulation_data(
     bucket, series_name, [""], random_seeds, n_timepoints, n_monomer_points
 )
-
-# %%

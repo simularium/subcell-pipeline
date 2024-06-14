@@ -7,7 +7,7 @@
 [![Code style](https://simularium.github.io/subcell-pipeline/_badges/style.svg)](https://github.com/psf/black)
 [![License](https://simularium.github.io/subcell-pipeline/_badges/license.svg)](https://github.com/simularium/subcell-pipeline/blob/main/LICENSE)
 
-Analysis functionality for subcellular models
+Simulation, analysis, and visualization for subcellular models
 
 ---
 
@@ -56,31 +56,37 @@ Note that this installation method does not include the `readdy` package for Rea
 
 ## Usage
 
-### 1. Run Simulations
-The notebook aws_batch_job_submission.py can be used for configuring and executing simulations. Before this notebook can be succesfully executed, one must setup their AWSCLI credentials for submitting jobs and job definitions via the CLI. This notebook has five parts: 1a.) upload configuration files to s3, which involves generating the configuration files based on the template (vary_compress_rate.cym.tpl). Next, we have to create and register our job definition. In AWS Batch, a job definition specifies how many jobs are to be run, which docker image to use, how many CPUs to use, and the command a container should run when it is started.  We then submit our job to AWS using the submit_batch_job function. We can monitor these simulations as needed using check_batch_job. Finally, we can load in our results using the create_dataframes_for_repeats function which requires a bucket name, number of repeats, configs, and a save folder.
+The repository contains three major pipeline modules: `simulation`, `analysis`, and `visualization`.
 
-### 2. Post process to create dataframes from simulation data
-Involves running scripts in `subcell_analysis/postprocessing`. This also creates subsampled dataframes for further processing and metric calculation.
+### Simulations
 
-### 3. Tomography data analysis
-Selecting the tomogram filaments for analysis.
+The `simulation` module contains code for initializing, simulating, and post-processing simulations from different simulators.
+The module is further organized by simulator.
 
-### 3. Calculate metrics
+- [simulation.cytosim](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/cytosim) -- Simulations and processing for cytoskeleton simulation engine [Cytosim](https://gitlab.com/f-nedelec/cytosim)
+- [simulation.readdy](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/readdy) -- Simulations and processing for particle-based reaction-diffusion simulator [ReaDDy](https://readdy.github.io/)
 
-### 4. Visualize in simularium
+### Analysis
 
-### 5. Dimensionality reduction using PCA/PaCMAP
-Runs through generate_figure_data.ipynb
+The `analysis` module contains code for different analyses.
+Each analysis type contains a README with additional information:
 
+- [analysis.compression_metrics](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics)
+- [analysis.dimensionality_reduction](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction)
+- [analysis.tomography_data](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data)
 
-## Glossary of terms
-Definitions of some terms used in these analyses
-* *polymer trace*:
+### Visualization
 
-    refers to the line traced by a polymer backbone in three dimensions. For cytosim, this corresponds to the positions of the control points. For ReaDDy, this corresponds to a derived metric that traces the polymer backbone
+The `visualization` module contains code for visualizing simulation and analysis outputs.
 
-* *end-to-end axis*:
+## Glossary
 
-    refers to the line connecting the first and last points of a polymer trace
+Definitions of some terms used in this repo.
 
-**Apache Software License 2.0**
+- *polymer trace*
+
+    Refers to the line traced by a polymer backbone in three dimensions. For Cytosim, this corresponds to the positions of the control points. For ReaDDy, this corresponds to a derived metric that traces the polymer backbone
+
+- *end-to-end axis*
+
+    Refers to the line connecting the first and last points of a polymer trace

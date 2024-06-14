@@ -15,6 +15,8 @@ import os
 import sys
 from datetime import datetime
 
+from sphinx.ext.autosummary.generate import AutosummaryRenderer
+
 sys.path.insert(0, os.path.abspath("../subcell_pipeline"))
 
 # -- Project information -----------------------------------------------------
@@ -72,3 +74,33 @@ html_theme = "furo"
 
 # The name for this set of Sphinx documents.
 html_title = f"<strong>{project}</strong> <br />{release}"
+
+# -- Options for MyST --------------------------------------------------------
+
+# Automatically generate label slugs for header anchors
+myst_heading_anchors = 2
+
+# -- Patch custom template filters -------------------------------------------
+
+
+def custom_fullname_filter(fullname):
+    return ".".join(fullname.split(".")[1:])
+
+
+def custom_module_filter(module):
+    return module.split(".")[0]
+
+
+def custom_tocname_filter(fullname):
+    return ".".join(fullname.split(".")[1:])
+
+
+def patch_init(self, app):
+    AutosummaryRenderer.__original_init__(self, app)
+    self.env.filters["custom_fullname"] = custom_fullname_filter
+    self.env.filters["custom_module"] = custom_module_filter
+    self.env.filters["custom_tocname"] = custom_tocname_filter
+
+
+AutosummaryRenderer.__original_init__ = AutosummaryRenderer.__init__
+AutosummaryRenderer.__init__ = patch_init
