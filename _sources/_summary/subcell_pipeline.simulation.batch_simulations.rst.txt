@@ -1,0 +1,34 @@
+simulation.batch\_simulations
+=============================
+
+.. automodule:: subcell_pipeline.simulation.batch_simulations
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      check_and_save_job_logs
+      generate_configs_from_file
+      generate_configs_from_template
+      register_and_run_simulations
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

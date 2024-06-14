@@ -1,0 +1,38 @@
+﻿simulation
+==========
+
+.. automodule:: subcell_pipeline.simulation
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+
+.. currentmodule:: subcell_pipeline
+
+.. autosummary::
+   :toctree:
+   :template: custom_summary.rst
+   :recursive:
+
+   simulation.batch_simulations
+   simulation.cytosim
+   simulation.post_processing
+   simulation.readdy
+

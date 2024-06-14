@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Simulation workflow notebooks" href="simulation.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="simulation" href="_summary/subcell_pipeline.simulation.html" /><link rel="prev" title="Subcellular model simulation and analysis pipeline" href="index.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>Subcellular modeling pipeline 0.1.0</title>
+        <title>Simulation workflow notebooks - Subcellular modeling pipeline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -180,7 +180,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand"><strong>Subcellular modeling pipeline</strong> <br />0.1.0</div></a>
+      <a href="index.html"><div class="brand"><strong>Subcellular modeling pipeline</strong> <br />0.1.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -201,7 +201,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
   <span class="sidebar-brand-text"><strong>Subcellular modeling pipeline</strong> <br />0.1.0</span>
@@ -213,12 +213,12 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Overview</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Workflow notebooks</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulations</a></li>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Simulations</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
@@ -255,7 +255,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/index.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/simulation.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -275,137 +275,71 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <div class="line-block">
-<div class="line"><br /></div>
-</div>
-<section id="subcellular-model-simulation-and-analysis-pipeline">
-<h1>Subcellular model simulation and analysis pipeline<a class="headerlink" href="#subcellular-model-simulation-and-analysis-pipeline" title="Link to this heading">¶</a></h1>
-<p><a class="reference external" href="https://github.com/simularium/subcell-pipeline/actions?query=workflow%3Abuild"><img alt="Build status" src="https://simularium.github.io/subcell-pipeline/_badges/build.svg" /></a>
-<a class="reference external" href="https://github.com/simularium/subcell-pipeline/actions?query=workflow%3Alint"><img alt="Lint status" src="https://simularium.github.io/subcell-pipeline/_badges/lint.svg" /></a>
-<a class="reference external" href="https://simularium.github.io/subcell-pipeline/"><img alt="Documentation" src="https://simularium.github.io/subcell-pipeline/_badges/documentation.svg" /></a>
-<a class="reference external" href="https://simularium.github.io/subcell-pipeline/_coverage/"><img alt="Coverage" src="https://simularium.github.io/subcell-pipeline/_badges/coverage.svg" /></a>
-<a class="reference external" href="https://github.com/psf/black"><img alt="Code style" src="https://simularium.github.io/subcell-pipeline/_badges/style.svg" /></a>
-<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/LICENSE"><img alt="License" src="https://simularium.github.io/subcell-pipeline/_badges/license.svg" /></a></p>
-<p>Simulation, analysis, and visualization for subcellular models</p>
-<hr class="docutils" />
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<section id="install-with-conda-and-pip">
-<h3>Install with <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#install-with-conda-and-pip" title="Link to this heading">¶</a></h3>
-<p>Use this installation method for a general user environment.
-Note that with the installation, you cannot add/remove/update dependencies.</p>
-<ol class="arabic simple">
-<li><p>Create a virtual environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">subcell_pipeline</span> <span class="pre">python=3.10</span></code></p></li>
-<li><p>Activate the environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">subcell_pipeline</span></code></p></li>
-<li><p>Install all dependencies: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code></p></li>
-</ol>
-<p>Or,</p>
-<ol class="arabic simple">
-<li><p>Create a virtual environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">subcell_pipeline</span> <span class="pre">python=3.10</span></code></p></li>
-<li><p>Activate the environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">subcell_pipeline</span></code></p></li>
-<li><p>Install conda-specific dependencies: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">update</span> <span class="pre">--file</span> <span class="pre">environment.yml</span> <span class="pre">--prune</span></code></p></li>
-<li><p>Install dependencies: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code></p></li>
-<li><p>Install the project in editable mode: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
-</ol>
-</section>
-<section id="install-with-conda-and-pdm">
-<h3>Install with <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pdm</span></code><a class="headerlink" href="#install-with-conda-and-pdm" title="Link to this heading">¶</a></h3>
-<p>Use this installation method for a complete development environment.</p>
-<ol class="arabic simple">
-<li><p>Create a virtual environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">subcell_pipeline</span> <span class="pre">python=3.10</span></code></p></li>
-<li><p>Activate the environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">subcell_pipeline</span></code></p></li>
-<li><p>Install all dependencies: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span> <span class="pre">DEV=1</span></code></p></li>
-</ol>
-<p>Or,</p>
-<ol class="arabic simple">
-<li><p>Create a virtual environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">subcell_pipeline</span> <span class="pre">python=3.10</span></code></p></li>
-<li><p>Activate the environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">subcell_pipeline</span></code></p></li>
-<li><p>Install conda-specific dependencies: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">update</span> <span class="pre">--file</span> <span class="pre">environment.yml</span> <span class="pre">--prune</span></code></p></li>
-<li><p>Install dependencies: <code class="docutils literal notranslate"><span class="pre">pdm</span> <span class="pre">sync</span></code></p></li>
-</ol>
-</section>
-<section id="install-with-pyenv-and-pdm">
-<h3>Install with <code class="docutils literal notranslate"><span class="pre">pyenv</span></code> and <code class="docutils literal notranslate"><span class="pre">pdm</span></code><a class="headerlink" href="#install-with-pyenv-and-pdm" title="Link to this heading">¶</a></h3>
-<p>Use this installation method for a (mostly) complete, non-Conda development environment.
-Note that this installation method does not include the <code class="docutils literal notranslate"><span class="pre">readdy</span></code> package for ReaDDy-specific post-processsing; if needed, use a <code class="docutils literal notranslate"><span class="pre">conda</span></code> installation method.</p>
-<ol class="arabic simple">
-<li><p>Install Python 3.10 or higher with <code class="docutils literal notranslate"><span class="pre">pyenv</span></code></p></li>
-<li><p>Install dependencies: <code class="docutils literal notranslate"><span class="pre">pdm</span> <span class="pre">sync</span></code></p></li>
-<li><p>Activate the environment: <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">.venv/bin/activate</span></code></p></li>
-</ol>
-</section>
-</section>
-<section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>The repository contains three major pipeline modules: <code class="docutils literal notranslate"><span class="pre">simulation</span></code>, <code class="docutils literal notranslate"><span class="pre">analysis</span></code>, and <code class="docutils literal notranslate"><span class="pre">visualization</span></code>.</p>
-<section id="simulations">
-<h3>Simulations<a class="headerlink" href="#simulations" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">simulation</span></code> module contains code for initializing, simulating, and post-processing simulations from different simulators.
-The module is further organized by simulator.</p>
+          <section id="simulation-workflow-notebooks">
+<h1>Simulation workflow notebooks<a class="headerlink" href="#simulation-workflow-notebooks" title="Link to this heading">¶</a></h1>
+<section id="cytosim-simulations">
+<h2>Cytosim simulations<a class="headerlink" href="#cytosim-simulations" title="Link to this heading">¶</a></h2>
+<p>Simulations and processing for cytoskeleton simulation engine <a class="reference external" href="https://gitlab.com/f-nedelec/cytosim">Cytosim</a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Base simulator</strong>: <a class="reference external" href="https://gitlab.com/f-nedelec/cytosim">https://gitlab.com/f-nedelec/cytosim</a></p></li>
+<li><p><strong>Model development</strong>: <a class="reference external" href="https://github.com/simularium/Cytosim">https://github.com/simularium/Cytosim</a></p></li>
+</ul>
+</div></blockquote>
+<section id="baseline-single-actin-fiber-with-no-compression">
+<h3>Baseline single actin fiber with no compression<a class="headerlink" href="#baseline-single-actin-fiber-with-no-compression" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">NO_COMPRESSION</span></code> simulation series simulates a single actin fiber with a free barbed end across five replicates.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/cytosim">simulation.cytosim</a> – Simulations and processing for cytoskeleton simulation engine <a class="reference external" href="https://gitlab.com/f-nedelec/cytosim">Cytosim</a></p></li>
-<li><p><a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/readdy">simulation.readdy</a> – Simulations and processing for particle-based reaction-diffusion simulator <a class="reference external" href="https://readdy.github.io/">ReaDDy</a></p></li>
+<li><p><strong>Run Cytosim single fiber simulations</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/cytosim/_run_cytosim_no_compression_batch_simulations.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/simulation/cytosim/_run_cytosim_no_compression_batch_simulations.html">notebook</a>)</p></li>
+<li><p><strong>Process Cytosim single fiber simulations</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/cytosim/_process_cytosim_no_compression_simulations.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/simulation/cytosim/_process_cytosim_no_compression_simulations.html">notebook</a>)</p></li>
 </ul>
 </section>
-<section id="analysis">
-<h3>Analysis<a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">analysis</span></code> module contains code for different analyses.
-Each analysis type contains a README with additional information:</p>
+<section id="single-actin-fiber-compressed-at-different-compression-velocities">
+<h3>Single actin fiber compressed at different compression velocities<a class="headerlink" href="#single-actin-fiber-compressed-at-different-compression-velocities" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">COMPRESSION_VELOCITY</span></code> simulation series simulates compression of a single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with five replicates.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics">analysis.compression_metrics</a></p></li>
-<li><p><a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction">analysis.dimensionality_reduction</a></p></li>
-<li><p><a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data">analysis.tomography_data</a></p></li>
-</ul>
-</section>
-<section id="visualization">
-<h3>Visualization<a class="headerlink" href="#visualization" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">visualization</span></code> module contains code for visualizing simulation and analysis outputs.</p>
-</section>
-</section>
-<section id="glossary">
-<h2>Glossary<a class="headerlink" href="#glossary" title="Link to this heading">¶</a></h2>
-<p>Definitions of some terms used in this repo.</p>
-<ul>
-<li><p><em>polymer trace</em></p>
-<p>Refers to the line traced by a polymer backbone in three dimensions. For Cytosim, this corresponds to the positions of the control points. For ReaDDy, this corresponds to a derived metric that traces the polymer backbone</p>
-</li>
-<li><p><em>end-to-end axis</em></p>
-<p>Refers to the line connecting the first and last points of a polymer trace</p>
-</li>
+<li><p><strong>Run Cytosim compression simulations</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/cytosim/_run_cytosim_compression_batch_simulations.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/simulation/cytosim/_run_cytosim_compression_batch_simulations.html">notebook</a>)</p></li>
+<li><p><strong>Process Cytosim compression simulations</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/simulation/cytosim/_process_cytosim_compression_simulations.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/simulation/cytosim/_process_cytosim_compression_simulations.html">notebook</a>)</p></li>
 </ul>
 </section>
 </section>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_summary/subcell_pipeline.simulation.html#module-subcell_pipeline.simulation" title="subcell_pipeline.simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subcell_pipeline.simulation</span></code></a></p></td>
-<td><p>Simulation methods and notebooks.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="toctree-wrapper compound">
-</div>
+<section id="readdy-simulations">
+<h2>ReaDDy simulations<a class="headerlink" href="#readdy-simulations" title="Link to this heading">¶</a></h2>
+<p>Simulations and processing for particle-based reaction-diffusion simulator <a class="reference external" href="https://readdy.github.io/">ReaDDy</a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Base simulator</strong>: <a class="reference external" href="https://github.com/readdy/readdy">https://github.com/readdy/readdy</a></p></li>
+<li><p><strong>Model development</strong>: <a class="reference external" href="https://github.com/simularium/readdy-models">https://github.com/simularium/readdy-models</a></p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="simulation.html">
+          <a class="next-page" href="_summary/subcell_pipeline.simulation.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Simulation workflow notebooks</div>
+                <div class="title">simulation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -436,20 +370,13 @@ Each analysis type contains a README with additional information:</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Subcellular model simulation and analysis pipeline</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a><ul>
-<li><a class="reference internal" href="#install-with-conda-and-pip">Install with <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
-<li><a class="reference internal" href="#install-with-conda-and-pdm">Install with <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pdm</span></code></a></li>
-<li><a class="reference internal" href="#install-with-pyenv-and-pdm">Install with <code class="docutils literal notranslate"><span class="pre">pyenv</span></code> and <code class="docutils literal notranslate"><span class="pre">pdm</span></code></a></li>
+<li><a class="reference internal" href="#">Simulation workflow notebooks</a><ul>
+<li><a class="reference internal" href="#cytosim-simulations">Cytosim simulations</a><ul>
+<li><a class="reference internal" href="#baseline-single-actin-fiber-with-no-compression">Baseline single actin fiber with no compression</a></li>
+<li><a class="reference internal" href="#single-actin-fiber-compressed-at-different-compression-velocities">Single actin fiber compressed at different compression velocities</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#usage">Usage</a><ul>
-<li><a class="reference internal" href="#simulations">Simulations</a></li>
-<li><a class="reference internal" href="#analysis">Analysis</a></li>
-<li><a class="reference internal" href="#visualization">Visualization</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#glossary">Glossary</a></li>
+<li><a class="reference internal" href="#readdy-simulations">ReaDDy simulations</a></li>
 </ul>
 </li>
 </ul>
