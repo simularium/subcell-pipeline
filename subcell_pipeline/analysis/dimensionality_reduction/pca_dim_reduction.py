@@ -1,8 +1,11 @@
 """Methods for dimensionality reduction using PCA."""
 
+import random
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from io_collection.save.save_json import save_json
 from sklearn.decomposition import PCA
 
 from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import reshape_fibers
@@ -36,6 +39,62 @@ def run_pca(data: pd.DataFrame) -> tuple[pd.DataFrame, PCA]:
     pca_results = pca_results.sample(frac=1, random_state=1)
 
     return pca_results, pca
+
+
+def save_pca_trajectories(
+    pca_results: pd.DataFrame, save_location: str, save_key: str
+) -> None:
+    output = []
+
+    for (simulator, repeat, velocity), group in pca_results.groupby(
+        ["SIMULATOR", "REPEAT", "VELOCITY"]
+    ):
+        output.append(
+            {
+                "simulator": simulator.upper(),
+                "replicate": int(repeat),
+                "velocity": velocity,
+                "x": group["PCA1"].tolist(),
+                "y": group["PCA2"].tolist(),
+            }
+        )
+
+    random.Random(1).shuffle(output)
+    save_json(save_location, save_key, output)
+
+
+def save_pca_transforms(
+    pca: PCA, points: list[list[float]], save_location: str, save_key: str
+) -> None:
+    output = []
+
+    pc1_points, pc2_points = points
+
+    for point in pc1_points:
+        fiber = pca.inverse_transform([point, 0]).reshape(-1, 3)
+        output.append(
+            {
+                "component": 1,
+                "point": point,
+                "x": fiber[:, 0].tolist(),
+                "y": fiber[:, 1].tolist(),
+                "z": fiber[:, 2].tolist(),
+            }
+        )
+
+    for point in pc2_points:
+        fiber = pca.inverse_transform([0, point]).reshape(-1, 3)
+        output.append(
+            {
+                "component": 2,
+                "point": point,
+                "x": fiber[:, 0].tolist(),
+                "y": fiber[:, 1].tolist(),
+                "z": fiber[:, 2].tolist(),
+            }
+        )
+
+    save_json(save_location, save_key, output)
 
 
 def plot_pca_feature_scatter(data: pd.DataFrame, features: dict, pca: PCA) -> None:

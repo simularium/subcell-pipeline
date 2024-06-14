@@ -6,6 +6,7 @@ import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
+from io_collection.save.save_json import save_json
 
 
 def get_merged_data(
@@ -48,7 +49,7 @@ def get_merged_data(
         print(
             f"Dataframe [ { data_key } ] already exists. Loading existing merged data."
         )
-        return load_dataframe(bucket, data_key)
+        return load_dataframe(bucket, data_key, dtype={"key": "str"})
 
     all_samples: list[pd.DataFrame] = []
 
@@ -161,6 +162,32 @@ def reshape_fibers(data: pd.DataFrame) -> tuple[np.ndarray, pd.DataFrame]:
         )
 
     return np.array(all_fibers).squeeze(), pd.DataFrame(all_features)
+
+
+def save_aligned_fibers(
+    data: pd.DataFrame, time_map: dict, save_location: str, save_key: str
+) -> None:
+    output = []
+
+    for (simulator, repeat, key, time), group in data.groupby(
+        ["simulator", "repeat", "key", "time"]
+    ):
+        if time != time_map[(simulator, key)]:
+            continue
+
+        fiber = group[["xpos", "ypos", "zpos"]].values
+        output.append(
+            {
+                "simulator": simulator.upper(),
+                "repeat": int(repeat),
+                "key": key,
+                "x": fiber[:, 0].tolist(),
+                "y": fiber[:, 1].tolist(),
+                "z": fiber[:, 2].tolist(),
+            }
+        )
+
+    save_json(save_location, save_key, output)
 
 
 def plot_fibers_by_key_and_seed(data: pd.DataFrame) -> None:
