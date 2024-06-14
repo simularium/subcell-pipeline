@@ -12,7 +12,7 @@ and scripts. Clone a copy and set the environment variable
 This notebook provides an example of running a simulation series in which there
 are multiple conditions, each of which need to be run for multiple replicates.
 For an example of running a simulation series for a single condition for
-multiple replicates, see `run_cytosim_single_fiber_batch_simulations.py`.
+multiple replicates, see `run_cytosim_no_compression_batch_simulations.py`.
 
 - [Define simulation conditions](#define-simulation-conditions)
 - [Generate configs from template](#generate-configs-from-template)

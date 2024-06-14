@@ -1,10 +1,10 @@
 # %% [markdown]
-# # Process Cytosim single fiber simulations
+# # Process Cytosim no compression simulations
 
 # %% [markdown]
 """
 Notebook contains steps for post processing of Cytosim simulations for a
-baseline single actin fiber.
+baseline single actin fiber with no compression.
 
 This notebook provides an example of processing a simulation series for a single
 condition with multiple replicates. For an example of processing a simulation
@@ -27,14 +27,14 @@ from subcell_pipeline.simulation.post_processing import sample_simulation_data
 """
 ## Define simulation conditions
 
-Defines the `SINGLE_FIBER` simulation series, which simulates a single actin
+Defines the `NO_COMPRESSION` simulation series, which simulates a single actin
 fiber with a free barbed end across five replicates (random seeds 1, 2, 3, 4,
 and 5).
 """
 
 # %%
 # Name of the simulation series
-series_name: str = "SINGLE_FIBER"
+series_name: str = "NO_COMPRESSION"
 
 # S3 bucket for input and output files
 bucket: str = "s3://cytosim-working-bucket"

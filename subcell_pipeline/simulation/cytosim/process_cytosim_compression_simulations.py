@@ -9,7 +9,7 @@ single actin fiber is compressed at different compression velocities.
 This notebook provides an example of processing a simulation series in which
 there are multiple conditions, each of which were run with multiple replicates.
 For an example of processing a simulation series with a single condition with
-multiple replicates, see `process_cytosim_single_fiber_simulations.py`.
+multiple replicates, see `process_cytosim_no_compression_simulations.py`.
 
 - [Define simulation conditions](#define-simulation-conditions)
 - [Parse simulation data](#parse-simulation-data)
