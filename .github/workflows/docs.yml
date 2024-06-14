@@ -55,7 +55,7 @@ jobs:
     - name: Convert notebook formats
       shell: bash -l {0}
       run: |
-        for FILE in $(find . -type f -name "_[a-z]*py"); do jupytext --sync $FILE; done
+        for FILE in $(find ./subcell_pipeline -type f -name "_[a-z]*py"); do jupytext --sync $FILE; done
 
     - name: Generate documentation with Sphinx
       shell: bash -l {0}
