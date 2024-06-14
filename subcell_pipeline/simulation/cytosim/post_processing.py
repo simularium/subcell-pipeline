@@ -33,6 +33,10 @@ COLUMN_DTYPES = {
     "fiber_point": int,
 }
 
+CYTOSIM_SCALE_FACTOR: int = 1000
+
+CYTOSIM_RIGIDITY: float = 0.041
+
 
 def parse_cytosim_simulation_data(
     bucket: str,
@@ -78,7 +82,9 @@ def parse_cytosim_simulation_data(
 
 
 def parse_cytosim_simulation_curvature_data(
-    data: str, rigidity: float = 0.041
+    data: str,
+    rigidity: float = CYTOSIM_RIGIDITY,
+    scale_factor: int = CYTOSIM_SCALE_FACTOR,
 ) -> pd.DataFrame:
     """
     Parse Cytosim fiber segment curvature data into tidy data format.
@@ -89,6 +95,8 @@ def parse_cytosim_simulation_curvature_data(
         Output data from Cytosim report fiber:segment_energy.
     rigidity
         Fiber rigidity used to calculate segment energy.
+    scale_factor
+        Scaling factor for fiber points.
 
     Returns
     -------
@@ -124,6 +132,10 @@ def parse_cytosim_simulation_curvature_data(
     # Combine all data into dataframe and update data types.
     dataframe = pd.DataFrame(point_data, columns=COLUMN_NAMES)
     dataframe = dataframe.astype(dtype=COLUMN_DTYPES)
+
+    dataframe["xpos"] = dataframe["xpos"] * scale_factor
+    dataframe["ypos"] = dataframe["ypos"] * scale_factor
+    dataframe["zpos"] = dataframe["zpos"] * scale_factor
 
     # Calculate force magnitude
     dataframe["force_magnitude"] = np.sqrt(
