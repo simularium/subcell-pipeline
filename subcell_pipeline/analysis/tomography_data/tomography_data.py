@@ -150,6 +150,9 @@ def get_tomography_data(
             tomogram_file = f"{repository}/{folder}/{group.title()}Actin_{name}.txt"
             tomogram_df = read_tomography_data(tomogram_file)
             tomogram_df["dataset"] = name
+            tomogram_df["id"] = tomogram_df["fil"].apply(
+                lambda row: f"{row:02d}_{name}"
+            )
             rescale_tomography_data(tomogram_df, scale_factor)
             all_tomogram_dfs.append(tomogram_df)
 
