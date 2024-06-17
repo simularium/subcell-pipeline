@@ -44,6 +44,7 @@ dev = [
     "check-manifest>=0.49",
     "pre-commit>=3.7.1",
     "isort>=5.13.2",
+    "jupytext>=1.16.2",
 ]
 lint = [
     "black>=24.4.2",
@@ -98,6 +99,7 @@ extend-ignore = [
     "D101", # Missing docstring in public class
     "D103", # Missing docstring in public function
     "D107", # Missing docstring in __init__
+    "D202", # Blank lines between the function body and the function docstring
     "D203", # 1 blank line required before class docstring
     "D205", # 1 blank line required between summary line and description
     "D212", # Multi-line docstring summary should start at the first line
@@ -132,3 +134,7 @@ ignore_missing_imports = true
 disallow_untyped_defs = true
 check_untyped_defs = true
 show_error_codes = true
+
+[tool.jupytext.formats]
+"docs/_notebooks/" = "md"
+"subcell_pipeline/" = "py:percent"

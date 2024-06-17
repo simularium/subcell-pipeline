@@ -1,9 +1,10 @@
 # %% [markdown]
-"""
-# Run Cytosim single fiber simulations
+# # Run Cytosim no compression simulations
 
+# %% [markdown]
+"""
 Notebook contains steps for running Cytosim simulations for a baseline single
-actin fiber.
+actin fiber with no compression.
 
 This notebook uses [Cytosim](https://github.com/simularium/Cytosim) configs and
 scripts. Clone a copy and set the environment variable
@@ -19,7 +20,11 @@ see `run_cytosim_compression_batch_simulations.py`.
 - [Define simulation settings](#define-simulation-settings)
 - [Register and run jobs](#register-and-run-jobs)
 - [Check and save job logs](#check-and-save-job-logs)
-"""  # noqa: D400, D415
+"""
+
+# %%
+if __name__ != "__main__":
+    raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
 import getpass
@@ -43,14 +48,14 @@ cytosim_path: Path = Path(os.getenv("CYTOSIM", "."))
 """
 ## Define simulation conditions
 
-Defines the `SINGLE_FIBER` simulation series, which simulates a single actin
+Defines the `NO_COMPRESSION` simulation series, which simulates a single actin
 fiber with a free barbed end across five replicates (random seeds 1, 2, 3, 4,
 and 5).
 """
 
 # %%
 # Name of the simulation series
-series_name: str = "SINGLE_FIBER"
+series_name: str = "NO_COMPRESSION"
 
 # S3 bucket for input and output files
 bucket: str = "s3://cytosim-working-bucket"
