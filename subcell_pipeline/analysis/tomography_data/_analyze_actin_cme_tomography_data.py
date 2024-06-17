@@ -1,10 +1,17 @@
 # %% [markdown]
-# # Analyze tomography data
+# # Analyze actin CME tomography data
 
 # %% [markdown]
 """
 Notebook contains steps for loading, processing, and analyzing segmented
-cryo-electron tomography of actin filaments.
+cryo-electron tomography of CME-associated actin filaments.
+
+Data is compiled from:
+
+> D Serwas, M Akamatsu, A Moayed, K Vegesna, R Vasan, JM Hill, J Schöneberg, KM
+Davies, P Rangamani, DG Drubin. (2022). Mechanistic insights into actin force
+generation during vesicle formation from cryo-electron tomography.
+_Developmental Cell_, 57(9), P1132-1145.e5. DOI: 10.1016/j.devcel.2022.04.012
 
 - [Load tomography datasets](#load-tomography-datasets)
 - [Plot branched tomography fibers](#plot-branched-tomography-fibers)
@@ -26,18 +33,14 @@ from subcell_pipeline.analysis.tomography_data.tomography_data import (
 """
 ## Load tomography datasets
 
-Tomogram data is compiled from data published in:
-
-> D Serwas, M Akamatsu, A Moayed, K Vegesna, R Vasan, JM Hill, J Schöneberg, KM
-Davies, P Rangamani, DG Drubin. (2022). Mechanistic insights into actin force
-generation during vesicle formation from cryo-electron tomography.
-_Developmental Cell_, 57(9), P1132-1145.e5. DOI: 10.1016/j.devcel.2022.04.012
-
 Each dataset contains x, y, and z positions of segmented actin filaments from
 cryo-electron tomography.
 """
 
 # %%
+# Dataset name
+name = "actin_cme_tomography"
+
 # S3 bucket for input and output files
 bucket = "s3://subcell-working-bucket"
 
@@ -68,10 +71,10 @@ scale_factor = 0.00006
 
 # %%
 branched_df = get_branched_tomography_data(
-    bucket, repository, branched_datasets, scale_factor
+    bucket, name, repository, branched_datasets, scale_factor
 )
 unbranched_df = get_unbranched_tomography_data(
-    bucket, repository, unbranched_datasets, scale_factor
+    bucket, name, repository, unbranched_datasets, scale_factor
 )
 
 # %% [markdown]
@@ -115,7 +118,7 @@ sampling.
 """
 
 # %%
-sampled_key = "tomogram_data_sampled_coordinates.csv"
+sampled_key = f"{name}/{name}_coordinates_sampled.csv"
 sampled_data = sample_tomography_data(
     unbranched_df, bucket, sampled_key, n_monomer_points, minimum_points
 )

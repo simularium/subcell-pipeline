@@ -56,6 +56,7 @@ def rescale_tomography_data(data: pd.DataFrame, scale_factor: float = 1.0) -> No
 
 def get_branched_tomography_data(
     bucket: str,
+    name: str,
     repository: str,
     datasets: "list[tuple[str, str]]",
     scale_factor: float = 1.0,
@@ -67,6 +68,8 @@ def get_branched_tomography_data(
     ----------
     bucket
         Name of S3 bucket for input and output files.
+    name
+        Name of dataset.
     repository : str
         Data repository for downloading tomography data
     datasets : list[tuple[str, str]]
@@ -80,11 +83,14 @@ def get_branched_tomography_data(
         Merged data.
     """
 
-    return get_tomography_data(bucket, repository, datasets, "branched", scale_factor)
+    return get_tomography_data(
+        bucket, name, repository, datasets, "branched", scale_factor
+    )
 
 
 def get_unbranched_tomography_data(
     bucket: str,
+    name: str,
     repository: str,
     datasets: "list[tuple[str, str]]",
     scale_factor: float = 1.0,
@@ -96,6 +102,8 @@ def get_unbranched_tomography_data(
     ----------
     bucket
         Name of S3 bucket for input and output files.
+    name
+        Name of dataset.
     repository : str
         Data repository for downloading tomography data
     datasets : list[tuple[str, str]]
@@ -109,11 +117,14 @@ def get_unbranched_tomography_data(
         Merged data.
     """
 
-    return get_tomography_data(bucket, repository, datasets, "unbranched", scale_factor)
+    return get_tomography_data(
+        bucket, name, repository, datasets, "unbranched", scale_factor
+    )
 
 
 def get_tomography_data(
     bucket: str,
+    name: str,
     repository: str,
     datasets: "list[tuple[str, str]]",
     group: str,
@@ -126,6 +137,8 @@ def get_tomography_data(
     ----------
     bucket
         Name of S3 bucket for input and output files.
+    name
+        Name of dataset.
     repository : str
         Data repository for downloading tomography data
     datasets : list[tuple[str, str]]
@@ -141,7 +154,7 @@ def get_tomography_data(
         Merged data.
     """
 
-    data_key = f"tomogram_cme_all_{group}_coordinates.csv"
+    data_key = f"{name}/{name}_coordinates_{group}.csv"
 
     if check_key(bucket, data_key):
         print(f"Loading existing combined tomogram data from [ { data_key } ]")
