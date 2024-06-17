@@ -44,6 +44,19 @@ def run_pca(data: pd.DataFrame) -> tuple[pd.DataFrame, PCA]:
 def save_pca_trajectories(
     pca_results: pd.DataFrame, save_location: str, save_key: str
 ) -> None:
+    """
+    Save PCA trajectories data.
+
+    Parameters
+    ----------
+    pca_results
+        PCA trajectory data.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
+    """
+
     output = []
 
     for (simulator, repeat, velocity), group in pca_results.groupby(
@@ -66,6 +79,21 @@ def save_pca_trajectories(
 def save_pca_transforms(
     pca: PCA, points: list[list[float]], save_location: str, save_key: str
 ) -> None:
+    """
+    Save PCA transform data.
+
+    Parameters
+    ----------
+    pca : PCA
+        PCA object.
+    points
+        List of inverse transform points.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
+    """
+
     output = []
 
     pc1_points, pc2_points = points

@@ -167,6 +167,21 @@ def reshape_fibers(data: pd.DataFrame) -> tuple[np.ndarray, pd.DataFrame]:
 def save_aligned_fibers(
     data: pd.DataFrame, time_map: dict, save_location: str, save_key: str
 ) -> None:
+    """
+    Save aligned fiber data.
+
+    Parameters
+    ----------
+    data
+        Aligned fiber data.
+    time_map
+        Map of selected aligned time for each simulator and condition.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
+    """
+
     output = []
 
     for (simulator, repeat, key, time), group in data.groupby(
