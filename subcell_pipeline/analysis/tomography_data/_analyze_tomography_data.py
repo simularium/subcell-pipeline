@@ -7,12 +7,19 @@ Notebook contains steps for loading, processing, and analyzing segmented
 cryo-electron tomography of actin filaments.
 
 - [Load tomography datasets](#load-tomography-datasets)
+- [Plot branched tomography fibers](#plot-branched-tomography-fibers)
+- [Plot unbranched tomography fibers](#plot-unbranched-tomography-fibers)
+- [Define sampling settings](#define-sampling-settings)
+- [Sample tomography data](#sample-tomography-data)
+- [Plot sampled tomography fibers](#plot-sampled-tomography-fibers)
 """
 
 # %%
 from subcell_pipeline.analysis.tomography_data.tomography_data import (
     get_branched_tomography_data,
     get_unbranched_tomography_data,
+    plot_tomography_data_by_dataset,
+    sample_tomography_data,
 )
 
 # %% [markdown]
@@ -66,3 +73,57 @@ branched_df = get_branched_tomography_data(
 unbranched_df = get_unbranched_tomography_data(
     bucket, repository, unbranched_datasets, scale_factor
 )
+
+# %% [markdown]
+"""
+## Plot branched tomography fibers
+"""
+
+# %%
+plot_tomography_data_by_dataset(branched_df)
+
+# %% [markdown]
+"""
+## Plot unbranched tomography fibers
+"""
+
+# %%
+plot_tomography_data_by_dataset(unbranched_df)
+
+# %% [markdown]
+"""
+## Define sampling settings
+
+Defines the settings used for subsampling tomography data points.
+"""
+
+# %%
+# Number of monomer points per fiber
+n_monomer_points = 200
+
+# Minimum number of points for valid fiber
+minimum_points = 3
+
+
+# %% [markdown]
+"""
+## Sample tomography data
+
+Sample monomer points for each unique segmented tomography fiber. Fibers with
+less than the specified minimum number of segmented points are excluded from the
+sampling.
+"""
+
+# %%
+sampled_key = "tomogram_data_sampled_coordinates.csv"
+sampled_data = sample_tomography_data(
+    unbranched_df, bucket, sampled_key, n_monomer_points, minimum_points
+)
+
+# %% [markdown]
+"""
+## Plot sampled tomography fibers
+"""
+
+# %%
+plot_tomography_data_by_dataset(sampled_data)

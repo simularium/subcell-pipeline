@@ -1,7 +1,11 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
+
+SAMPLE_COLUMNS = ["xpos", "ypos", "zpos"]
 
 
 def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
@@ -24,9 +28,9 @@ def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
     coordinates = pd.read_table(file, delim_whitespace=True)
 
     if len(coordinates.columns) == 4:
-        coordinates.columns = [label, "X", "Y", "Z"]
+        coordinates.columns = [label, "xpos", "ypos", "zpos"]
     elif len(coordinates.columns) == 5:
-        coordinates.columns = ["object", label, "X", "Y", "Z"]
+        coordinates.columns = ["object", label, "xpos", "ypos", "zpos"]
     else:
         print("Data file [ {file} ] has an unexpected number of columns")
 
@@ -45,9 +49,9 @@ def rescale_tomography_data(data: pd.DataFrame, scale_factor: float = 1.0) -> No
         Data scaling factor (pixels to um).
     """
 
-    data["X"] = data["X"] * scale_factor
-    data["Y"] = data["Y"] * scale_factor
-    data["Z"] = data["Z"] * scale_factor
+    data["xpos"] = data["xpos"] * scale_factor
+    data["ypos"] = data["ypos"] * scale_factor
+    data["zpos"] = data["zpos"] * scale_factor
 
 
 def get_branched_tomography_data(
@@ -151,7 +155,7 @@ def get_tomography_data(
             tomogram_df = read_tomography_data(tomogram_file)
             tomogram_df["dataset"] = name
             tomogram_df["id"] = tomogram_df["fil"].apply(
-                lambda row: f"{row:02d}_{name}"
+                lambda row, name=name: f"{row:02d}_{name}"
             )
             rescale_tomography_data(tomogram_df, scale_factor)
             all_tomogram_dfs.append(tomogram_df)
@@ -162,3 +166,97 @@ def get_tomography_data(
         save_dataframe(bucket, data_key, all_tomogram_df, index=False)
 
         return all_tomogram_df
+
+
+def sample_tomography_data(
+    data: pd.DataFrame,
+    save_location: str,
+    save_key: str,
+    n_monomer_points: int,
+    minimum_points: int,
+    sampled_columns: list[str] = SAMPLE_COLUMNS,
+) -> pd.DataFrame:
+    """
+    Sample selected columns from tomography data at given resolution.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Tomography data to sample.
+    save_location
+        Location to save sampled data.
+    save_key
+        File key for sampled data.
+    n_monomer_points
+        Number of equally spaced monomer points to sample.
+    minimum_points
+        Minimum number of points for valid fiber.
+    sampled_columns
+        List of column names to sample.
+
+    Returns
+    -------
+    :
+        Sampled tomography data.
+    """
+
+    if check_key(save_location, save_key):
+        print(f"Loading existing sampled tomogram data from [ { save_key } ]")
+        return load_dataframe(save_location, save_key)
+    else:
+        all_sampled_points = []
+
+        for fiber_id, group in data.groupby("id"):
+            if len(group) < minimum_points:
+                continue
+
+            sampled_points = pd.DataFrame()
+            sampled_points["monomer_ids"] = np.arange(n_monomer_points)
+            sampled_points["dataset"] = group["dataset"].unique()[0]
+            sampled_points["id"] = fiber_id
+
+            for column in sampled_columns:
+                sampled_points[column] = np.interp(
+                    np.linspace(0, 1, n_monomer_points),
+                    np.linspace(0, 1, group.shape[0]),
+                    group[column].values,
+                )
+
+            all_sampled_points.append(sampled_points)
+
+        all_sampled_df = pd.concat(all_sampled_points)
+
+        print(f"Saving sampled tomogram data to [ { save_key } ]")
+        save_dataframe(save_location, save_key, all_sampled_df, index=False)
+
+        return all_sampled_df
+
+
+def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
+    """
+    Plot tomography data for each dataset.
+
+    Parameters
+    ----------
+    data
+        Tomography data.
+    """
+
+    for dataset, group in data.groupby("dataset"):
+        _, ax = plt.subplots(1, 3, figsize=(6, 2))
+
+        ax[1].set_title(dataset)
+
+        views = ["XY", "XZ", "YZ"]
+        for index, view in enumerate(views):
+            ax[index].set_xticks([])
+            ax[index].set_yticks([])
+            ax[index].set_xlabel(view[0])
+            ax[index].set_ylabel(view[1], rotation=0)
+
+        for _, fiber in group.groupby("id"):
+            ax[0].plot(fiber["xpos"], fiber["ypos"], marker="o", ms=1, lw=1)
+            ax[1].plot(fiber["xpos"], fiber["zpos"], marker="o", ms=1, lw=1)
+            ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
+
+        plt.show()
