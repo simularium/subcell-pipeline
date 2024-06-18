@@ -12,6 +12,29 @@ def get_wall_clock_time_from_logs(
     job_arns: dict,
     pattern: str,
 ) -> pd.DataFrame:
+    """
+    Extract wall clock times from log files.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    condition_keys
+        List of condition keys.
+    random_seeds
+        Random seeds for simulations.
+    job_arns
+        Map of conditions to job ARNs.
+    pattern
+        Regex pattern to find wall clock time in log text.
+
+    Returns
+    -------
+    :
+        Dataframe of wall clock times.
+    """
 
     wall_clock_times: list[dict] = []
 
