@@ -72,7 +72,7 @@ The `analysis` module contains code for different analyses.
 Each analysis type contains a README with additional information:
 
 - [analysis.compression_metrics](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics)
-- [analysis.dimensionality_reduction](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction)
+- [analysis.dimensionality_reduction](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction) -- Analysis and plotting for dimensionality reduction on individual fiber shapes
 - [analysis.tomography_data](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data)
 
 ### Visualization
