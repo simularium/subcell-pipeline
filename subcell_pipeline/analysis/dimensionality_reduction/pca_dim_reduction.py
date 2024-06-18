@@ -206,13 +206,17 @@ def plot_pca_inverse_transform(pca: PCA, pca_results: pd.DataFrame) -> None:
         ax[1, 1].plot(fiber[:, 1], fiber[:, 2], color=cmap((point + 2) / 4))
         ax[1, 2].plot(fiber[:, 0], fiber[:, 2], color=cmap((point + 2) / 4))
 
-    ax[0, 0].set_title("PC1 X/Y")
-    ax[0, 1].set_title("PC1 Y/Z")
-    ax[0, 2].set_title("PC1 X/Z")
+    for index in [0, 1]:
+        ax[index, 0].set_xlabel("X")
+        ax[index, 0].set_ylabel("Y", rotation=0)
+        ax[index, 1].set_xlabel("Y")
+        ax[index, 1].set_ylabel("Z", rotation=0)
+        ax[index, 2].set_xlabel("X")
+        ax[index, 2].set_ylabel("Z", rotation=0)
 
-    ax[1, 0].set_title("PC2 X/Y")
-    ax[1, 1].set_title("PC2 Y/Z")
-    ax[1, 2].set_title("PC2 X/Z")
+    for index in [0, 1, 2]:
+        ax[0, index].set_title("PC1")
+        ax[1, index].set_title("PC2")
 
     plt.tight_layout()
     plt.show()
