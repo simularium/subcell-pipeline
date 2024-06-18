@@ -5,8 +5,9 @@
 """
 Notebooks contains steps for plotting combined Cytosim and Readdy compression
 velocity simulations and applying Pairwise Controlled Manifold Approximation
-(PaCMAP) on individual fibers. By default, fibers are aligned to the positive x
-axis before running PaCMAP.
+(PaCMAP) on individual fibers. By default, fibers coordinates are aligned in the
+yz-plane to the positive y axis, keeping x axis coordinates unchanged, before
+running PaCMAP.
 
 - [Define simulation conditions](#define-simulation-conditions)
 - [Load merged data](#load-merged-data)
@@ -60,8 +61,9 @@ condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 """
 ## Load merged data
 
-Load merged simulation data from Cytosim and ReaDDy. Data is aligned to the
-positive x axis by default. Set `align=False` to load un-aligned data instead.
+Load merged simulation data from Cytosim and ReaDDy. Data is aligned in the
+yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
+`align=False` to load un-aligned data instead.
 """
 
 # %%

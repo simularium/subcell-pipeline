@@ -5,8 +5,8 @@
 """
 Notebooks contains steps for plotting combined Cytosim and Readdy compression
 velocity simulations and applying Principal Component Analysis (PCA) on
-individual fibers. By default, fibers are aligned to the positive x axis before
-running PCA.
+individual fibers. By default, fibers coordinates are aligned in the yz-plane to
+the positive y axis, keeping x axis coordinates unchanged, before running PCA.
 
 - [Define simulation conditions](#define-simulation-conditions)
 - [Load merged data](#load-merged-data)
@@ -73,8 +73,9 @@ save_location: str = str(Path(__file__).parents[3] / "analysis_outputs")
 """
 ## Load merged data
 
-Load merged simulation data from Cytosim and ReaDDy. Data is aligned to the
-positive x axis by default. Set `align=False` to load un-aligned data instead.
+Load merged simulation data from Cytosim and ReaDDy. Data is aligned in the
+yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
+`align=False` to load un-aligned data instead.
 """
 
 # %%
