@@ -1,13 +1,20 @@
 from enum import Enum
+from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pacmap import PaCMAP
+from io_collection.keys.check_key import check_key
+from io_collection.load.load_dataframe import load_dataframe
+from io_collection.save.save_dataframe import save_dataframe
 from sklearn.decomposition import PCA
 
 ABSOLUTE_TOLERANCE = 1e-6
+SIMULATOR_COLOR_MAP: dict[str, str] = {
+    "readdy": "#ca562c",
+    "cytosim": "#008080",
+}
 
 
 class COMPRESSIONMETRIC(Enum):
@@ -24,19 +31,19 @@ class COMPRESSIONMETRIC(Enum):
     COMPRESSION_RATIO = "compression_ratio"
 
     def label(self):
-        # Returns the label for the compression metric
+        # Returns the label of the metric
         labels = {
-            COMPRESSIONMETRIC.NON_COPLANARITY: "Non-coplanarity",
-            COMPRESSIONMETRIC.PEAK_ASYMMETRY: "Peak asymmetry",
-            COMPRESSIONMETRIC.SUM_BENDING_ENERGY: "Bending energy",
-            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: "Average perpendicular distance",
-            COMPRESSIONMETRIC.TOTAL_FIBER_TWIST: "Total fiber twist",
-            COMPRESSIONMETRIC.ENERGY_ASYMMETRY: "Energy asymmetry",
-            COMPRESSIONMETRIC.CALC_BENDING_ENERGY: "Calculated bending energy",
-            COMPRESSIONMETRIC.CONTOUR_LENGTH: "Contour length",
-            COMPRESSIONMETRIC.COMPRESSION_RATIO: "Compression ratio",
+            COMPRESSIONMETRIC.NON_COPLANARITY.value: "Non-coplanarity",
+            COMPRESSIONMETRIC.PEAK_ASYMMETRY.value: "Peak Asymmetry",
+            COMPRESSIONMETRIC.SUM_BENDING_ENERGY.value: "Sum Bending Energy",
+            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE.value: "Average Perpendicular Distance",
+            COMPRESSIONMETRIC.TOTAL_FIBER_TWIST.value: "Total Fiber Twist",
+            COMPRESSIONMETRIC.ENERGY_ASYMMETRY.value: "Energy Asymmetry",
+            COMPRESSIONMETRIC.CALC_BENDING_ENERGY.value: "Calculated Bending Energy",
+            COMPRESSIONMETRIC.CONTOUR_LENGTH.value: "Contour Length",
+            COMPRESSIONMETRIC.COMPRESSION_RATIO.value: "Compression Ratio",
         }
-        return labels[self]
+        return labels.get(self.value, "")
 
     def calculate_metric(self, polymer_trace: np.ndarray, **options: dict):
         # Returns the calculated metric value
@@ -276,7 +283,7 @@ def get_bending_energy_from_trace(
         bending_constant: float
             bending constant of the fiber
     """
-    bending_constant = float(options.get("bending_constant", 1))
+    bending_constant = options.get("bending_constant", 1)
 
     cos_angle = np.zeros(len(polymer_trace) - 2)
     for ind in range(len(polymer_trace) - 2):
@@ -381,18 +388,17 @@ def get_angle_between_vectors(
     signed_angle: float
         signed angle between vec1 and vec2
     """
-    signed_angle = np.arctan2(vec1[1], vec1[0]) - np.arctan2(vec2[1], vec2[0])
+    vec1, vec1_length = get_unit_vector(vec1)
+    vec2, vec2_length = get_unit_vector(vec2)
 
-    # normalize to [-pi, pi]
-    if signed_angle > np.pi:
-        angle = signed_angle - 2 * np.pi
-    elif signed_angle < -np.pi:
-        angle = signed_angle + 2 * np.pi
-    else:
-        angle = signed_angle
+    if vec1_length < ABSOLUTE_TOLERANCE or vec2_length < ABSOLUTE_TOLERANCE:
+        return 0
 
-    if not signed:
-        angle = np.abs(signed_angle)
+    angle = np.arccos(np.dot(vec1, vec2))
+
+    if signed:
+        if np.cross(vec1, vec2) < 0:
+            angle = -angle
 
     return angle
 
@@ -436,101 +442,6 @@ def get_total_fiber_twist_2d(
         prev_vec = curr_vec
 
     return np.abs(np.nansum(angles) / 2 / np.pi)
-
-
-def get_total_fiber_twist_bak(
-    polymer_trace: np.ndarray,
-    tolerance: float = ABSOLUTE_TOLERANCE,
-) -> float:
-    """
-    Returns the sum of angles between consecutive vectors from the
-    polymer trace points to the end-to-end axis.
-
-    Parameters
-    ----------
-    polymer_trace: [n x 3] numpy array
-        array containing the x,y,z positions of the polymer trace
-        at a given time
-    tolerance: float
-        ABSOLUTE_TOLERANCE
-
-    Returns
-    -------
-    total_twist: float
-        sum of angles between vectors from trace points to axis
-        in degrees
-    """
-    (
-        perp_distances,
-        _,
-        projection_positions,
-    ) = get_end_to_end_axis_distances_and_projections(polymer_trace=polymer_trace)
-
-    # if all perpendicular distances are zero, return 0
-    if np.all(perp_distances < tolerance):
-        return 0
-
-    perp_vectors = polymer_trace - projection_positions
-
-    twist_angle = 0
-
-    prev_vec, prev_vec_length = get_unit_vector(perp_vectors[1])
-
-    for i in range(2, len(perp_vectors) - 1):
-        curr_vec, curr_vec_length = get_unit_vector(perp_vectors[i])
-
-        if prev_vec_length < tolerance:
-            prev_vec = curr_vec
-            prev_vec_length = curr_vec_length
-            continue
-
-        if curr_vec_length < tolerance:
-            continue
-
-        dot_product = np.dot(prev_vec, curr_vec)
-
-        if np.isnan(dot_product) or np.abs(dot_product) > 1:
-            continue
-
-        # print(prev_vec_length, curr_vec_length, dot_product, twist_angle)
-
-        curr_angle = np.arccos(dot_product)
-
-        if ~np.isnan(curr_angle):
-            twist_angle += curr_angle
-            prev_vec = curr_vec
-            prev_vec_length = curr_vec_length
-
-    total_twist = twist_angle / np.pi
-
-    return total_twist
-
-
-def get_pacmap_embedding(polymer_trace_time_series: np.ndarray) -> np.ndarray:
-    """
-    Returns the pacmap embedding of the polymer trace time series.
-
-    Parameters
-    ----------
-    polymer_trace_time_series: [k x t x n x 3] numpy array
-        array containing the x,y,z positions of the polymer trace
-        at each time point. k = number of traces, t = number of time points,
-        n = number of points in each trace
-        If k = 1, then the embedding is of a single trace
-
-    Returns
-    -------
-    pacmap_embedding: [k x 2] numpy array
-        pacmap embedding of each polymer trace
-        If k = 1, then the embedding is of a single trace with size [t x 2]
-    """
-    embedding = PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0)
-
-    reshaped_time_series = polymer_trace_time_series.reshape(
-        polymer_trace_time_series.shape[0], -1
-    )
-
-    return embedding.fit_transform(reshaped_time_series)
 
 
 def fit_pca_to_polymer_trace(
@@ -581,7 +492,7 @@ def get_third_component_variance(
 def get_energy_asymmetry(
     fiber_energy: np.ndarray,
     **options: dict,
-) -> float:
+) -> Union[float, np.floating[Any]]:
     """
     Returns the sum bending energy given a single fiber x,y,z positions
     and segment energy values.
@@ -618,126 +529,169 @@ def get_sum_bending_energy(
 def get_compression_ratio(
     polymer_trace: np.ndarray,
     **options: dict,
-) -> float:
+) -> Union[float, np.floating[Any]]:
     return 1 - get_end_to_end_unit_vector(polymer_trace)[
         1
     ] / get_contour_length_from_trace(polymer_trace)
-
-
-def run_single_metric_calculation(
-    df_repeat: pd.DataFrame, metric: COMPRESSIONMETRIC, **options: dict
-) -> pd.DataFrame:
-    """
-    Given cytosim output, run_metric_calculation calculates a chosen metric over
-    all points in a fiber.
-
-    Parameters
-    ----------
-    df_repeat: [(num_timepoints * num_points) x n columns] pandas dataframe
-        df_repeat is a dataframe of cytosim outputs that is generated after
-        some post-processing.
-        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce,
-        segment_curvature,
-        force_magnitude, segment_energy] columns and any metric columns
-    metric: COMPRESSIONMETRIC enum
-        metric that includes chosen compression metric
-    **options: dict
-        Additional options as key-value pairs.
-
-    Returns
-    -------
-    df_repeat dataframe with calculated metric appended
-    """
-    df_repeat[metric.value] = np.nan
-    for _ct, (_time, fiber_at_time) in enumerate(df_repeat.groupby("time")):
-        polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
-        df_repeat.loc[fiber_at_time.index, metric.value] = metric.calculate_metric(
-            polymer_trace=polymer_trace, **options
-        )
-
-    return df_repeat
-
-
-def compression_metrics_workflow(
-    df_repeat: pd.DataFrame, metrics_to_calculate: list, **options: dict
-) -> pd.DataFrame:
-    """
-    Calculates chosen metrics from cytosim output of fiber positions and
-    properties across timesteps.
-
-    Parameters
-    ----------
-    df_repeat: [(num_timepoints * num_points) x n columns] pandas dataframe
-        df_repeat is a dataframe of cytosim outputs that is generated
-        after some post-processing.
-        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce,
-        segment_curvature,
-        force_magnitude, segment_energy] columns and any metric columns
-    metrics_to_calculate: [n] list of CM to calculate
-        list of COMPRESSIONMETRICS
-    **options: dict
-        Additional options as key-value pairs.
-
-    Returns
-    -------
-    df_repeat dataframe with chosen metrics appended as columns
-
-    """
-    for metric in metrics_to_calculate:
-        df_repeat = run_single_metric_calculation(df_repeat, metric, **options)
-    return df_repeat
-
-
-def plot_metric(df_repeat: pd.DataFrame, metric: COMPRESSIONMETRIC) -> None:
-    """
-    Plots and saves metric values over time.
-    gi
-    Parameters
-    ----------
-    df_repeat: [(num_timepoints * num_points) x n columns] pandas dataframe
-        includes [fiber_id, x_pos, y_pos, z_pos, xforce, yforce, zforce,
-        segment_curvature,
-        force_magnitude, segment_energy] columns and any metric columns
-    metric: metric name to be plotted
-        chosen COMPRESSIONMETRIC.
-
-    """
-    metric_by_time = df_repeat.groupby(["time"])[metric].mean()
-    plt.plot(metric_by_time)
-    plt.xlabel("Time")
-    plt.ylabel(metric.label())
-    # Save files if needed.
-    # plt.savefig(str(metric) + "-time.pdf")
-    # plt.savefig(str(metric) + "-time.png")
-
-
-def plot_metric_list(df_repeat: pd.DataFrame, metrics: list) -> None:
-    # docs
-    for metric in metrics:
-        plot_metric(df_repeat, metric)
 
 
 def calculate_compression_metrics(
     df: pd.DataFrame, metrics: List[Any], **options: Dict[str, Any]
 ) -> pd.DataFrame:
     """
-    Calculate compression metrics for each group in the given DataFrame.
+    Calculate compression metrics for a single simulation condition and seed
 
     Args:
-        df (pd.DataFrame): The input DataFrame.
+        df (pd.DataFrame): The input DataFrame for a single simulator.
         metrics (List[Any]): The list of metrics to calculate.
         **options (Dict[str, Any]): Additional options for the calculation.
 
     Returns:
         pd.DataFrame: The DataFrame with the calculated metrics.
     """
-    for simulator, df_sim in df.groupby("simulator"):
-        for velocity, df_velocity in df_sim.groupby("velocity"):
-            for repeat, df_repeat in df_velocity.groupby("repeat"):
-                print(f"simulator: {simulator}, velocity: {velocity}, repeat: {repeat}")
-                df_repeat = compression_metrics_workflow(
-                    df_repeat, metrics_to_calculate=metrics, **options
-                )
-                for metric in metrics:
-                    df.loc[df_repeat.index, metric.value] = df_repeat[metric.value]
-    return df
+    time_values = df["time"].unique()
+    df_metrics = pd.DataFrame(
+        index=time_values, columns=[metric.value for metric in metrics]
+    )
+
+    for time, fiber_at_time in df.groupby("time"):
+        polymer_trace = fiber_at_time[["xpos", "ypos", "zpos"]].values
+        for metric in metrics:
+            df_metrics.loc[time, metric.value] = metric.calculate_metric(
+                polymer_trace=polymer_trace, **options
+            )
+
+    return df_metrics.reset_index().rename(columns={"index": "time"})
+
+
+def get_compression_metric_data(
+    bucket: str,
+    series_name: str,
+    condition_keys: list[str],
+    random_seeds: list[int],
+    metrics: list[COMPRESSIONMETRIC],
+    recalculate: bool = False,
+) -> pd.DataFrame:
+    """
+    Load or create merged data with metrics for given conditions and random seeds.
+
+    If merged data already exists, load the data.
+    Otherwise, iterate through the conditions and seeds to merge the data.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    condition_keys
+        List of condition keys.
+    random_seeds
+        Random seeds for simulations.
+    metrics
+        List of metrics to calculate.
+    recalculate
+        True if data should be recalculated, False otherwise.
+
+    Returns
+    -------
+    :
+        Merged dataframe with one row per fiber.
+    """
+
+    data_key = f"{series_name}/analysis/{series_name}_compression_metrics.csv"
+
+    # Return data, if merged data already exists.
+    if check_key(bucket, data_key) and not recalculate:
+        print(
+            f"Dataframe [ { data_key } ] already exists. Loading existing merged data."
+        )
+        return load_dataframe(bucket, data_key, dtype={"key": "str"})
+
+    all_metrics: list[pd.DataFrame] = []
+
+    for condition_key in condition_keys:
+        series_key = f"{series_name}_{condition_key}" if condition_key else series_name
+
+        for seed in random_seeds:
+            print(
+                f"Loading samples and calculating metrics for [ {condition_key} ] seed [ {seed} ]"
+            )
+
+            sample_key = f"{series_name}/samples/{series_key}_{seed:06d}.csv"
+            samples = load_dataframe(bucket, sample_key)
+
+            metric_data = calculate_compression_metrics(samples, metrics)
+            metric_data["seed"] = seed
+            metric_data["key"] = condition_key
+
+            all_metrics.append(metric_data)
+
+    metrics_dataframe = pd.concat(all_metrics)
+    save_dataframe(bucket, data_key, metrics_dataframe, index=False)
+
+    return metrics_dataframe
+
+
+def plot_metrics_vs_time(
+    df: pd.DataFrame,
+    metrics: List[COMPRESSIONMETRIC],
+    figure_path: Union[Path, None] = None,
+    suffix: str = "",
+    compression_distance: float = 150.0,
+    use_real_time: bool = False,
+) -> None:
+    """
+    Plot metrics vs time.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+
+        metrics (List[COMPRESSIONMETRIC]): The list of metrics to plot.
+
+        figure_path (Path): The path to save the figure.
+
+        suffix (str, optional): The suffix to append to the figure filename.
+        Defaults to "".
+    """
+    if figure_path is None:
+        figure_path = Path(__file__).parents[3] / "analysis_outputs/figures"
+        figure_path.mkdir(parents=True, exist_ok=True)
+
+    num_velocities = df["velocity"].nunique()
+    total_time = 1.0
+    time_label = "Normalized Time"
+    plt.rcParams.update({"font.size": 16})
+
+    for metric in metrics:
+        fig, axs = plt.subplots(
+            1, num_velocities, figsize=(num_velocities * 5, 5), sharey=True, dpi=300
+        )
+        axs = axs.ravel()
+        for ct, (velocity, df_velocity) in enumerate(df.groupby("velocity")):
+            if use_real_time:
+                total_time = compression_distance / velocity  # s
+                time_label = "Time (s)"
+            for simulator, df_simulator in df_velocity.groupby("simulator"):
+                for repeat, df_repeat in df_simulator.groupby("repeat"):
+                    if repeat == 0:
+                        label = f"{simulator}"
+                    else:
+                        label = "_nolegend_"
+                    xvals = np.linspace(0, 1, df_repeat["time"].nunique()) * total_time
+                    yvals = df_repeat.groupby("time")[metric.value].mean()
+
+                    axs[ct].plot(
+                        xvals,
+                        yvals,
+                        label=label,
+                        color=SIMULATOR_COLOR_MAP[simulator],
+                        alpha=0.6,
+                    )
+            axs[ct].set_title(f"Velocity: {velocity}")
+            if ct == 0:
+                axs[ct].legend()
+        fig.supxlabel(time_label)
+        fig.supylabel(metric.label())
+        fig.tight_layout()
+        fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time{suffix}.png")
