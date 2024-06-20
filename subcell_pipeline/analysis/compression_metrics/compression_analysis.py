@@ -1,8 +1,6 @@
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
@@ -10,11 +8,11 @@ from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
 from sklearn.decomposition import PCA
 
-ABSOLUTE_TOLERANCE = 1e-6
-SIMULATOR_COLOR_MAP: dict[str, str] = {
-    "readdy": "#ca562c",
-    "cytosim": "#008080",
-}
+from subcell_pipeline.analysis.compression_metrics.constants import ABSOLUTE_TOLERANCE
+from subcell_pipeline.analysis.compression_metrics.vectors import (
+    get_end_to_end_unit_vector,
+    get_unit_vector,
+)
 
 
 class COMPRESSIONMETRIC(Enum):
@@ -31,14 +29,27 @@ class COMPRESSIONMETRIC(Enum):
     COMPRESSION_RATIO = "compression_ratio"
 
     def label(self):
-        # Returns the label of the metric
+        """
+        Return the label for the compression metric.
+
+        Parameters
+        ----------
+        self
+            the COMPRESSIONMETRIC object
+
+        Returns
+        -------
+        :
+            The label for the compression metric.
+        """
         labels = {
             COMPRESSIONMETRIC.NON_COPLANARITY.value: "Non-coplanarity",
             COMPRESSIONMETRIC.PEAK_ASYMMETRY.value: "Peak Asymmetry",
             COMPRESSIONMETRIC.SUM_BENDING_ENERGY.value: "Sum Bending Energy",
-            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE.value: "Average Perpendicular Distance",
+            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE.value: (
+                "Average Perpendicular Distance"
+            ),
             COMPRESSIONMETRIC.TOTAL_FIBER_TWIST.value: "Total Fiber Twist",
-            COMPRESSIONMETRIC.ENERGY_ASYMMETRY.value: "Energy Asymmetry",
             COMPRESSIONMETRIC.CALC_BENDING_ENERGY.value: "Calculated Bending Energy",
             COMPRESSIONMETRIC.CONTOUR_LENGTH.value: "Contour Length",
             COMPRESSIONMETRIC.COMPRESSION_RATIO.value: "Compression Ratio",
@@ -46,14 +57,33 @@ class COMPRESSIONMETRIC(Enum):
         return labels.get(self.value, "")
 
     def calculate_metric(self, polymer_trace: np.ndarray, **options: dict):
-        # Returns the calculated metric value
+        """
+        Calculate the compression metric for the given polymer trace.
+
+        Parameters
+        ----------
+        self
+            the COMPRESSIONMETRIC object
+
+        polymer_trace
+            array containing the x,y,z positions of the polymer trace
+
+        **options
+            Additional options as key-value pairs.
+
+        Returns
+        -------
+        :
+            The calculated compression metric for the polymer
+        """
         functions = {
             COMPRESSIONMETRIC.NON_COPLANARITY: get_third_component_variance,
             COMPRESSIONMETRIC.PEAK_ASYMMETRY: get_asymmetry_of_peak,
             COMPRESSIONMETRIC.SUM_BENDING_ENERGY: get_sum_bending_energy,
-            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: get_average_distance_from_end_to_end_axis,
+            COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: (
+                get_average_distance_from_end_to_end_axis
+            ),
             COMPRESSIONMETRIC.TOTAL_FIBER_TWIST: get_total_fiber_twist,
-            COMPRESSIONMETRIC.ENERGY_ASYMMETRY: get_energy_asymmetry,
             COMPRESSIONMETRIC.CALC_BENDING_ENERGY: get_bending_energy_from_trace,
             COMPRESSIONMETRIC.CONTOUR_LENGTH: get_contour_length_from_trace,
             COMPRESSIONMETRIC.COMPRESSION_RATIO: get_compression_ratio,
@@ -61,77 +91,31 @@ class COMPRESSIONMETRIC(Enum):
         return functions[self](polymer_trace, **options)
 
 
-def get_unit_vector(
-    vector: np.array,
-) -> Tuple[np.array, Union[float, np.floating[Any]]]:
-    """
-    Calculates the unit vector and length of a given vector.
-
-    Parameters:
-        vector (np.array): The input vector.
-
-    Returns:
-        Tuple[np.array, Union[float, np.floating[Any]]]: A tuple containing the unit vector
-        and length of the input vector.
-    """
-    if np.linalg.norm(vector) < ABSOLUTE_TOLERANCE or np.isnan(vector).any():
-        return np.array([0, 0, 0]), 0.0
-    else:
-        vec_length = np.linalg.norm(vector)
-        return vector / vec_length, vec_length
-
-
-def get_end_to_end_unit_vector(
-    polymer_trace: np.ndarray,
-) -> Tuple[np.array, Union[float, np.floating[Any]]]:
-    """
-    Returns the unit vector of the end-to-end axis of a polymer trace.
-
-    Parameters
-    ----------
-    polymer_trace: [n x 3] numpy array
-        array containing the x,y,z positions of the polymer trace points
-
-    Returns
-    -------
-    end_to_end_unit_vector: [3 x 1] numpy array
-        unit vector of the end-to-end axis of the polymer trace
-    end_to_end_axis_length: float
-        length of the end-to-end axis of the polymer trace
-    """
-    assert len(polymer_trace) > 1, "Polymer trace must have at least 2 points"
-    assert polymer_trace.shape[1] == 3, "Polymer trace must have 3 columns"
-
-    end_to_end_axis = polymer_trace[-1] - polymer_trace[0]
-
-    return get_unit_vector(end_to_end_axis)
-
-
 def get_end_to_end_axis_distances_and_projections(
     polymer_trace: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Returns the distances of the polymer trace points from the end-to-end axis.
+    Calculate the distances of the polymer trace points from the end-to-end axis.
     Here, the end-to-end axis is defined as the line joining the first and last
     fiber point.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace points
         at a given time
 
     Returns
     -------
-    perp_distances: [n x 1] numpy array
+    perp_distances
         perpendicular distances of the polymer trace from the end-to-end axis
 
-    scaled_projections: [n x 1] numpy array
+    scaled_projections
         length of fiber point projections along the end-to-end axis, scaled
         by axis length.
         Can be negative.
 
-    projection_positions: [n x 3] numpy array
+    projection_positions
         positions of points on the end-to-end axis that are
         closest from the respective points in the polymer trace.
         The distance from projection_positions
@@ -157,21 +141,21 @@ def get_average_distance_from_end_to_end_axis(
     **options: dict,
 ) -> Union[float, np.floating[Any]]:
     """
-    Returns the average perpendicular distance of polymer trace points from
+    Calculate the average perpendicular distance of polymer trace points from
     the end-to-end axis.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
         at a given time
 
-    **options: dict
+    **options
         Additional options as key-value pairs.
 
     Returns
     -------
-    avg_perp_distance: float
+    :
         average perpendicular distance of polymer trace points from the
         end-to-end axis
     """
@@ -188,20 +172,21 @@ def get_asymmetry_of_peak(
     **options: dict,
 ) -> float:
     """
-    returns the scaled distance of the projection of the peak from the
+    Calculate the scaled distance of the projection of the peak from the
     end-to-end axis midpoint.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
         at a given time
-    **options: dict
+
+    **options
         Additional options as key-value pairs.
 
     Returns
     -------
-    peak_asym: float
+    :
         scaled distance of the projection of the peak from the axis midpoint
     """
     (
@@ -226,16 +211,16 @@ def get_pca_polymer_trace_projection(
     polymer_trace: np.ndarray,
 ) -> np.ndarray:
     """
-    Returns the PCA projection of the polymer trace.
+    Calculate the PCA projection of the polymer trace.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
 
     Returns
     -------
-    pca_projection: [n x 3] numpy array
+    pca_projection
         PCA projection of the polymer trace
     """
     pca = fit_pca_to_polymer_trace(polymer_trace=polymer_trace)
@@ -247,18 +232,19 @@ def get_contour_length_from_trace(
     **options: dict,
 ) -> Union[float, np.floating[Any]]:
     """
-    Returns the sum of inter-monomer distances in the trace.
+    Calculate the sum of inter-monomer distances in the trace.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
-        array containing the x,y,z positions of the polymer trace
-    **options: dict
+    polymer_trace
+        n x 3 array containing the x,y,z positions of the polymer trace
+
+    **options
         Additional options as key-value pairs.
 
     Returns
     -------
-    total_distance: float
+    :
         sum of inter-monomer distances in the trace
     """
     total_distance = 0
@@ -272,18 +258,24 @@ def get_bending_energy_from_trace(
     **options: dict[str, Any],
 ) -> Union[float, np.floating[Any]]:
     """
-    Returns the bending energy per monomer of a polymer trace.
+    Calculate the bending energy per monomer of a polymer trace.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
-    **options: dict
+
+    **options
         Additional options as key-value pairs.
         bending_constant: float
             bending constant of the fiber
+
+    Returns
+    -------
+    :
+        bending energy per monomer of the polymer trace
     """
-    bending_constant = options.get("bending_constant", 1)
+    bending_constant = options.get("bending_constant", 1.0)
 
     cos_angle = np.zeros(len(polymer_trace) - 2)
     for ind in range(len(polymer_trace) - 2):
@@ -294,7 +286,7 @@ def get_bending_energy_from_trace(
             np.dot(vec1, vec2) / np.linalg.norm(vec1) / np.linalg.norm(vec2)
         )
 
-    energy = bending_constant * np.nanmean(1 - cos_angle)
+    energy = bending_constant * (1 - np.nanmean(cos_angle))
 
     return energy
 
@@ -304,14 +296,14 @@ def get_total_fiber_twist(
     **options: dict,
 ) -> float:
     """
-    Calculates the total twist using projections of the polymer trace
+    Calculate the total twist using projections of the polymer trace
     in the 2nd and 3rd dimension.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
-        at a given time
+
     **options: dict
         Additional options as key-value pairs:
 
@@ -321,9 +313,10 @@ def get_total_fiber_twist(
             whether to return the signed or unsigned total twist
         tolerance: float
             ABSOLUTE_TOLERANCE
+
     Returns
-    ----------
-    total_twist: float
+    -------
+    :
         sum of angles between PCA projection vectors
     """
     compression_axis = options.get("compression_axis", 0)
@@ -345,19 +338,20 @@ def get_total_fiber_twist_pca(
     tolerance: float = ABSOLUTE_TOLERANCE,
 ) -> float:
     """
-    Calculates the total twist using PCA projections of the polymer trace
+    Calculate the total twist using PCA projections of the polymer trace
     in the 2nd and 3rd dimension.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
-        at a given time
-    tolerance: float
+
+    tolerance
         ABSOLUTE_TOLERANCE
+
     Returns
-    ----------
-    total_twist: float
+    -------
+    :
         sum of angles between PCA projection vectors
     """
     pca_trace = get_pca_polymer_trace_projection(polymer_trace=polymer_trace)
@@ -372,20 +366,23 @@ def get_angle_between_vectors(
     signed: bool = False,
 ) -> float:
     """
-    Returns the signed angle between two vectors.
+    Calculate the signed angle between two vectors.
 
     Parameters
     ----------
-    vec1: [2 x 1] numpy array
-        vector 1
-    vec2: [2 x 1] numpy array
-        vector 2
-    signed: bool
+    vec1
+        The first vector
+
+    vec2
+        The second vector
+
+    signed
         if True, returns the signed angle between vec1 and vec2
+        Default is False
 
     Returns
     -------
-    signed_angle: float
+    :
         signed angle between vec1 and vec2
     """
     vec1, vec1_length = get_unit_vector(vec1)
@@ -409,19 +406,25 @@ def get_total_fiber_twist_2d(
     tolerance: float = ABSOLUTE_TOLERANCE,
 ) -> float:
     """
-    Calculates the total twist for 2d traces.
+    Calculate the total twist for 2d traces. The 2D twist is defined as the sum of
+    (signed) angles between consecutive vectors in the 2D projection along the
+    compression axis.
 
     Parameters
     ----------
-    trace_2d: [n x 2] numpy array
+    trace_2d
         array containing the x,y positions of the polymer trace
-    signed: bool
+
+    signed
         if True, returns the signed total twist
-    tolerance: float
-        ABSOLUTE_TOLERANCE
+        Default is False
+
+    tolerance
+        Tolerance for vector length
+
     Returns
-    ----------
-    total_twist: float
+    -------
+    :
         sum of angles between trace vectors
     """
     prev_vec = None
@@ -448,16 +451,17 @@ def fit_pca_to_polymer_trace(
     polymer_trace: np.ndarray,
 ) -> PCA:
     """
-    Returns the pca object fit to the polymer trace.
+    Fits PCA to the polymer trace and returns the fitted object.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
 
     Returns
     -------
-    pca: PCA object
+    :
+        PCA object fitted to the polymer trace
     """
     pca = PCA(n_components=3)
     pca.fit(polymer_trace)
@@ -469,60 +473,48 @@ def get_third_component_variance(
     **options: dict,
 ) -> float:
     """
-    Returns the third PCA component given the x,y,z positions of a fiber at
+    Calculate the third PCA component given the x,y,z positions of a fiber at
     a given time. This component reflects non-coplanarity/out of planeness.
 
     Parameters
     ----------
-    polymer_trace: [n x 3] numpy array
+    polymer_trace
         array containing the x,y,z positions of the polymer trace
-        at a given time
+
     **options: dict
         Additional options as key-value pairs.
 
     Returns
     -------
-    third_component_variance: float
+    :
         noncoplanarity of fiber
+        defined as the explained variance ratio of the third PCA component
     """
     pca = fit_pca_to_polymer_trace(polymer_trace=polymer_trace)
     return pca.explained_variance_ratio_[2]
-
-
-def get_energy_asymmetry(
-    fiber_energy: np.ndarray,
-    **options: dict,
-) -> Union[float, np.floating[Any]]:
-    """
-    Returns the sum bending energy given a single fiber x,y,z positions
-    and segment energy values.
-
-    Parameters
-    ----------
-    fiber_energy: [n x 4] numpy array
-        array containing the x,y,z positions of the polymer trace and segment energy
-        at a given time
-    **options: dict
-        Additional options as key-value pairs.
-
-    Returns
-    -------
-    total_energy: float
-        energy of a vector at a given time
-    """
-    middle_index = np.round(len(fiber_energy) / 2).astype(int)
-    diff = np.zeros(len(fiber_energy))
-    for index, _point in enumerate(fiber_energy):
-        diff[index] = np.abs(fiber_energy[index] - fiber_energy[-1 - index])
-        if index == middle_index:
-            break
-    return np.sum(diff)
 
 
 def get_sum_bending_energy(
     fiber_energy: np.ndarray,
     **options: dict,
 ) -> float:
+    """
+    Calculate the sum of bending energy from the given fiber energy array.
+
+    Parameters
+    ----------
+    fiber_energy
+        Array containing fiber energy values.
+
+    options
+        Additional options for calculation.
+
+    Returns
+    -------
+    :
+        Sum of bending energy.
+
+    """
     return fiber_energy[3].sum()
 
 
@@ -530,6 +522,25 @@ def get_compression_ratio(
     polymer_trace: np.ndarray,
     **options: dict,
 ) -> Union[float, np.floating[Any]]:
+    """
+    Calculate the compression ratio of a polymer trace.
+
+    The compression ratio is defined as 1 minus the ratio of the length of
+    the end-to-end vector to the contour length of the polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace: np.ndarray
+        The polymer trace as a numpy array.
+
+    **options: dict
+        Additional options for the calculation.
+
+    Returns
+    -------
+    :
+        The compression ratio of the polymer trace.
+    """
     return 1 - get_end_to_end_unit_vector(polymer_trace)[
         1
     ] / get_contour_length_from_trace(polymer_trace)
@@ -539,15 +550,23 @@ def calculate_compression_metrics(
     df: pd.DataFrame, metrics: List[Any], **options: Dict[str, Any]
 ) -> pd.DataFrame:
     """
-    Calculate compression metrics for a single simulation condition and seed
+    Calculate compression metrics for a single simulation condition and seed.
 
-    Args:
-        df (pd.DataFrame): The input DataFrame for a single simulator.
-        metrics (List[Any]): The list of metrics to calculate.
-        **options (Dict[str, Any]): Additional options for the calculation.
+    Parameters
+    ----------
+    df
+        The input DataFrame for a single simulator.
 
-    Returns:
-        pd.DataFrame: The DataFrame with the calculated metrics.
+    metrics
+        The list of metrics to calculate.
+
+    **options
+        Additional options for the calculation.
+
+    Returns
+    -------
+    :
+        The DataFrame with the calculated metrics.
     """
     time_values = df["time"].unique()
     df_metrics = pd.DataFrame(
@@ -582,21 +601,26 @@ def get_compression_metric_data(
     ----------
     bucket
         Name of S3 bucket for input and output files.
+
     series_name
         Name of simulation series.
+
     condition_keys
         List of condition keys.
+
     random_seeds
         Random seeds for simulations.
+
     metrics
         List of metrics to calculate.
+
     recalculate
         True if data should be recalculated, False otherwise.
 
     Returns
     -------
     :
-        Merged dataframe with one row per fiber.
+        Merged dataframe with one row per fiber with calculated metrics.
     """
 
     data_key = f"{series_name}/analysis/{series_name}_compression_metrics.csv"
@@ -615,7 +639,8 @@ def get_compression_metric_data(
 
         for seed in random_seeds:
             print(
-                f"Loading samples and calculating metrics for [ {condition_key} ] seed [ {seed} ]"
+                f"Loading samples and calculating metrics for "
+                f"[ {condition_key} ] seed [ {seed} ]"
             )
 
             sample_key = f"{series_name}/samples/{series_key}_{seed:06d}.csv"
@@ -631,67 +656,3 @@ def get_compression_metric_data(
     save_dataframe(bucket, data_key, metrics_dataframe, index=False)
 
     return metrics_dataframe
-
-
-def plot_metrics_vs_time(
-    df: pd.DataFrame,
-    metrics: List[COMPRESSIONMETRIC],
-    figure_path: Union[Path, None] = None,
-    suffix: str = "",
-    compression_distance: float = 150.0,
-    use_real_time: bool = False,
-) -> None:
-    """
-    Plot metrics vs time.
-
-    Args:
-        df (pd.DataFrame): The input DataFrame.
-
-        metrics (List[COMPRESSIONMETRIC]): The list of metrics to plot.
-
-        figure_path (Path): The path to save the figure.
-
-        suffix (str, optional): The suffix to append to the figure filename.
-        Defaults to "".
-    """
-    if figure_path is None:
-        figure_path = Path(__file__).parents[3] / "analysis_outputs/figures"
-        figure_path.mkdir(parents=True, exist_ok=True)
-
-    num_velocities = df["velocity"].nunique()
-    total_time = 1.0
-    time_label = "Normalized Time"
-    plt.rcParams.update({"font.size": 16})
-
-    for metric in metrics:
-        fig, axs = plt.subplots(
-            1, num_velocities, figsize=(num_velocities * 5, 5), sharey=True, dpi=300
-        )
-        axs = axs.ravel()
-        for ct, (velocity, df_velocity) in enumerate(df.groupby("velocity")):
-            if use_real_time:
-                total_time = compression_distance / velocity  # s
-                time_label = "Time (s)"
-            for simulator, df_simulator in df_velocity.groupby("simulator"):
-                for repeat, df_repeat in df_simulator.groupby("repeat"):
-                    if repeat == 0:
-                        label = f"{simulator}"
-                    else:
-                        label = "_nolegend_"
-                    xvals = np.linspace(0, 1, df_repeat["time"].nunique()) * total_time
-                    yvals = df_repeat.groupby("time")[metric.value].mean()
-
-                    axs[ct].plot(
-                        xvals,
-                        yvals,
-                        label=label,
-                        color=SIMULATOR_COLOR_MAP[simulator],
-                        alpha=0.6,
-                    )
-            axs[ct].set_title(f"Velocity: {velocity}")
-            if ct == 0:
-                axs[ct].legend()
-        fig.supxlabel(time_label)
-        fig.supylabel(metric.label())
-        fig.tight_layout()
-        fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time{suffix}.png")
