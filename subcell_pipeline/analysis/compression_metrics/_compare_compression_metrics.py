@@ -79,7 +79,7 @@ metrics = [
 
 # %% [markdown]
 """
-## Calculate metrics for cytosim data
+## Calculate metrics for Cytosim data
 
 """
 
@@ -96,7 +96,7 @@ cytosim_metrics["simulator"] = "cytosim"
 
 # %% [markdown]
 """
-## Calculate metrics for readdy data
+## Calculate metrics for ReaDDy data
 
 """
 

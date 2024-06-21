@@ -1,5 +1,5 @@
 Analysis workflow notebooks
-=============================
+===========================
 
 .. include:: ../subcell_pipeline/analysis/compression_metrics/README.md
    :parser: myst_parser.sphinx_

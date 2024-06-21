@@ -1,6 +1,6 @@
-# Compression Metric Calculations
+# Compression metric calculations
 
-## Metrics for Comparing Traces of Compressed Fibers
+## Metrics for comparing traces of compressed fibers
 
 Analysis combines compression simulations from Cytosim and Readdy and calculates various metrics to compare the compressed fibers.
 

@@ -3,3 +3,4 @@ SIMULATOR_COLOR_MAP: dict[str, str] = {
     "readdy": "#ca562c",
     "cytosim": "#008080",
 }
+"""Map of simulator name to color."""
