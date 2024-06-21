@@ -53,8 +53,9 @@ random_seeds: list[int] = [1, 2, 3, 4, 5]
 # List of condition file keys for each velocity
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
-# Location to save analysis results (S3 bucket or local path)
-save_location: str = str(Path(__file__).parents[3] / "analysis_outputs")
+# Location to save plot of metrics vs time (local path)
+save_location: Path = Path(__file__).parents[3] / "analysis_outputs"
+save_location.mkdir(parents=True, exist_ok=True)
 
 # Specify whether the metrics should be recalculated. Set this to true if you
 # make changes to any metric calculation functions.
@@ -129,4 +130,9 @@ combined_metrics["velocity"] = combined_metrics["key"].astype("int") / 10
 """
 
 # %%
-plot_metrics_vs_time(df=combined_metrics, metrics=metrics, suffix="_subsampled")
+plot_metrics_vs_time(
+    df=combined_metrics,
+    metrics=metrics,
+    figure_path=save_location,
+    suffix="_subsampled",
+)

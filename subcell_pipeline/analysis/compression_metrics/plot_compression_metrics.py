@@ -45,10 +45,6 @@ def plot_metrics_vs_time(
         Whether to use real time for the x-axis.
         Defaults to False.
     """
-    if figure_path is None:
-        figure_path = Path(__file__).parents[3] / "analysis_outputs/figures"
-        figure_path.mkdir(parents=True, exist_ok=True)
-
     num_velocities = df["velocity"].nunique()
     total_time = 1.0
     time_label = "Normalized Time"
@@ -85,4 +81,5 @@ def plot_metrics_vs_time(
         fig.supxlabel(time_label)
         fig.supylabel(metric.label())
         fig.tight_layout()
-        fig.savefig(figure_path / f"all_simulators_{metric.value}_vs_time{suffix}.png")
+        if figure_path is not None:
+            fig.savefig(figure_path / f"{metric.value}_vs_time{suffix}.png")
