@@ -8,7 +8,10 @@ from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
 from sklearn.decomposition import PCA
 
-from subcell_pipeline.analysis.compression_metrics.constants import ABSOLUTE_TOLERANCE
+from subcell_pipeline.analysis.compression_metrics.constants import (
+    ABSOLUTE_TOLERANCE,
+    DEFAULT_BENDING_CONSTANT,
+)
 from subcell_pipeline.analysis.compression_metrics.vectors import (
     get_end_to_end_unit_vector,
     get_unit_vector,
@@ -267,15 +270,16 @@ def get_bending_energy_from_trace(
 
     **options
         Additional options as key-value pairs.
+
         bending_constant: float
-            bending constant of the fiber
+            bending constant of the fiber in pN nm
 
     Returns
     -------
     :
         bending energy per monomer of the polymer trace
     """
-    bending_constant = options.get("bending_constant", 1.0)
+    bending_constant = options.get("bending_constant", DEFAULT_BENDING_CONSTANT)
 
     cos_angle = np.zeros(len(polymer_trace) - 2)
     for ind in range(len(polymer_trace) - 2):
