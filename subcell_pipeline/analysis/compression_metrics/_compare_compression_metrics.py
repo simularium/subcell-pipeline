@@ -6,8 +6,11 @@
 Notebook contains steps to compare metrics of fiber compression across different
 simulators. Currently supports comparison of Cytosim and ReaDDy simulations.
 
-- [Load dataframes](#load-dataframes)
-- [Calculate metrics and add to dataframe](#calculate-metrics)
+- [Define simulation conditions](#define-simulation-conditions)
+- [Select metrics to analyze](#select-metrics-to-analyze)
+- [Calculate metrics for Cytosim data](#calculate-metrics-for-cytosim-data)
+- [Calculate metrics for ReaDDy data](#calculate-metrics-for-readdy-data)
+- [Combine metrics from both simulators](#combine-metrics-from-both-simulators)
 - [Plot metrics vs time](#plot-metrics-vs-time)
 """
 
