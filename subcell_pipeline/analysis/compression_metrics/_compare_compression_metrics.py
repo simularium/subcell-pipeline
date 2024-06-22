@@ -24,11 +24,11 @@ from pathlib import Path
 import pandas as pd
 
 from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
-    COMPRESSIONMETRIC,
     get_compression_metric_data,
-)
-from subcell_pipeline.analysis.compression_metrics.plot_compression_metrics import (
     plot_metrics_vs_time,
+)
+from subcell_pipeline.analysis.compression_metrics.compression_metric import (
+    CompressionMetric,
 )
 
 # %% [markdown]
@@ -73,12 +73,12 @@ Available metrics are defined in the `COMPRESSIONMETRIC` enum.
 
 # %%
 metrics = [
-    COMPRESSIONMETRIC.NON_COPLANARITY,
-    COMPRESSIONMETRIC.PEAK_ASYMMETRY,
-    COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE,
-    COMPRESSIONMETRIC.CALC_BENDING_ENERGY,
-    COMPRESSIONMETRIC.CONTOUR_LENGTH,
-    COMPRESSIONMETRIC.COMPRESSION_RATIO,
+    CompressionMetric.NON_COPLANARITY,
+    CompressionMetric.PEAK_ASYMMETRY,
+    CompressionMetric.AVERAGE_PERP_DISTANCE,
+    CompressionMetric.CALC_BENDING_ENERGY,
+    CompressionMetric.CONTOUR_LENGTH,
+    CompressionMetric.COMPRESSION_RATIO,
 ]
 
 # %% [markdown]

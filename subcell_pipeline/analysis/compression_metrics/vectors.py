@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Union
+# Methods for vector operations.
 
 import numpy as np
 
@@ -6,8 +6,8 @@ from subcell_pipeline.analysis.compression_metrics.constants import ABSOLUTE_TOL
 
 
 def get_unit_vector(
-    vector: np.array,
-) -> Tuple[np.array, Union[float, np.floating[Any]]]:
+    vector: np.ndarray,
+) -> np.ndarray:
     """
     Calculate the unit vector and length of a given vector.
 
@@ -19,18 +19,18 @@ def get_unit_vector(
     Returns
     -------
     :
-        A tuple containing the unit vector and length of the input vector.
+        unit vector of the input vector
     """
     if np.linalg.norm(vector) < ABSOLUTE_TOLERANCE or np.isnan(vector).any():
-        return np.array([0, 0, 0]), 0.0
+        return np.array([0, 0, 0])
     else:
         vec_length = np.linalg.norm(vector)
-        return vector / vec_length, vec_length
+        return vector / vec_length
 
 
 def get_end_to_end_unit_vector(
     polymer_trace: np.ndarray,
-) -> Tuple[np.array, Union[float, np.floating[Any]]]:
+) -> np.ndarray:
     """
     Calculate the unit vector of the end-to-end axis of a polymer trace.
 
