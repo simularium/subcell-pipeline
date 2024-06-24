@@ -12,3 +12,5 @@ SIMULATOR_COLOR_MAP: dict[str, str] = {
 """Map of simulator name to color."""
 DEFAULT_BENDING_CONSTANT: float = 1.0
 """The default bending constant in pN nm."""
+DEFAULT_COMPRESSION_DISTANCE: float = 150.0
+"""The default compression distance in nm."""

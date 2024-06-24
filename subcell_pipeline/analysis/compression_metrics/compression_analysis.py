@@ -16,7 +16,10 @@ from matplotlib import pyplot as plt
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
 )
-from subcell_pipeline.analysis.compression_metrics.constants import SIMULATOR_COLOR_MAP
+from subcell_pipeline.analysis.compression_metrics.constants import (
+    DEFAULT_COMPRESSION_DISTANCE,
+    SIMULATOR_COLOR_MAP,
+)
 
 
 def get_compression_metric_data(
@@ -136,7 +139,7 @@ def plot_metrics_vs_time(
     metrics: List[CompressionMetric],
     figure_path: Union[Path, None] = None,
     suffix: str = "",
-    compression_distance: float = 150.0,
+    compression_distance: float = DEFAULT_COMPRESSION_DISTANCE,
     use_real_time: bool = False,
 ) -> None:
     """
