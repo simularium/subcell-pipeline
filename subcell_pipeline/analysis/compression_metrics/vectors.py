@@ -1,4 +1,4 @@
-# Methods for vector operations.
+"""Methods for vector operations."""
 
 import numpy as np
 

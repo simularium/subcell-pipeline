@@ -1,4 +1,4 @@
-# Methods to calculate metrics from polymer trace data.
+"""Methods to calculate metrics from polymer trace data."""
 
 from typing import Any, Dict, Tuple, Union
 

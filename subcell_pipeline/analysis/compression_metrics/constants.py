@@ -1,4 +1,4 @@
-# Constants used in compression metric analysis.
+"""Constants used in compression metric analysis."""
 
 ABSOLUTE_TOLERANCE: float = 1e-6
 """
