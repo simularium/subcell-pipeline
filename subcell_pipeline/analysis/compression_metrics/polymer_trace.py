@@ -200,6 +200,8 @@ def get_bending_energy_from_trace(
     """
     bending_constant = options.get("bending_constant", DEFAULT_BENDING_CONSTANT)
 
+    assert isinstance(bending_constant, (float, np.floating))
+
     cos_angle = np.zeros(len(polymer_trace) - 2)
     for ind in range(len(polymer_trace) - 2):
         vec1 = polymer_trace[ind + 1] - polymer_trace[ind]
@@ -211,7 +213,7 @@ def get_bending_energy_from_trace(
 
     # since the bending constant is obtained from a kwargs dictionary
     # the type checker is unable to infer its type
-    energy = bending_constant * (1 - np.nanmean(cos_angle))  # type: ignore
+    energy = bending_constant * (1 - np.nanmean(cos_angle))
 
     return energy
 
@@ -248,14 +250,15 @@ def get_total_fiber_twist(
     signed = options.get("signed", True)
     tolerance = options.get("tolerance", ABSOLUTE_TOLERANCE)
 
+    assert isinstance(signed, bool)
+    assert isinstance(tolerance, (float, np.floating))
+
     trace_2d = polymer_trace[
         :, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]
     ]
     trace_2d = trace_2d - np.mean(trace_2d, axis=0)
 
-    return get_total_fiber_twist_2d(
-        trace_2d, signed=signed, tolerance=tolerance  # type: ignore
-    )
+    return get_total_fiber_twist_2d(trace_2d, signed=signed, tolerance=tolerance)
 
 
 def get_total_fiber_twist_pca(

@@ -68,7 +68,7 @@ recalculate: bool = False
 """
 ## Select metrics to analyze
 
-Available metrics are defined in the `COMPRESSIONMETRIC` enum.
+Available metrics are defined in the `CompressionMetric` enum.
 """
 
 # %%
