@@ -40,7 +40,7 @@ class CompressionMetric(Enum):
         Parameters
         ----------
         self
-            the COMPRESSIONMETRIC object
+            the CompressionMetric object
 
         Returns
         -------
@@ -70,7 +70,7 @@ class CompressionMetric(Enum):
         Parameters
         ----------
         self
-            the COMPRESSIONMETRIC object
+            the CompressionMetric object
 
         polymer_trace
             array containing the x,y,z positions of the polymer trace
