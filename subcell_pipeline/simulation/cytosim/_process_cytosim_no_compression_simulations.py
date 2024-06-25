@@ -54,8 +54,8 @@ Iterate through all condition keys and random seeds to load simulation output
 files and parse them into a tidy data format. If the parsed file for a given
 condition key and random seed already exists, parsing is skipped.
 
-- Input: `(name)/outputs/(name)_(condition_key)_(index)/`
-- Output: `(name)/data/(name)_(condition_key)_(seed).csv`
+- Input: `(series_name)/outputs/(series_name)_(index)/`
+- Output: `(series_name)/data/(series_name)_(seed).csv`
 """
 
 # %%

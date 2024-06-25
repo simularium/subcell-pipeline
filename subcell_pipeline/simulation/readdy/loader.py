@@ -7,7 +7,7 @@ import numpy as np
 import readdy
 from tqdm import tqdm
 
-from .readdy_data import FrameData, ParticleData, TopologyData
+from .data_structures import FrameData, ParticleData, TopologyData
 
 
 class ReaddyLoader:

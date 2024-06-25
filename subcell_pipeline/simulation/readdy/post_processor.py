@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import math
-import time
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -10,7 +9,7 @@ from numpy import ndarray
 from tqdm import tqdm
 
 from ..compression_analysis import get_contour_length_from_trace
-from .readdy_data import FrameData
+from .data_structures import FrameData
 
 
 class ReaddyPostProcessor:
@@ -39,6 +38,20 @@ class ReaddyPostProcessor:
         self.trajectory = trajectory
         self.box_size = box_size
         self.periodic_boundary = periodic_boundary
+        
+    def times(self) -> np.ndarray:
+        """
+        Get simulation time at each timestep.
+
+        Returns
+        -------
+        times: np.array (shape = n_timesteps)
+            Array of time stamps in simulation time for each time step.
+        """
+        result = []
+        for time_ix in self.trajectory:
+            result.append(self.trajectory[time_ix].time)
+        return np.array(result)
 
     def _id_for_neighbor_of_types(
         self,
@@ -248,7 +261,7 @@ class ReaddyPostProcessor:
             for each particle in each fiber at each time.
         ideal_positions: np.ndarray (shape = 3 x 3)
             XYZ positions for 3 particles in an ideal chain.
-        ideal_vector_to_axis: np.ndarray
+        ideal_vector_to_axis: np.ndarray (shape = 3)
             Vector from the second ideal position
             to the axis of the fiber.
 
@@ -494,35 +507,3 @@ class ReaddyPostProcessor:
         for frame in self.trajectory:
             edges.append(frame.edges)
         return edges
-
-
-def array_to_dataframe(fiber_point_array: ndarray) -> pd.DataFrame:
-    """
-    Convert a 3D array to a pandas DataFrame.
-
-    Parameters
-    ----------
-    fiber_point_array: ndarray
-        The input 3D array.
-
-    Returns
-    -------
-    DataFrame: A pandas DataFrame with timepoint and fiber point as multi-index.
-    """
-    # Reshape the array to remove the singleton dimensions
-    fiber_point_array = np.squeeze(fiber_point_array)
-
-    # Reshape the array to have dimensions (timepoints * 50, 3)
-    reshaped_arr = fiber_point_array.reshape(-1, 3)
-
-    # Create a DataFrame with timepoint and fiber point as multi-index
-    timepoints = np.repeat(range(fiber_point_array.shape[0]), 50)
-    fiber_points = np.tile(range(50), fiber_point_array.shape[0])
-
-    df = pd.DataFrame(reshaped_arr)
-    df["time"] = timepoints
-    df["id"] = fiber_points
-
-    df.set_index(["time", "id"], inplace=True)
-
-    return df
