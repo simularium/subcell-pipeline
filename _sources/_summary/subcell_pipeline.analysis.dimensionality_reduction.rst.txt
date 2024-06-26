@@ -1,0 +1,37 @@
+analysis.dimensionality\_reduction
+==================================
+
+.. automodule:: subcell_pipeline.analysis.dimensionality_reduction
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+
+.. currentmodule:: subcell_pipeline
+
+.. autosummary::
+   :toctree:
+   :template: custom_summary.rst
+   :recursive:
+
+   analysis.dimensionality_reduction.fiber_data
+   analysis.dimensionality_reduction.pacmap_dim_reduction
+   analysis.dimensionality_reduction.pca_dim_reduction
+

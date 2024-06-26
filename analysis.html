@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head>
-<meta charset="utf-8"/>
+  <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="#" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="simulation" href="_summary/subcell_pipeline.simulation.html" /><link rel="prev" title="Simulation workflow notebooks" href="simulation.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-<meta name="robots" content="noindex" />
-<title>Search - <strong>Subcellular modeling pipeline</strong> <br />0.1.0</title><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+        <title>Analysis workflow notebooks - Subcellular modeling pipeline 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
@@ -192,7 +192,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -206,7 +206,7 @@
   
   <span class="sidebar-brand-text"><strong>Subcellular modeling pipeline</strong> <br />0.1.0</span>
   
-</a><form class="sidebar-search-container" method="get" action="#" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -217,9 +217,9 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Workflow notebooks</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Analysis</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
@@ -272,7 +272,13 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/analysis.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
@@ -281,31 +287,72 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          
-<noscript>
-<div class="admonition error">
-  <p class="admonition-title">Error</p>
-  <p>
-    Please activate JavaScript to enable the search functionality.
-  </p>
-</div>
-</noscript>
-
-<div id="search-results"></div>
+          <section id="analysis-workflow-notebooks">
+<h1>Analysis workflow notebooks<a class="headerlink" href="#analysis-workflow-notebooks" title="Link to this heading">¶</a></h1>
+<section id="compression-metric-calculations">
+<h2>Compression metric calculations<a class="headerlink" href="#compression-metric-calculations" title="Link to this heading">¶</a></h2>
+<section id="metrics-for-comparing-traces-of-compressed-fibers">
+<h3>Metrics for comparing traces of compressed fibers<a class="headerlink" href="#metrics-for-comparing-traces-of-compressed-fibers" title="Link to this heading">¶</a></h3>
+<p>Analysis combines compression simulations from Cytosim and Readdy and calculates various metrics to compare the compressed fibers.</p>
+<ul class="simple">
+<li><p><strong>Calculate compression metrics</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics/_compare_compression_metrics.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/analysis/compression_metrics/_compare_compression_metrics.html">notebook</a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="dimensionality-reduction">
+<h2>Dimensionality reduction<a class="headerlink" href="#dimensionality-reduction" title="Link to this heading">¶</a></h2>
+<section id="single-actin-fiber-compressed-at-different-compression-velocities">
+<h3>Single actin fiber compressed at different compression velocities<a class="headerlink" href="#single-actin-fiber-compressed-at-different-compression-velocities" title="Link to this heading">¶</a></h3>
+<p>Analysis combines compression simulations from Cytosim and Readdy and applies dimensionality reduction to individual fibers aligned in the yz-plane to the positive y axis, keeping x axis coordinates unchanged.</p>
+<ul class="simple">
+<li><p><strong>Run PCA on compression simulations</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction/_run_pca_on_compression_simulations.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/analysis/dimensionality_reduction/_run_pca_on_compression_simulations.html">notebook</a>)</p></li>
+<li><p><strong>Run PaCMAP on compression simulations</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction/_run_pacmap_on_compression_simulations.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/analysis/dimensionality_reduction/_run_pacmap_on_compression_simulations.html">notebook</a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="tomography-data">
+<h2>Tomography data<a class="headerlink" href="#tomography-data" title="Link to this heading">¶</a></h2>
+<section id="actin-cme-tomography-data">
+<h3>Actin CME tomography data<a class="headerlink" href="#actin-cme-tomography-data" title="Link to this heading">¶</a></h3>
+<p>Load, process, and analyze segmented cryo-electron tomography data of CME-associated actin filaments.</p>
+<ul class="simple">
+<li><p><strong>Analyze tomography data</strong> (<a class="reference external" href="https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data/_analyze_actin_cme_tomography_data.py">source</a> | <a class="reference external" href="https://simularium.github.io/subcell-pipeline/_notebooks/analysis/tomography_data/_analyze_actin_cme_tomography_data.html">notebook</a>)</p></li>
+</ul>
+</section>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="_summary/subcell_pipeline.simulation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">simulation</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="simulation.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Simulation workflow notebooks</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -324,8 +371,38 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Analysis workflow notebooks</a><ul>
+<li><a class="reference internal" href="#compression-metric-calculations">Compression metric calculations</a><ul>
+<li><a class="reference internal" href="#metrics-for-comparing-traces-of-compressed-fibers">Metrics for comparing traces of compressed fibers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dimensionality-reduction">Dimensionality reduction</a><ul>
+<li><a class="reference internal" href="#single-actin-fiber-compressed-at-different-compression-velocities">Single actin fiber compressed at different compression velocities</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tomography-data">Tomography data</a><ul>
+<li><a class="reference internal" href="#actin-cme-tomography-data">Actin CME tomography data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -336,8 +413,5 @@
     <script src="_static/scripts/furo.js?v=4e2eecee"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
-    
-<script src="_static/searchtools.js"></script>
-<script src="_static/language_data.js"></script>
-<script src="searchindex.js"></script></body>
+    </body>
 </html>

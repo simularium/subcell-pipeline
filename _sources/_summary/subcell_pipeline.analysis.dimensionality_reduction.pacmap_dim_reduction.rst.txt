@@ -1,0 +1,32 @@
+analysis.dimensionality\_reduction.pacmap\_dim\_reduction
+=========================================================
+
+.. automodule:: subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      plot_pacmap_feature_scatter
+      run_pacmap
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

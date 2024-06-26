@@ -15,6 +15,7 @@
    :caption: Workflow notebooks
 
    Simulations <simulation>
+   Analysis <analysis>
 
 .. autosummary::
    :toctree: _summary
@@ -23,6 +24,7 @@
    :recursive:
 
    subcell_pipeline.simulation
+   subcell_pipeline.analysis
 
 .. toctree::
    :hidden:

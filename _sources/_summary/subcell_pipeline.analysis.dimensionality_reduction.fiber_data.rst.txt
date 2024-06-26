@@ -1,0 +1,36 @@
+analysis.dimensionality\_reduction.fiber\_data
+==============================================
+
+.. automodule:: subcell_pipeline.analysis.dimensionality_reduction.fiber_data
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      align_fiber
+      align_fibers
+      get_merged_data
+      plot_fibers_by_key_and_seed
+      reshape_fibers
+      save_aligned_fibers
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

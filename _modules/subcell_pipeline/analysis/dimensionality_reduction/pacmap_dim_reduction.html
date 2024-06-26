@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>subcell_pipeline.simulation.cytosim.post_processing - Subcellular modeling pipeline 0.1.0</title>
+        <title>subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction - Subcellular modeling pipeline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
@@ -286,164 +286,98 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for subcell_pipeline.simulation.cytosim.post_processing</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Methods for processing Cytosim simulations.&quot;&quot;&quot;</span>
+          <h1>Source code for subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Methods for dimensionality reduction using PaCMAP.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">io_collection.keys.check_key</span> <span class="kn">import</span> <span class="n">check_key</span>
-<span class="kn">from</span> <span class="nn">io_collection.load.load_text</span> <span class="kn">import</span> <span class="n">load_text</span>
-<span class="kn">from</span> <span class="nn">io_collection.save.save_dataframe</span> <span class="kn">import</span> <span class="n">save_dataframe</span>
+<span class="kn">from</span> <span class="nn">pacmap</span> <span class="kn">import</span> <span class="n">PaCMAP</span>
 
-<span class="n">COLUMN_NAMES</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;fiber_id&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;xpos&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ypos&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zpos&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;xforce&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yforce&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zforce&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;segment_curvature&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;time&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fiber_point&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<span class="kn">from</span> <span class="nn">subcell_pipeline.analysis.dimensionality_reduction.fiber_data</span> <span class="kn">import</span> <span class="n">reshape_fibers</span>
 
 
-<span class="n">COLUMN_DTYPES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;fiber_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="s2">&quot;xpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;ypos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;zpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;xforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;yforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;zforce&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;segment_curvature&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;fiber_point&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">CYTOSIM_SCALE_FACTOR</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
-
-<span class="n">CYTOSIM_RIGIDITY</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.041</span>
-
-
-<div class="viewcode-block" id="parse_cytosim_simulation_data">
-<a class="viewcode-back" href="../../../../_summary/subcell_pipeline.simulation.cytosim.post_processing.html#subcell_pipeline.simulation.cytosim.post_processing.parse_cytosim_simulation_data">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_cytosim_simulation_data</span><span class="p">(</span>
-    <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">condition_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">random_seeds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="run_pacmap">
+<a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction.html#subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction.run_pacmap">[docs]</a>
+<span class="k">def</span> <span class="nf">run_pacmap</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">PaCMAP</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parse Cytosim simulation data for select conditions and seeds.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    bucket</span>
-<span class="sd">        Name of S3 bucket for input and output files.</span>
-<span class="sd">    series_name</span>
-<span class="sd">        Name of simulation series.</span>
-<span class="sd">    condition_keys</span>
-<span class="sd">        List of condition keys.</span>
-<span class="sd">    random_seeds</span>
-<span class="sd">        Random seeds for simulations.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">for</span> <span class="n">condition_key</span> <span class="ow">in</span> <span class="n">condition_keys</span><span class="p">:</span>
-        <span class="n">series_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">condition_key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">condition_key</span> <span class="k">else</span> <span class="n">series_name</span>
-
-        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">random_seeds</span><span class="p">):</span>
-            <span class="n">dataframe_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_name</span><span class="si">}</span><span class="s2">/data/</span><span class="si">{</span><span class="n">series_key</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">seed</span><span class="si">:</span><span class="s2">06d</span><span class="si">}</span><span class="s2">.csv&quot;</span>
-
-            <span class="c1"># Skip if dataframe file already exists.</span>
-            <span class="k">if</span> <span class="n">check_key</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">dataframe_key</span><span class="p">):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataframe [ </span><span class="si">{</span><span class="w"> </span><span class="n">dataframe_key</span><span class="w"> </span><span class="si">}</span><span class="s2"> ] already exists. Skipping.&quot;</span><span class="p">)</span>
-                <span class="k">continue</span>
-
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsing data for [ </span><span class="si">{</span><span class="n">condition_key</span><span class="si">}</span><span class="s2"> ] seed [ </span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s2"> ]&quot;</span><span class="p">)</span>
-
-            <span class="n">output_key_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_name</span><span class="si">}</span><span class="s2">/outputs/</span><span class="si">{</span><span class="n">series_key</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">/%s&quot;</span>
-            <span class="n">segment_curvature</span> <span class="o">=</span> <span class="n">load_text</span><span class="p">(</span>
-                <span class="n">bucket</span><span class="p">,</span> <span class="n">output_key_template</span> <span class="o">%</span> <span class="s2">&quot;fiber_segment_curvature.txt&quot;</span>
-            <span class="p">)</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">parse_cytosim_simulation_curvature_data</span><span class="p">(</span><span class="n">segment_curvature</span><span class="p">)</span>
-
-            <span class="n">save_dataframe</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">dataframe_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="parse_cytosim_simulation_curvature_data">
-<a class="viewcode-back" href="../../../../_summary/subcell_pipeline.simulation.cytosim.post_processing.html#subcell_pipeline.simulation.cytosim.post_processing.parse_cytosim_simulation_curvature_data">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_cytosim_simulation_curvature_data</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">rigidity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">CYTOSIM_RIGIDITY</span><span class="p">,</span>
-    <span class="n">scale_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">CYTOSIM_SCALE_FACTOR</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parse Cytosim fiber segment curvature data into tidy data format.</span>
+<span class="sd">    Run Pairwise Controlled Manifold Approximation (PaCMAP) on simulation data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    data</span>
-<span class="sd">        Output data from Cytosim report fiber:segment_energy.</span>
-<span class="sd">    rigidity</span>
-<span class="sd">        Fiber rigidity used to calculate segment energy.</span>
-<span class="sd">    scale_factor</span>
-<span class="sd">        Scaling factor for fiber points.</span>
+<span class="sd">        Simulated fiber data.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        Data for individual fiber points.</span>
+<span class="sd">        Dataframe with PaCMAP emebdding appended and the PaCMAP object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">point_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_fibers</span><span class="p">,</span> <span class="n">all_features</span> <span class="o">=</span> <span class="n">reshape_fibers</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="n">fiber_index</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">point_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pacmap</span> <span class="o">=</span> <span class="n">PaCMAP</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">MN_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">FP_ratio</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">pacmap</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">all_fibers</span><span class="p">)</span>
 
-    <span class="c1"># Iterate through each row of the data and extract data for each point.</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-        <span class="n">line_split</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;% time&quot;</span><span class="p">):</span>
-                <span class="n">time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsing timepoint [ </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> ]&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">% e</span><span class="s2">nd&quot;</span><span class="p">):</span>
-                <span class="n">fiber_index</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">point_index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_split</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">fiber_index</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">line_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">point_index</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">point_index</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">fiber_index</span> <span class="o">+=</span> <span class="mi">1</span>
-
-            <span class="n">point_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="o">*</span><span class="n">line_split</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">point_index</span><span class="p">])</span>
-
-    <span class="c1"># Combine all data into dataframe and update data types.</span>
-    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">point_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">COLUMN_NAMES</span><span class="p">)</span>
-    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">COLUMN_DTYPES</span><span class="p">)</span>
-
-    <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span>
-    <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;ypos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;ypos&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span>
-    <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;zpos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;zpos&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span>
-
-    <span class="c1"># Calculate force magnitude</span>
-    <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;force_magnitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;xforce&quot;</span><span class="p">])</span>
-        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;yforce&quot;</span><span class="p">])</span>
-        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;zforce&quot;</span><span class="p">])</span>
+    <span class="n">pacmap_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PACMAP1&quot;</span><span class="p">,</span> <span class="s2">&quot;PACMAP2&quot;</span><span class="p">]),</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">all_features</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">pacmap_results</span> <span class="o">=</span> <span class="n">pacmap_results</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># Calculate segment bending energy in pN nm</span>
-    <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;segment_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;segment_curvature&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rigidity</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="k">return</span> <span class="n">pacmap_results</span><span class="p">,</span> <span class="n">pacmap</span></div>
 
-    <span class="k">return</span> <span class="n">dataframe</span></div>
+
+
+<div class="viewcode-block" id="plot_pacmap_feature_scatter">
+<a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction.html#subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction.plot_pacmap_feature_scatter">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_pacmap_feature_scatter</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot scatter of PaCMAP embedding colored by the given features.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        PaCMAP results data.</span>
+<span class="sd">    features : dict</span>
+<span class="sd">        Map of feature name to coloring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">colors</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PACMAP1&quot;</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PACMAP2&quot;</span><span class="p">],</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">c</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">colors</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PACMAP1&quot;</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PACMAP2&quot;</span><span class="p">],</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">c</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PACMAP1&quot;</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;PACMAP2&quot;</span><span class="p">],</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">c</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">feature</span><span class="p">],</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;PACMAP1&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;PACMAP2&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
 </pre></div>
         </article>

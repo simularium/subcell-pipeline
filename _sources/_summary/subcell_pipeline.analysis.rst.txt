@@ -1,0 +1,36 @@
+﻿analysis
+========
+
+.. automodule:: subcell_pipeline.analysis
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+
+.. currentmodule:: subcell_pipeline
+
+.. autosummary::
+   :toctree:
+   :template: custom_summary.rst
+   :recursive:
+
+   analysis.compression_metrics
+   analysis.dimensionality_reduction
+

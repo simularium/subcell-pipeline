@@ -1,0 +1,39 @@
+analysis.compression\_metrics
+=============================
+
+.. automodule:: subcell_pipeline.analysis.compression_metrics
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+
+.. currentmodule:: subcell_pipeline
+
+.. autosummary::
+   :toctree:
+   :template: custom_summary.rst
+   :recursive:
+
+   analysis.compression_metrics.compression_analysis
+   analysis.compression_metrics.compression_metric
+   analysis.compression_metrics.constants
+   analysis.compression_metrics.polymer_trace
+   analysis.compression_metrics.vectors
+

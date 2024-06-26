@@ -1,0 +1,35 @@
+analysis.dimensionality\_reduction.pca\_dim\_reduction
+======================================================
+
+.. automodule:: subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      plot_pca_feature_scatter
+      plot_pca_inverse_transform
+      run_pca
+      save_pca_trajectories
+      save_pca_transforms
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

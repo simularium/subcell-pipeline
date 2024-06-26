@@ -1,0 +1,32 @@
+analysis.compression\_metrics.vectors
+=====================================
+
+.. automodule:: subcell_pipeline.analysis.compression_metrics.vectors
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_end_to_end_unit_vector
+      get_unit_vector
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
