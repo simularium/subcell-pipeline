@@ -21,7 +21,7 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %% 
-from subcell_pipeline.simulation.cytosim.post_processing import (
+from subcell_pipeline.simulation.readdy.parser import (
     parse_readdy_simulation_data,
 )
 
@@ -63,6 +63,7 @@ condition key and random seed already exists, parsing is skipped.
 
 - Input: `(series_name)/outputs/(series_name)_(condition_key)_(index).h5`
 - Output: `(series_name)/data/(series_name)_(condition_key)_(seed).csv`
+  and `(series_name)/data/(series_name)_(condition_key)_(seed).pkl`
 """
 
 # %%

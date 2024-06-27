@@ -6,6 +6,9 @@ from typing import Any, List, Optional
 import numpy as np
 import readdy
 from tqdm import tqdm
+from io_collection.keys.check_key import check_key
+from io_collection.load.load_pickle import load_pickle
+from io_collection.save.save_pickle import save_pickle
 
 from .data_structures import FrameData, ParticleData, TopologyData
 
@@ -18,7 +21,8 @@ class ReaddyLoader:
         max_time_ix: int = -1,
         time_inc: int = 1,
         timestep: float = 100.0,
-        save_pickle_file: bool = False,
+        pickle_location: str = None,
+        pickle_key: str = None,
     ):
         """
         Load and shape data from a ReaDDy trajectory.
@@ -43,9 +47,13 @@ class ReaddyLoader:
             (In any time units, resulting time measurements
             will be in the same units.)
             Default: 100.
-        save_pickle_file: bool = False (optional)
-            Save loaded data in a pickle file for easy reload?
-            Default: False
+        pickle_location: str (optional)
+            If provided along with pickle_key, 
+            save a pickle file for easy reload.
+            This can be an AWS S3 bucket or a local path.
+        pickle_key: str (optional)
+            If provided along with pickle_location, 
+            save a pickle file for easy reload.
         """
         self._readdy_trajectory: readdy.Trajectory = None
         self._trajectory: Optional[List[FrameData]] = None
@@ -54,7 +62,8 @@ class ReaddyLoader:
         self.max_time_ix = max_time_ix
         self.time_inc = time_inc
         self.timestep = timestep
-        self.save_pickle_file = save_pickle_file
+        self.pickle_location = pickle_location
+        self.pickle_key = pickle_key
 
     def readdy_trajectory(self) -> readdy.Trajectory:
         """
@@ -67,6 +76,7 @@ class ReaddyLoader:
             The ReaDDy trajectory object.
         """
         if self._readdy_trajectory is None:
+            # this line requires a path to a local file, does not support S3 paths
             self._readdy_trajectory = readdy.Trajectory(self.h5_file_path)
         return self._readdy_trajectory
 
@@ -144,6 +154,9 @@ class ReaddyLoader:
                 )
             result.append(frame)
         return result
+    
+    def _use_pickle(self) -> bool:
+        return self.pickle_location is not None and self.pickle_key is not None
 
     def trajectory(self) -> List[FrameData]:
         """
@@ -157,25 +170,12 @@ class ReaddyLoader:
         """
         if self._trajectory is not None:
             return self._trajectory
-        pickle_file_path = self.h5_file_path + ".dat"
-        if os.path.isfile(pickle_file_path):
-            print("Loading pickle file for ReaDDy data")
-            import pickle
-
-            data = []
-            with open(pickle_file_path, "rb") as f:
-                while True:
-                    try:
-                        data.append(pickle.load(f))
-                    except EOFError:
-                        break
-            self._trajectory = data[0]
+        if self._use_pickle() and check_key(self.pickle_location, self.pickle_key):
+            print(f"Loading pickle file for ReaDDy data from {self.h5_file_path}")
+            self._trajectory = load_pickle(self.pickle_location, self.pickle_key)
         else:
-            print("Loading ReaDDy data from h5 file...")
+            print(f"Loading ReaDDy data from h5 file {self.h5_file_path}")
             self._trajectory = self._shape_trajectory_data()
-            if self.save_pickle_file:
-                import pickle
-
-                with open(pickle_file_path, "wb") as file:
-                    pickle.dump(self._trajectory, file)
+            if self._use_pickle() and not check_key(self.pickle_location, self.pickle_key):
+                save_pickle(self.pickle_location, self.pickle_key, self._trajectory)
         return self._trajectory
