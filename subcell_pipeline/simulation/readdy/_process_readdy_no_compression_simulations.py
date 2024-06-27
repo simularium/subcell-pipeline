@@ -52,12 +52,12 @@ n_monomer_points = 200
 """
 ## Parse simulation data
 
-Iterate through all condition keys and random seeds to load simulation output
+Iterate through all replicates to load simulation output
 files and parse them into a tidy data format. If the parsed file for a given
-condition key and random seed already exists, parsing is skipped.
+replicate already exists, parsing is skipped.
 
-- Input: `(series_name)/outputs/(series_name)_(index).h5`
-- Output: `(series_name)/data/(series_name)_(index).csv`
+- Input: `(series_name)/outputs/(series_name)_(index+1).h5`
+- Output: `(series_name)/data/(series_name)_(index+1).csv`
 """
 
 # %%

@@ -4,9 +4,11 @@ import os
 from typing import Tuple, Dict, List
 
 import numpy as np
+import pandas as pd
 from pint import UnitRegistry
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_text import load_text
+from io_collection.load.load_dataframe import load_dataframe
 from simulariumio import (
     TrajectoryConverter,
     MetaData,
@@ -17,6 +19,8 @@ from simulariumio import (
     EveryNthTimestepFilter,
     ScatterPlotData,
     CameraData,
+    TrajectoryData,
+    AgentData,
 )
 from simulariumio.cytosim import CytosimConverter, CytosimData, CytosimObjectInfo
 from simulariumio.readdy import ReaddyConverter, ReaddyData
@@ -27,6 +31,7 @@ from ..constants import (
     READDY_TOTAL_STEPS, 
     READDY_SAVED_FRAMES,
     READDY_DISPLAY_DATA,
+    SIMULATOR_COLORS,
 )
 
 from ..temporary_file_io import (
@@ -125,7 +130,7 @@ def _empty_scatter_plots(
     }
 
 
-def _generate_plot_data(fiber_points):
+def _generate_plot_data(fiber_points: np.ndarray) -> Dict[COMPRESSIONMETRIC, list[float]]:
     """
     Calculate plot traces from fiber_points.
     """
@@ -169,11 +174,11 @@ def _generate_plot_data(fiber_points):
     return result
 
 
-def _add_plots(
+def _add_individual_plots(
     converter: TrajectoryConverter, 
     fiber_points: np.ndarry,
     times: np.ndarray,
-):
+) -> None:
     """
     Add plots to an individual trajectory 
     using fiber_points to calculate metrics.
@@ -272,7 +277,7 @@ def _visualize_readdy_trajectory(
     post_processor, fiber_chain_ids, axis_positions, fiber_points, times = load_readdy_fiber_points(
         bucket, series_name, series_key, rep_ix, n_timepoints, n_monomer_points
     )  
-    _add_plots(converter, fiber_points, times)
+    _add_individual_plots(converter, fiber_points, times)
     _add_readdy_spatial_annotations(
         converter, post_processor, fiber_chain_ids, axis_positions, fiber_points
     )
@@ -318,7 +323,8 @@ def visualize_individual_readdy_trajectories(
 
         for rep_ix in range(n_replicates):
             local_h5_path = os.path.join(LOCAL_DOWNLOADS_PATH, f"{series_key}_{rep_ix}.h5")
-            output_key = f"{series_name}/viz/{series_key}_{rep_ix}.simularium"
+            rep_id = rep_ix + 1
+            output_key = f"{series_name}/viz/{series_key}_{rep_id:06d}.simularium"
 
             # Skip if output file already exists.
             if not overwrite_existing and check_key(bucket, output_key):
@@ -431,7 +437,7 @@ def _visualize_cytosim_trajectory(
     Save a Simularium file for a single Cytosim trajectory with plots.
     """
     converter = _load_cytosim_simularium(fiber_points_data, singles_data, n_timepoints)
-    _add_plots(
+    _add_individual_plots(
         converter, 
         converter._data.agent_data.subpoints, 
         converter._data.agent_data.times
@@ -489,3 +495,164 @@ def visualize_individual_cytosim_trajectories(
             )
             
             upload_file_to_s3(bucket, local_output_path, output_key)
+
+
+def _load_fiber_points_from_dataframe(
+    simulator: str,
+    dataframe: pd.DataFrame, 
+    n_timepoints: int
+) -> np.ndarray:
+    """
+    Save a Simularium file for a single Cytosim trajectory with plots.
+    """
+    dataframe.sort_values(by=["time", "fiber_point"])
+    total_steps = dataframe.time.unique().shape[0]
+    n_points = dataframe.fiber_point.unique().shape[0]
+    if total_steps != n_timepoints:
+        raise Exception(
+            f"Requested number of timesteps [ {n_timepoints} ] does not match "
+            f"number of timesteps in dataset [ {total_steps} ]."
+        )
+    result = []
+    for time_ix in range(total_steps):
+        result.append([])
+        result[time_ix].append(
+            (CYTOSIM_SCALE_FACTOR if simulator == "cytosim" else 1) * np.array(
+                dataframe[time_ix * n_points : (time_ix + 1) * n_points][["xpos", "ypos", "zpos"]]
+            )
+        )
+    return np.array(result)
+     
+            
+def _generate_simularium_all(
+    fiber_points: list[np.ndarray],
+    type_names: list[str],
+    display_data: Dict[str, DisplayData],
+) -> TrajectoryConverter:
+    """
+    Generate a TrajectoryConverter with all simulations from ReaDDy and Cytosim together.
+    """
+    total_conditions = len(fiber_points)
+    total_steps = fiber_points[0].shape[0]
+    n_monomer_points = fiber_points[0].shape[1]
+    subpoints = []
+    traj_data = TrajectoryData(
+        meta_data=MetaData(
+            box_size=np.array([BOX_SIZE, BOX_SIZE, BOX_SIZE]),
+            camera_defaults=CameraData(
+                position=np.array([10.0, 0.0, 200.0]),
+                look_at_position=np.array([10.0, 0.0, 0.0]),
+                fov_degrees=60.0,
+            ),
+            trajectory_title="Actin compression in Cytosim and Readdy",
+        ),
+        agent_data=AgentData(
+            times=np.arange(total_steps),
+            n_agents=total_conditions * np.ones((total_steps)),
+            viz_types=1001
+            * np.ones((total_steps, total_conditions)),  # fiber viz type = 1001
+            unique_ids=np.array(total_steps * [list(range(total_conditions))]),
+            types=total_steps * [type_names],
+            positions=np.zeros((total_steps, total_conditions, 3)),
+            radii=np.ones((total_steps, total_conditions)),
+            n_subpoints=3 * n_monomer_points * np.ones((total_steps, total_conditions)),
+            subpoints=align(subpoints),
+            display_data=display_data,
+        ),
+        time_units=UnitData("count"),  # frames
+        spatial_units=UnitData("nm"),  # nanometer
+    )
+    return TrajectoryConverter(traj_data)
+
+
+def _add_combined_plots(
+    converter: TrajectoryConverter, 
+    fiber_points: np.ndarry,
+    type_names: list[str],
+    n_timepoints: int,
+) -> None:
+    """
+    Add plots to an individual trajectory 
+    using fiber_points to calculate metrics.
+    """
+    scatter_plots = _empty_scatter_plots(total_steps=n_timepoints)
+    for traj_ix in range(len(fiber_points)):
+        plot_data = _generate_plot_data(fiber_points[traj_ix])
+        for metric, plot in scatter_plots.items():
+            plot.ytraces[type_names[traj_ix]] = np.array(plot_data[metric])
+    for metric, plot in scatter_plots.items():
+        converter.add_plot(plot, "scatter")
+
+
+def visualize_all_compressed_trajectories_together(
+    subcell_bucket: str,
+    readdy_bucket: str,
+    readdy_series_name: str,
+    cytosim_bucket: str,
+    cytosim_series_name: str,
+    condition_keys: list[str],
+    n_replicates: int,
+    n_timepoints: int,
+) -> None:
+    """
+    Visualize simulations from ReaDDy and Cytosim together
+    for select conditions and number of replicates.
+
+    Parameters
+    ----------
+    subcell_bucket
+        Name of S3 bucket for combined input and output files.
+    readdy_bucket
+        Name of S3 bucket for ReaDDy input and output files.
+    readdy_series_name
+        Name of ReaDDy simulation series.
+    cytosim_bucket
+        Name of S3 bucket for Cytosim input and output files.
+    cytosim_series_name
+        Name of Cytosim simulation series.
+    condition_keys
+        List of condition keys.
+    n_replicates
+        How many replicates to visualize.
+    n_timepoints
+        Number of timepoints to visualize.
+    """
+    fiber_points = []
+    type_names = []
+    display_data = {}
+    for condition_key in condition_keys:
+        for index in range(n_replicates):
+            for simulator in SIMULATOR_COLORS:
+                
+                # get path of dataframe from simulation post-processing to use as input
+                rep_id = index + 1
+                if simulator == "readdy":
+                    bucket = readdy_bucket
+                    df_key = f"{readdy_series_name}/data/{readdy_series_name}_{condition_key}_{rep_id:06d}.csv"
+                else:
+                    bucket = cytosim_bucket
+                    df_key = f"{cytosim_series_name}/samples/{cytosim_series_name}_{condition_key}_{rep_id:06d}.csv"
+                
+                # Skip if input dataframe does not exist.
+                if not check_key(bucket, df_key):
+                    print(f"Dataframe not available for {simulator} [ { df_key } ]. Skipping.")
+                    continue
+                
+                dataframe = load_dataframe(bucket, df_key)
+                fiber_points.append(_load_fiber_points_from_dataframe(simulator, dataframe, n_timepoints))
+                condition = float(condition_key[:3] + "." + condition_key[-1])
+                condition = round(condition) if condition_key[-1] == "0" else condition
+                type_names.append(f"{simulator}#{condition} um/s {index}")
+                display_data[type_names[-1]] = DisplayData(
+                    name=type_names[-1],
+                    display_type=DISPLAY_TYPE.FIBER,
+                    color=SIMULATOR_COLORS[simulator],
+                )
+    
+    converter = _generate_simularium_all(fiber_points, type_names, display_data)
+    _add_combined_plots(converter, fiber_points, type_names, n_timepoints)
+    output_key = "actin_compression_cytosim_readdy.simularium"
+    local_output_path = os.path.join(LOCAL_DOWNLOADS_PATH, output_key)
+    converter.save(local_output_path)
+            
+    upload_file_to_s3(subcell_bucket, local_output_path, output_key)

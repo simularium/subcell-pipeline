@@ -188,3 +188,9 @@ def READDY_DISPLAY_DATA() -> Dict[str, DisplayData]:
             },
         )
     return result
+
+
+SIMULATOR_COLORS = {
+    "cytosim": "#1cbfa4",
+    "readdy": "#ffae52",
+}

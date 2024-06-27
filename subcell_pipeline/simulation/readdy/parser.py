@@ -50,7 +50,8 @@ def readdy_post_processor(
         Number of timepoints to visualize.
     """
     h5_file_path = os.path.join(LOCAL_DOWNLOADS_PATH, f"{series_key}_{rep_ix}.h5")
-    pickle_key = f"{series_name}/data/{series_key}_{rep_ix}.pkl"
+    rep_id = rep_ix + 1
+    pickle_key = f"{series_name}/data/{series_key}_{rep_id:06d}.pkl"
     time_inc = READDY_TOTAL_STEPS[series_key] / n_timepoints
     readdy_loader = ReaddyLoader(
         h5_file_path=str(h5_file_path),
@@ -202,7 +203,8 @@ def parse_readdy_simulation_data(
         series_key = f"{series_name}_{condition_key}" if condition_key else series_name
 
         for rep_ix in range(n_replicates):
-            dataframe_key = f"{series_name}/data/{series_key}_{rep_ix}.csv"
+            rep_id = rep_ix + 1
+            dataframe_key = f"{series_name}/data/{series_key}_{rep_id:06d}.csv"
 
             # Skip if dataframe file already exists.
             if check_key(bucket, dataframe_key):

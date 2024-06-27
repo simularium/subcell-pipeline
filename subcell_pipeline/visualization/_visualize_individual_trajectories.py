@@ -19,12 +19,12 @@ if __name__ != "__main__":
 """
 ## Visualize ReaDDy
 
-Iterate through all condition keys and random seeds to load simulation output
+Iterate through all condition keys and replicates to load simulation output
 files and visualize them. If the visualization file for a given
-condition key and random seed already exists, parsing is skipped.
+condition key and replicate already exists, parsing is skipped.
 
-- Input: `(series_name)/outputs/(series_name)_(condition_key)_(index).h5`
-- Output: `(series_name)/viz/(series_name)_(condition_key)_(index).simularium`
+- Input: `(series_name)/outputs/(series_name)_(condition_key)_(index+1).h5`
+- Output: `(series_name)/viz/(series_name)_(condition_key)_(index+1).simularium`
 """
 
 # %% 
