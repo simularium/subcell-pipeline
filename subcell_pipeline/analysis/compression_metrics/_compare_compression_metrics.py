@@ -11,6 +11,7 @@ simulators. Currently supports comparison of Cytosim and ReaDDy simulations.
 - [Calculate metrics for Cytosim data](#calculate-metrics-for-cytosim-data)
 - [Calculate metrics for ReaDDy data](#calculate-metrics-for-readdy-data)
 - [Combine metrics from both simulators](#combine-metrics-from-both-simulators)
+- [Save combined compression metrics](#save-combined-compression-metrics)
 - [Plot metrics vs time](#plot-metrics-vs-time)
 """
 
@@ -26,6 +27,7 @@ import pandas as pd
 from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
     get_compression_metric_data,
     plot_metrics_vs_time,
+    save_compression_metrics,
 )
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
@@ -84,7 +86,6 @@ metrics = [
 # %% [markdown]
 """
 ## Calculate metrics for Cytosim data
-
 """
 
 # %%
@@ -101,7 +102,6 @@ cytosim_metrics["simulator"] = "cytosim"
 # %% [markdown]
 """
 ## Calculate metrics for ReaDDy data
-
 """
 
 # %%
@@ -118,7 +118,6 @@ readdy_metrics["simulator"] = "readdy"
 # %% [markdown]
 """
 ## Combine metrics from both simulators
-
 """
 
 # %%
@@ -128,8 +127,18 @@ combined_metrics["velocity"] = combined_metrics["key"].astype("int") / 10
 
 # %% [markdown]
 """
-## Plot metrics vs time
+## Save combined compression metrics
+"""
 
+# %%
+save_compression_metrics(
+    combined_metrics, str(save_location), "actin_compression_combined_metrics.csv"
+)
+
+
+# %% [markdown]
+"""
+## Plot metrics vs time
 """
 
 # %%
