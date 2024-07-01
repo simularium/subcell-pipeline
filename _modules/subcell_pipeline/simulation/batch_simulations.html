@@ -246,6 +246,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_summary/subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.html">analysis.dimensionality_reduction.pca_dim_reduction</a></li>
 </ul>
 </li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_summary/subcell_pipeline.analysis.wall_clock_time.html">analysis.wall_clock_time</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of analysis.wall_clock_time</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_summary/subcell_pipeline.analysis.wall_clock_time.log_data.html">analysis.wall_clock_time.log_data</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -528,7 +532,7 @@
 
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving logs for job [ </span><span class="si">{</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;jobId&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> ] to [ </span><span class="si">{</span><span class="n">log_key</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 
-            <span class="n">logs</span> <span class="o">=</span> <span class="n">get_batch_logs</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;jobArn&quot;</span><span class="p">],</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">logs</span> <span class="o">=</span> <span class="n">get_batch_logs</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;jobArn&quot;</span><span class="p">],</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
             <span class="n">save_text</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">log_key</span><span class="p">,</span> <span class="n">logs</span><span class="p">)</span></div>
 
 </pre></div>

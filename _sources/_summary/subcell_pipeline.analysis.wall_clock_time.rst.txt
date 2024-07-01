@@ -1,7 +1,7 @@
-﻿analysis
-========
+analysis.wall\_clock\_time
+==========================
 
-.. automodule:: subcell_pipeline.analysis
+.. automodule:: subcell_pipeline.analysis.wall_clock_time
    :members:
    :undoc-members:
 
@@ -31,7 +31,5 @@
    :template: custom_summary.rst
    :recursive:
 
-   analysis.compression_metrics
-   analysis.dimensionality_reduction
-   analysis.wall_clock_time
+   analysis.wall_clock_time.log_data
 

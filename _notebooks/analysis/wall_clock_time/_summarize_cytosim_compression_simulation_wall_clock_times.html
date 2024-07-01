@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>Process Cytosim no compression simulations - Subcellular modeling pipeline 0.1.0</title>
+        <title>Summarize Cytosim compression simulation wall clock times - Subcellular modeling pipeline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -277,7 +277,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../_sources/_notebooks/simulation/cytosim/_process_cytosim_no_compression_simulations.md.txt" title="View this page">
+  <a class="muted-link" href="../../../_sources/_notebooks/analysis/wall_clock_time/_summarize_cytosim_compression_simulation_wall_clock_times.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -297,82 +297,70 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="process-cytosim-no-compression-simulations">
-<h1>Process Cytosim no compression simulations<a class="headerlink" href="#process-cytosim-no-compression-simulations" title="Link to this heading">¶</a></h1>
-<p>Notebook contains steps for post processing of Cytosim simulations for a
-baseline single actin fiber with no compression.</p>
-<p>This notebook provides an example of processing a simulation series for a single
-condition with multiple replicates. For an example of processing a simulation
-series with multiple conditions, each of which have multiple replicates, see
-<code class="docutils literal notranslate"><span class="pre">process_cytosim_compression_simulations.py</span></code>.</p>
+          <section id="summarize-cytosim-compression-simulation-wall-clock-times">
+<h1>Summarize Cytosim compression simulation wall clock times<a class="headerlink" href="#summarize-cytosim-compression-simulation-wall-clock-times" title="Link to this heading">¶</a></h1>
+<p>Notebook contains steps for extracting wall clock time for Cytosim simulations
+in which a single actin fiber is compressed at different compression
+velocities.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#define-simulation-conditions">Define simulation conditions</a></p></li>
-<li><p><a class="reference internal" href="#parse-simulation-data">Parse simulation data</a></p></li>
-<li><p><a class="reference internal" href="#define-sampling-settings">Define sampling settings</a></p></li>
-<li><p><a class="reference internal" href="#sample-simulation-data">Sample simulation data</a></p></li>
+<li><p><a class="reference internal" href="#extract-wall-clock-time-from-logs">Extract wall clock time from logs</a></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">!=</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;This module is a notebook and is not meant to be imported&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">subcell_pipeline.simulation.cytosim.post_processing</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">parse_cytosim_simulation_data</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">io_collection.save.save_dataframe</span> <span class="kn">import</span> <span class="n">save_dataframe</span>
+
+<span class="kn">from</span> <span class="nn">subcell_pipeline.analysis.wall_clock_time.log_data</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_wall_clock_time_from_logs</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">subcell_pipeline.simulation.post_processing</span> <span class="kn">import</span> <span class="n">sample_simulation_data</span>
 </pre></div>
 </div>
 <section id="define-simulation-conditions">
 <h2>Define simulation conditions<a class="headerlink" href="#define-simulation-conditions" title="Link to this heading">¶</a></h2>
-<p>Defines the <code class="docutils literal notranslate"><span class="pre">NO_COMPRESSION</span></code> simulation series, which simulates a single actin
-fiber with a free barbed end across five replicates (random seeds 1, 2, 3, 4,
-and 5).</p>
+<p>Defines the <code class="docutils literal notranslate"><span class="pre">COMPRESSION_VELOCITY</span></code> simulation series, which compresses a single
+500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
+five replicates each (random seeds 1, 2, 3, 4, and 5).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Name of the simulation series</span>
-<span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NO_COMPRESSION&quot;</span>
+<span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;COMPRESSION_VELOCITY&quot;</span>
 
 <span class="c1"># S3 bucket for input and output files</span>
 <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;s3://cytosim-working-bucket&quot;</span>
 
 <span class="c1"># Random seeds for simulations</span>
 <span class="n">random_seeds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-</pre></div>
-</div>
-</section>
-<section id="parse-simulation-data">
-<h2>Parse simulation data<a class="headerlink" href="#parse-simulation-data" title="Link to this heading">¶</a></h2>
-<p>Iterate through all condition keys and random seeds to load simulation output
-files and parse them into a tidy data format. If the parsed file for a given
-condition key and random seed already exists, parsing is skipped.</p>
-<ul class="simple">
-<li><p>Input: <code class="docutils literal notranslate"><span class="pre">(name)/outputs/(name)_(condition_key)_(index)/</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">(name)/data/(name)_(condition_key)_(seed).csv</span></code></p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parse_cytosim_simulation_data</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">series_name</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span> <span class="n">random_seeds</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="define-sampling-settings">
-<h2>Define sampling settings<a class="headerlink" href="#define-sampling-settings" title="Link to this heading">¶</a></h2>
-<p>Defines the settings used for sub sampling data timepoints and monomer points.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Number of timepoints</span>
-<span class="n">n_timepoints</span> <span class="o">=</span> <span class="mi">200</span>
 
-<span class="c1"># Number of monomer points per fiber</span>
-<span class="n">n_monomer_points</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="c1"># List of condition file keys for each velocity</span>
+<span class="n">condition_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;0047&quot;</span><span class="p">,</span> <span class="s2">&quot;0150&quot;</span><span class="p">,</span> <span class="s2">&quot;0470&quot;</span><span class="p">,</span> <span class="s2">&quot;1500&quot;</span><span class="p">]</span>
+
+<span class="c1"># Job ARN</span>
+<span class="n">job_arns</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;0047&quot;</span><span class="p">:</span> <span class="s2">&quot;c1210f24-d2d4-47ee-84c5-c0bbcd6d6d1a&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;0150&quot;</span><span class="p">:</span> <span class="s2">&quot;bab2b1b2-8159-412b-bfee-9ed5f5ee53d8&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;0470&quot;</span><span class="p">:</span> <span class="s2">&quot;b57fdc74-a1f8-45df-867b-492c99009b46&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;1500&quot;</span><span class="p">:</span> <span class="s2">&quot;36d1198f-16cc-4564-ae30-a2944753c143&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Pattern for finding wall clock time in logs</span>
+<span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;end\s+([0-9]+) s&quot;</span>
 </pre></div>
 </div>
 </section>
-<section id="sample-simulation-data">
-<h2>Sample simulation data<a class="headerlink" href="#sample-simulation-data" title="Link to this heading">¶</a></h2>
-<p>Iterate through all condition keys and random seeds to load the parsed data and
-sample the timepoints and monomer points. If the sampled file for a given
-condition key and random seed already exists, sampling is skipped.</p>
-<ul class="simple">
-<li><p>Input: <code class="docutils literal notranslate"><span class="pre">(name)/data/(name)_(condition_key)_(seed).csv</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">(name)/samples/(name)_(condition_key)_(seed).csv</span></code></p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sample_simulation_data</span><span class="p">(</span>
-    <span class="n">bucket</span><span class="p">,</span> <span class="n">series_name</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span> <span class="n">random_seeds</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">,</span> <span class="n">n_monomer_points</span>
+<section id="extract-wall-clock-time-from-logs">
+<h2>Extract wall clock time from logs<a class="headerlink" href="#extract-wall-clock-time-from-logs" title="Link to this heading">¶</a></h2>
+<p>Iterate through all the logs and extract wall clock time using the specified
+regex pattern.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">logs</span> <span class="o">=</span> <span class="n">get_wall_clock_time_from_logs</span><span class="p">(</span>
+    <span class="n">bucket</span><span class="p">,</span> <span class="n">series_name</span><span class="p">,</span> <span class="n">condition_keys</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">,</span> <span class="n">job_arns</span><span class="p">,</span> <span class="n">pattern</span>
 <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wall_clock_time_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_name</span><span class="si">}</span><span class="s2">/analysis/</span><span class="si">{</span><span class="n">series_name</span><span class="si">}</span><span class="s2">_wall_clock_times.csv&quot;</span>
+<span class="n">save_dataframe</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">wall_clock_time_key</span><span class="p">,</span> <span class="n">logs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">logs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;condition&quot;</span><span class="p">)[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -415,11 +403,9 @@ condition key and random seed already exists, sampling is skipped.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Process Cytosim no compression simulations</a><ul>
+<li><a class="reference internal" href="#">Summarize Cytosim compression simulation wall clock times</a><ul>
 <li><a class="reference internal" href="#define-simulation-conditions">Define simulation conditions</a></li>
-<li><a class="reference internal" href="#parse-simulation-data">Parse simulation data</a></li>
-<li><a class="reference internal" href="#define-sampling-settings">Define sampling settings</a></li>
-<li><a class="reference internal" href="#sample-simulation-data">Sample simulation data</a></li>
+<li><a class="reference internal" href="#extract-wall-clock-time-from-logs">Extract wall clock time from logs</a></li>
 </ul>
 </li>
 </ul>
