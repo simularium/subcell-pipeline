@@ -19,9 +19,10 @@ if __name__ != "__main__":
 """
 ## Visualize ReaDDy
 
-Iterate through all condition keys and replicates to load simulation output
-files and visualize them. If the visualization file for a given
-condition key and replicate already exists, parsing is skipped.
+Iterate through all condition keys and replicates to load simulation 
+output files and visualize them. If the visualization file for a given
+condition key and replicate already exists and overwrite_existing is False, 
+parsing is skipped.
 
 - Input: `(series_name)/outputs/(series_name)_(condition_key)_(index+1).h5`
 - Output: `(series_name)/viz/(series_name)_(condition_key)_(index+1).simularium`
@@ -52,7 +53,17 @@ n_monomer_points = 200
 
 visualize_individual_readdy_trajectories(
     bucket,
-    series_name,
+    "ACTIN_NO_COMPRESSION",
+    [""],
+    n_replicates,
+    n_timepoints,
+    n_monomer_points,
+    overwrite_existing=True,
+)
+
+visualize_individual_readdy_trajectories(
+    bucket,
+    "ACTIN_COMPRESSION_VELOCITY",
     condition_keys,
     n_replicates,
     n_timepoints,
