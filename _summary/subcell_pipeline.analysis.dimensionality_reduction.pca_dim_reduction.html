@@ -313,10 +313,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.run_pca" title="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.run_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_pca</span></code></a>(data)</p></td>
 <td><p>Run Principal Component Analysis (PCA) on simulation data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_trajectories" title="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_trajectories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_pca_trajectories</span></code></a>(pca_results, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_results" title="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_pca_results</span></code></a>(pca_results, save_location, ...)</p></td>
+<td><p>Save PCA results data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_trajectories" title="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_trajectories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_pca_trajectories</span></code></a>(pca_results, ...)</p></td>
 <td><p>Save PCA trajectories data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_transforms" title="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_pca_transforms</span></code></a>(pca, points, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_transforms" title="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_pca_transforms</span></code></a>(pca, points, ...)</p></td>
 <td><p>Save PCA transform data.</p></td>
 </tr>
 </tbody>
@@ -332,6 +335,22 @@
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dataframe with PCA components appended and the PCA object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_results">
+<span class="sig-name descname"><span class="pre">save_pca_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/dimensionality_reduction/pca_dim_reduction.html#save_pca_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_results" title="Link to this definition">¶</a></dt>
+<dd><p>Save PCA results data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pca_results</strong> – PCA trajectory data.</p></li>
+<li><p><strong>save_location</strong> – Location for output file (local path or S3 bucket).</p></li>
+<li><p><strong>save_key</strong> – Name key for output file.</p></li>
+<li><p><strong>resample</strong> (<em>bool</em>) – True if data should be resampled before saving, False otherwise.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -455,6 +474,7 @@
             <ul>
 <li><a class="reference internal" href="#">analysis.dimensionality_reduction.pca_dim_reduction</a><ul>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.run_pca"><code class="docutils literal notranslate"><span class="pre">run_pca()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_results"><code class="docutils literal notranslate"><span class="pre">save_pca_results()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_trajectories"><code class="docutils literal notranslate"><span class="pre">save_pca_trajectories()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_transforms"><code class="docutils literal notranslate"><span class="pre">save_pca_transforms()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.plot_pca_feature_scatter"><code class="docutils literal notranslate"><span class="pre">plot_pca_feature_scatter()</span></code></a></li>

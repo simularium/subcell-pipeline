@@ -314,6 +314,9 @@ plotting compression metrics vs time.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.plot_metrics_vs_time" title="subcell_pipeline.analysis.compression_metrics.compression_analysis.plot_metrics_vs_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_metrics_vs_time</span></code></a>(df, metrics[, ...])</p></td>
 <td><p>Plot metrics vs time.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.save_compression_metrics" title="subcell_pipeline.analysis.compression_metrics.compression_analysis.save_compression_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_compression_metrics</span></code></a>(data, ...)</p></td>
+<td><p>Save combined compression metrics data.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -354,6 +357,21 @@ Otherwise, iterate through the conditions and seeds to merge the data.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The DataFrame with the calculated metrics.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_pipeline.analysis.compression_metrics.compression_analysis.save_compression_metrics">
+<span class="sig-name descname"><span class="pre">save_compression_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/compression_metrics/compression_analysis.html#save_compression_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.save_compression_metrics" title="Link to this definition">¶</a></dt>
+<dd><p>Save combined compression metrics data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Compression metrics data.</p></li>
+<li><p><strong>save_location</strong> – Location for output file (local path or S3 bucket).</p></li>
+<li><p><strong>save_key</strong> – Name key for output file.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -439,6 +457,7 @@ Defaults to False.</p></li>
 <li><a class="reference internal" href="#">analysis.compression_metrics.compression_analysis</a><ul>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.get_compression_metric_data"><code class="docutils literal notranslate"><span class="pre">get_compression_metric_data()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.calculate_compression_metrics"><code class="docutils literal notranslate"><span class="pre">calculate_compression_metrics()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.save_compression_metrics"><code class="docutils literal notranslate"><span class="pre">save_compression_metrics()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_analysis.plot_metrics_vs_time"><code class="docutils literal notranslate"><span class="pre">plot_metrics_vs_time()</span></code></a></li>
 </ul>
 </li>

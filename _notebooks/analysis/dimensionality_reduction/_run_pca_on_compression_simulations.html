@@ -309,6 +309,7 @@ the positive y axis, keeping x axis coordinates unchanged, before running PCA.</
 <li><p><a class="reference internal" href="#save-aligned-fibers">Save aligned fibers</a></p></li>
 <li><p><a class="reference internal" href="#plot-aligned-fibers">Plot aligned fibers</a></p></li>
 <li><p><a class="reference internal" href="#run-pca">Run PCA</a></p></li>
+<li><p><a class="reference internal" href="#save-pca-results">Save PCA results</a></p></li>
 <li><p><a class="reference internal" href="#save-pca-trajectories">Save PCA trajectories</a></p></li>
 <li><p><a class="reference internal" href="#save-pca-transforms">Save PCA transforms</a></p></li>
 <li><p><a class="reference internal" href="#plot-pca-feature-scatter">Plot PCA feature scatter</a></p></li>
@@ -331,6 +332,7 @@ the positive y axis, keeping x axis coordinates unchanged, before running PCA.</
     <span class="n">plot_pca_feature_scatter</span><span class="p">,</span>
     <span class="n">plot_pca_inverse_transform</span><span class="p">,</span>
     <span class="n">run_pca</span><span class="p">,</span>
+    <span class="n">save_pca_results</span><span class="p">,</span>
     <span class="n">save_pca_trajectories</span><span class="p">,</span>
     <span class="n">save_pca_transforms</span><span class="p">,</span>
 <span class="p">)</span>
@@ -413,6 +415,16 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 </pre></div>
 </div>
 </section>
+<section id="save-pca-results">
+<h2>Save PCA results<a class="headerlink" href="#save-pca-results" title="Link to this heading">¶</a></h2>
+<p>The PCA results are saved with resampled rows, which shuffles the order of the
+entries. Pre-shuffled data is useful for scatter plots showing each individual</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_pca_results</span><span class="p">(</span>
+    <span class="n">pca_results</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;actin_compression_pca_results.csv&quot;</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="save-pca-trajectories">
 <h2>Save PCA trajectories<a class="headerlink" href="#save-pca-trajectories" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_pca_trajectories</span><span class="p">(</span>
@@ -423,7 +435,7 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 </section>
 <section id="save-pca-transforms">
 <h2>Save PCA transforms<a class="headerlink" href="#save-pca-transforms" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="p">[</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">[</span><span class="o">-</span><span class="mi">600</span><span class="p">,</span> <span class="o">-</span><span class="mi">300</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">900</span><span class="p">],</span>
     <span class="p">[</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">],</span>
 <span class="p">]</span>
@@ -504,6 +516,7 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 <li><a class="reference internal" href="#save-aligned-fibers">Save aligned fibers</a></li>
 <li><a class="reference internal" href="#plot-aligned-fibers">Plot aligned fibers</a></li>
 <li><a class="reference internal" href="#run-pca">Run PCA</a></li>
+<li><a class="reference internal" href="#save-pca-results">Save PCA results</a></li>
 <li><a class="reference internal" href="#save-pca-trajectories">Save PCA trajectories</a></li>
 <li><a class="reference internal" href="#save-pca-transforms">Save PCA transforms</a></li>
 <li><a class="reference internal" href="#plot-pca-feature-scatter">Plot PCA feature scatter</a></li>

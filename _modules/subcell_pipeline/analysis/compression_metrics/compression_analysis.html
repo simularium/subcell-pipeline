@@ -433,6 +433,28 @@
 
 
 
+<div class="viewcode-block" id="save_compression_metrics">
+<a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.compression_analysis.html#subcell_pipeline.analysis.compression_metrics.compression_analysis.save_compression_metrics">[docs]</a>
+<span class="k">def</span> <span class="nf">save_compression_metrics</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">save_location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">save_key</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save combined compression metrics data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data</span>
+<span class="sd">        Compression metrics data.</span>
+<span class="sd">    save_location</span>
+<span class="sd">        Location for output file (local path or S3 bucket).</span>
+<span class="sd">    save_key</span>
+<span class="sd">        Name key for output file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">save_dataframe</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span> <span class="n">save_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="plot_metrics_vs_time">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.compression_analysis.html#subcell_pipeline.analysis.compression_metrics.compression_analysis.plot_metrics_vs_time">[docs]</a>
 <span class="k">def</span> <span class="nf">plot_metrics_vs_time</span><span class="p">(</span>

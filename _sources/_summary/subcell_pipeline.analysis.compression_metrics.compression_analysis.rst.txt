@@ -18,6 +18,7 @@ analysis.compression\_metrics.compression\_analysis
       calculate_compression_metrics
       get_compression_metric_data
       plot_metrics_vs_time
+      save_compression_metrics
    
    
 

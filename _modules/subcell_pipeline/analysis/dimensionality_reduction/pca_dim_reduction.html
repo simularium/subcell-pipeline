@@ -298,6 +298,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">io_collection.save.save_dataframe</span> <span class="kn">import</span> <span class="n">save_dataframe</span>
 <span class="kn">from</span> <span class="nn">io_collection.save.save_json</span> <span class="kn">import</span> <span class="n">save_json</span>
 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 
@@ -331,9 +332,35 @@
         <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PCA1&quot;</span><span class="p">,</span> <span class="s2">&quot;PCA2&quot;</span><span class="p">]),</span> <span class="n">all_features</span><span class="p">],</span>
         <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">pca_results</span> <span class="o">=</span> <span class="n">pca_results</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">pca_results</span><span class="p">,</span> <span class="n">pca</span></div>
+
+
+
+<div class="viewcode-block" id="save_pca_results">
+<a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.html#subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.save_pca_results">[docs]</a>
+<span class="k">def</span> <span class="nf">save_pca_results</span><span class="p">(</span>
+    <span class="n">pca_results</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">save_location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">save_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save PCA results data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pca_results</span>
+<span class="sd">        PCA trajectory data.</span>
+<span class="sd">    save_location</span>
+<span class="sd">        Location for output file (local path or S3 bucket).</span>
+<span class="sd">    save_key</span>
+<span class="sd">        Name key for output file.</span>
+<span class="sd">    resample : bool</span>
+<span class="sd">        True if data should be resampled before saving, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
+        <span class="n">pca_results</span> <span class="o">=</span> <span class="n">pca_results</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">save_dataframe</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span> <span class="n">save_key</span><span class="p">,</span> <span class="n">pca_results</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 

@@ -307,6 +307,7 @@ simulators. Currently supports comparison of Cytosim and ReaDDy simulations.</p>
 <li><p><a class="reference internal" href="#calculate-metrics-for-cytosim-data">Calculate metrics for Cytosim data</a></p></li>
 <li><p><a class="reference internal" href="#calculate-metrics-for-readdy-data">Calculate metrics for ReaDDy data</a></p></li>
 <li><p><a class="reference internal" href="#combine-metrics-from-both-simulators">Combine metrics from both simulators</a></p></li>
+<li><p><a class="reference internal" href="#save-combined-compression-metrics">Save combined compression metrics</a></p></li>
 <li><p><a class="reference internal" href="#plot-metrics-vs-time">Plot metrics vs time</a></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">!=</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -320,6 +321,7 @@ simulators. Currently supports comparison of Cytosim and ReaDDy simulations.</p>
 <span class="kn">from</span> <span class="nn">subcell_pipeline.analysis.compression_metrics.compression_analysis</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_compression_metric_data</span><span class="p">,</span>
     <span class="n">plot_metrics_vs_time</span><span class="p">,</span>
+    <span class="n">save_compression_metrics</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">subcell_pipeline.analysis.compression_metrics.compression_metric</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">CompressionMetric</span><span class="p">,</span>
@@ -406,6 +408,14 @@ five replicates each (random seeds 1, 2, 3, 4, and 5).</p>
 </pre></div>
 </div>
 </section>
+<section id="save-combined-compression-metrics">
+<h2>Save combined compression metrics<a class="headerlink" href="#save-combined-compression-metrics" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_compression_metrics</span><span class="p">(</span>
+    <span class="n">combined_metrics</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_location</span><span class="p">),</span> <span class="s2">&quot;actin_compression_combined_metrics.csv&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="plot-metrics-vs-time">
 <h2>Plot metrics vs time<a class="headerlink" href="#plot-metrics-vs-time" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_metrics_vs_time</span><span class="p">(</span>
@@ -462,6 +472,7 @@ five replicates each (random seeds 1, 2, 3, 4, and 5).</p>
 <li><a class="reference internal" href="#calculate-metrics-for-cytosim-data">Calculate metrics for Cytosim data</a></li>
 <li><a class="reference internal" href="#calculate-metrics-for-readdy-data">Calculate metrics for ReaDDy data</a></li>
 <li><a class="reference internal" href="#combine-metrics-from-both-simulators">Combine metrics from both simulators</a></li>
+<li><a class="reference internal" href="#save-combined-compression-metrics">Save combined compression metrics</a></li>
 <li><a class="reference internal" href="#plot-metrics-vs-time">Plot metrics vs time</a></li>
 </ul>
 </li>

@@ -18,6 +18,7 @@ analysis.dimensionality\_reduction.pca\_dim\_reduction
       plot_pca_feature_scatter
       plot_pca_inverse_transform
       run_pca
+      save_pca_results
       save_pca_trajectories
       save_pca_transforms
    
