@@ -22,6 +22,8 @@ _Developmental Cell_, 57(9), P1132-1145.e5. DOI: 10.1016/j.devcel.2022.04.012
 """
 
 # %%
+import pandas as pd
+
 from subcell_pipeline.analysis.tomography_data.tomography_data import (
     get_branched_tomography_data,
     get_unbranched_tomography_data,
@@ -119,8 +121,9 @@ sampling.
 
 # %%
 sampled_key = f"{name}/{name}_coordinates_sampled.csv"
+all_tomogram_df = pd.concat([branched_df, unbranched_df])
 sampled_data = sample_tomography_data(
-    unbranched_df, bucket, sampled_key, n_monomer_points, minimum_points
+    all_tomogram_df, bucket, sampled_key, n_monomer_points, minimum_points
 )
 
 # %% [markdown]

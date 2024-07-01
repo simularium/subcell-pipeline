@@ -656,3 +656,30 @@ def visualize_all_compressed_trajectories_together(
     converter.save(local_output_path)
             
     upload_file_to_s3(subcell_bucket, local_output_path, output_key)
+
+
+def visualize_tomography(bucket: str, name: str) -> None:
+    """
+    Visualize segmented tomography data for actin fibers.
+
+    Parameters
+    ----------
+    data
+        Tomography data.
+    """
+    # TODO
+    
+    sampled_tomography_key = f"{name}/{name}_coordinates_sampled.csv"
+    data = "TODO"
+    
+    for _, group in data.groupby("dataset"):
+            for _, fiber in group.groupby("id"):
+                pos = [fiber["xpos"], fiber["ypos"], fiber["zpos"]]
+                
+    output_key = f"{name}.simularium"
+    local_output_path = os.path.join(LOCAL_DOWNLOADS_PATH, output_key)
+    converter = "TODO"
+    converter.save(local_output_path)
+            
+    upload_file_to_s3(bucket, local_output_path, output_key)
+                
