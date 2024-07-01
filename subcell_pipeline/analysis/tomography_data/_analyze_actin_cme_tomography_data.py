@@ -30,6 +30,7 @@ from subcell_pipeline.analysis.tomography_data.tomography_data import (
     plot_tomography_data_by_dataset,
     sample_tomography_data,
 )
+from subcell_pipeline.constants import TOMOGRAPHY_SCALE_FACTOR
 
 # %% [markdown]
 """
@@ -68,16 +69,15 @@ unbranched_datasets = [
     ("2018November_32", "TomoNovember_32_Vesicle"),
 ]
 
-# Spatial conversion scaling factor (pixels to um)
-scale_factor = 0.00006
-
 # %%
 branched_df = get_branched_tomography_data(
-    bucket, name, repository, branched_datasets, scale_factor
+    bucket, name, repository, branched_datasets, TOMOGRAPHY_SCALE_FACTOR
 )
 unbranched_df = get_unbranched_tomography_data(
-    bucket, name, repository, unbranched_datasets, scale_factor
+    bucket, name, repository, unbranched_datasets, TOMOGRAPHY_SCALE_FACTOR
 )
+
+# TODO run metric analysis on tomography data
 
 # %% [markdown]
 """

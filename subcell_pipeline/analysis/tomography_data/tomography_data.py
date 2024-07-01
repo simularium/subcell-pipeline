@@ -5,7 +5,7 @@ from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
 
-SAMPLE_COLUMNS = ["xpos", "ypos", "zpos"]
+from ...constants import TOMOGRAPHY_SAMPLE_COLUMNS
 
 
 def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:

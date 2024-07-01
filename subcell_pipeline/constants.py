@@ -190,7 +190,19 @@ def READDY_DISPLAY_DATA() -> Dict[str, DisplayData]:
     return result
 
 
-SIMULATOR_COLORS = {
+SIMULATOR_COLORS: Dict[str, str] = {
     "cytosim": "#1cbfa4",
     "readdy": "#ffae52",
 }
+
+
+TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
+
+
+TOMOGRAPHY_VIZ_SCALE: float = 0.1
+
+
+TOMOGRAPHY_MIN_COMPRESSION: int = 2
+
+# pixels to um
+TOMOGRAPHY_SCALE_FACTOR: float = 0.00006
