@@ -135,10 +135,15 @@ pca_results, pca = run_pca(data)
 # %% [markdown]
 """
 ## Save PCA results
+
+The PCA results are saved with resampled rows, which shuffles the order of the
+entries. Pre-shuffled data is useful for scatter plots showing each individual
 """
 
 # %%
-save_pca_results(pca_results, save_location, "actin_compression_pca_results.csv")
+save_pca_results(
+    pca_results, save_location, "actin_compression_pca_results.csv", resample=True
+)
 
 # %% [markdown]
 """

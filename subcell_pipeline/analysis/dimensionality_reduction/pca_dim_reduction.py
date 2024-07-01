@@ -56,7 +56,7 @@ def save_pca_results(
     save_key
         Name key for output file.
     resample : bool
-        True is data should be resampled before saving, False otherwise.
+        True if data should be resampled before saving, False otherwise.
     """
 
     if resample:
