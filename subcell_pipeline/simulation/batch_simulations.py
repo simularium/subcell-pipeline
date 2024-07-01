@@ -228,5 +228,5 @@ def check_and_save_job_logs(
 
             print(f"Saving logs for job [ {response['jobId']} ] to [ {log_key}]")
 
-            logs = get_batch_logs(response["jobArn"], ".")
+            logs = get_batch_logs(response["jobArn"], " ")
             save_text(bucket, log_key, logs)
