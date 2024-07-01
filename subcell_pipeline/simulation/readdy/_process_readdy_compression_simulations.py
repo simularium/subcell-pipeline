@@ -3,7 +3,6 @@
 
 # %% [markdown]
 """
-
 Notebook contains steps for post processing of ReaDDy simulations in which a
 single actin fiber is compressed at different compression velocities.
 
@@ -20,18 +19,16 @@ multiple replicates, see `process_readdy_no_compression_simulations.py`.
 if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
-# %% 
-from subcell_pipeline.simulation.readdy.parser import (
-    parse_readdy_simulation_data,
-)
+# %%
+from subcell_pipeline.simulation.readdy.parser import parse_readdy_simulation_data
 
 # %% [markdown]
 """
 ## Define simulation conditions
 
-Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each.
+Defines the `ACTIN_COMPRESSION_VELOCITY` simulation series, which compresses a
+single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150
+μm/s) with five replicates each.
 """
 
 # %%
@@ -61,10 +58,12 @@ Iterate through all condition keys and replicates to load simulation output
 files and parse them into a tidy data format. If the parsed file for a given
 condition key and replicate already exists, parsing is skipped.
 
-- Input: `(series_name)/outputs/(series_name)_(condition_key)_(index+1).h5`
-- Output: `(series_name)/data/(series_name)_(condition_key)_(index+1).csv`
-  and `(series_name)/data/(series_name)_(condition_key)_(index+1).pkl`
+- Input: `(series_name)/outputs/(series_name)_(condition_key)_(index + 1).h5`
+- Output: `(series_name)/data/(series_name)_(condition_key)_(index + 1).csv` and
+  `(series_name)/data/(series_name)_(condition_key)_(index + 1).pkl`
 """
 
 # %%
-parse_readdy_simulation_data(bucket, series_name, condition_keys, n_replicates, n_timepoints, n_monomer_points)
+parse_readdy_simulation_data(
+    bucket, series_name, condition_keys, n_replicates, n_timepoints, n_monomer_points
+)
