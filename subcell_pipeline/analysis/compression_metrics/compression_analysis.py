@@ -134,6 +134,25 @@ def calculate_compression_metrics(
     return df_metrics.reset_index().rename(columns={"index": "time"})
 
 
+def save_compression_metrics(
+    data: pd.DataFrame, save_location: str, save_key: str
+) -> None:
+    """
+    Save combined compression metrics data.
+
+    Parameters
+    ----------
+    data
+        Compression metrics data.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
+    """
+
+    save_dataframe(save_location, save_key, data, index=False)
+
+
 def plot_metrics_vs_time(
     df: pd.DataFrame,
     metrics: List[CompressionMetric],

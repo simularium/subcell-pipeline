@@ -13,6 +13,7 @@ the positive y axis, keeping x axis coordinates unchanged, before running PCA.
 - [Save aligned fibers](#save-aligned-fibers)
 - [Plot aligned fibers](#plot-aligned-fibers)
 - [Run PCA](#run-pca)
+- [Save PCA results](#save-pca-results)
 - [Save PCA trajectories](#save-pca-trajectories)
 - [Save PCA transforms](#save-pca-transforms)
 - [Plot PCA feature scatter](#plot-pca-feature-scatter)
@@ -37,6 +38,7 @@ from subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction import
     plot_pca_feature_scatter,
     plot_pca_inverse_transform,
     run_pca,
+    save_pca_results,
     save_pca_trajectories,
     save_pca_transforms,
 )
@@ -132,6 +134,19 @@ pca_results, pca = run_pca(data)
 
 # %% [markdown]
 """
+## Save PCA results
+
+The PCA results are saved with resampled rows, which shuffles the order of the
+entries. Pre-shuffled data is useful for scatter plots showing each individual
+"""
+
+# %%
+save_pca_results(
+    pca_results, save_location, "actin_compression_pca_results.csv", resample=True
+)
+
+# %% [markdown]
+"""
 ## Save PCA trajectories
 """
 # %%
@@ -144,7 +159,7 @@ save_pca_trajectories(
 ## Save PCA transforms
 """
 # %%
-points = [
+points: list[list[float]] = [
     [-600, -300, 0, 300, 600, 900],
     [-200, 0, 200, 400],
 ]

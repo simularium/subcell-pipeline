@@ -5,6 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from io_collection.save.save_dataframe import save_dataframe
 from io_collection.save.save_json import save_json
 from sklearn.decomposition import PCA
 
@@ -36,9 +37,32 @@ def run_pca(data: pd.DataFrame) -> tuple[pd.DataFrame, PCA]:
         [pd.DataFrame(transform, columns=["PCA1", "PCA2"]), all_features],
         axis=1,
     )
-    pca_results = pca_results.sample(frac=1, random_state=1)
 
     return pca_results, pca
+
+
+def save_pca_results(
+    pca_results: pd.DataFrame, save_location: str, save_key: str, resample: bool = True
+) -> None:
+    """
+    Save PCA results data.
+
+    Parameters
+    ----------
+    pca_results
+        PCA trajectory data.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
+    resample : bool
+        True if data should be resampled before saving, False otherwise.
+    """
+
+    if resample:
+        pca_results = pca_results.copy().sample(frac=1.0, random_state=1)
+
+    save_dataframe(save_location, save_key, pca_results, index=False)
 
 
 def save_pca_trajectories(
