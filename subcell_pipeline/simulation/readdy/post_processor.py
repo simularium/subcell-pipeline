@@ -9,6 +9,39 @@ from subcell_pipeline.analysis.compression_metrics.polymer_trace import (
 )
 from subcell_pipeline.simulation.readdy.data_structures import FrameData
 
+ACTIN_START_PARTICLE_PHRASE: list[str] = ["pointed"]
+"""Phrases indicating actin start particle."""
+
+ACTIN_PARTICLE_TYPES: list[str] = [
+    "actin#",
+    "actin#ATP_",
+    "actin#mid_",
+    "actin#mid_ATP_",
+    "actin#fixed_",
+    "actin#fixed_ATP_",
+    "actin#mid_fixed_",
+    "actin#mid_fixed_ATP_",
+    "actin#barbed_",
+    "actin#barbed_ATP_",
+    "actin#fixed_barbed_",
+    "actin#fixed_barbed_ATP_",
+]
+"""Actin particle types from simularium/readdy-models."""
+
+IDEAL_ACTIN_POSITIONS: np.ndarray = np.array(
+    [
+        [24.738, 20.881, 26.671],
+        [27.609, 24.061, 27.598],
+        [30.382, 21.190, 25.725],
+    ]
+)
+"""Ideal actin positions measured from crystal structure."""
+
+IDEAL_ACTIN_VECTOR_TO_AXIS: np.ndarray = np.array(
+    [-0.01056751, -1.47785105, -0.65833209]
+)
+"""Ideal actin vector to axis."""
+
 
 class ReaddyPostProcessor:
     """Get different views of ReaDDy trajectory for different analysis purposes."""
@@ -178,24 +211,24 @@ class ReaddyPostProcessor:
 
     def linear_fiber_chain_ids(
         self,
-        start_particle_phrases: list[str],
-        other_particle_types: list[str],
         polymer_number_range: int,
+        start_particle_phrases: list[str] = ACTIN_START_PARTICLE_PHRASE,
+        other_particle_types: list[str] = ACTIN_PARTICLE_TYPES,
     ) -> list[list[list[int]]]:
         """
         Get particle IDs for particles in each linear fiber at each timestep.
 
         Parameters
         ----------
+        polymer_number_range
+            How many numbers are used to represent the relative identity of
+            particles in the chain?
         start_particle_phrases
             List of phrases in particle type names for the first particles in
             the linear chain.
         other_particle_types
             List of particle type names (without polymer numbers at the end) for
             the particles other than the start particles.
-        polymer_number_range
-            How many numbers are used to represent the relative identity of
-            particles in the chain?
 
         Returns
         -------
@@ -236,8 +269,8 @@ class ReaddyPostProcessor:
     def linear_fiber_axis_positions(
         self,
         fiber_chain_ids: list[list[list[int]]],
-        ideal_positions: np.ndarray,
-        ideal_vector_to_axis: np.ndarray,
+        ideal_positions: np.ndarray = IDEAL_ACTIN_POSITIONS,
+        ideal_vector_to_axis: np.ndarray = IDEAL_ACTIN_VECTOR_TO_AXIS,
     ) -> tuple[list[list[np.ndarray]], list[list[list[int]]]]:
         """
         Get XYZ axis positions for each particle in each linear fiber at each

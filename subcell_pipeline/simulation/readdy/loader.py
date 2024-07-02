@@ -116,7 +116,7 @@ class ReaddyLoader:
             if (
                 time_ix < self.min_time_ix
                 or (self.max_time_ix >= 0 and time_ix > self.max_time_ix)
-                or time_ix % self.time_inc != 0
+                or times[time_ix] % self.time_inc != 0
             ):
                 continue
             frame = FrameData(time=self.timestep * time_ix)
@@ -171,7 +171,7 @@ class ReaddyLoader:
 
         if self.pickle_location is not None and self.pickle_key is not None:
             if check_key(self.pickle_location, self.pickle_key):
-                print(f"Loading pickle file for ReaDDy data from {self.h5_file_path}")
+                print(f"Loading pickle file for ReaDDy data from {self.pickle_key}")
                 self._trajectory = load_pickle(self.pickle_location, self.pickle_key)
             else:
                 print(f"Loading ReaDDy data from h5 file {self.h5_file_path}")
