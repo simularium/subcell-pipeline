@@ -1,69 +1,60 @@
-#!/usr/bin/env python
-
 import math
-from typing import Dict, List, Tuple
+from typing import Optional
 
 import numpy as np
-import pandas as pd
-from numpy import ndarray
 from tqdm import tqdm
 
-from ...analysis.compression_metrics.polymer_trace import get_contour_length_from_trace
-from .data_structures import FrameData
+from subcell_pipeline.analysis.compression_metrics.polymer_trace import (
+    get_contour_length_from_trace,
+)
+from subcell_pipeline.simulation.readdy.data_structures import FrameData
 
 
 class ReaddyPostProcessor:
+    """Get different views of ReaDDy trajectory for different analysis purposes."""
+
+    trajectory: list[FrameData]
+    """ReaDDy data trajectory from ReaddyLoader(h5_file_path).trajectory()."""
+
+    box_size: np.ndarray
+    """The size of the XYZ dimensions of the simulation volume (shape = 3)."""
+
+    periodic_boundary: bool
+    """True if simulation had periodic boundary, False otherwise."""
+
     def __init__(
         self,
-        trajectory: List[FrameData],
+        trajectory: list[FrameData],
         box_size: np.ndarray,
         periodic_boundary: bool = False,
     ):
-        """
-        Get different views of the ReaDDy trajectory
-        for different analysis purposes.
-
-
-        Parameters
-        ----------
-        trajectory: List[FrameData]
-            A trajectory of ReaDDy data from
-            ReaddyLoader(h5_file_path).trajectory().
-        box_size: np.ndarray (shape = 3)
-            The size of the XYZ dimensions of the simulation volume.
-        periodic_boundary: bool (optional)
-            Was there a periodic boundary in this simulation?
-            Default: False
-        """
         self.trajectory = trajectory
         self.box_size = box_size
         self.periodic_boundary = periodic_boundary
-        
+
     def times(self) -> np.ndarray:
         """
         Get simulation time at each timestep.
 
         Returns
         -------
-        times: np.array (shape = n_timesteps)
-            Array of time stamps in simulation time for each time step.
+        times
+            Array of time stamps in simulation time for each timestep (shape =
+            n_timesteps).
         """
-        result = []
-        for time_ix in self.trajectory:
-            result.append(self.trajectory[time_ix].time)
+        result = [trajectory.time for trajectory in self.trajectory]
         return np.array(result)
 
     def _id_for_neighbor_of_types(
         self,
         time_ix: int,
         particle_id: int,
-        neighbor_types: List[str],
-        exclude_ids: List[int] = None,
+        neighbor_types: list[str],
+        exclude_ids: Optional[list[int]] = None,
     ) -> int:
         """
-        Get the id for the first neighbor
-        with a type_name in neighbor_types
-        at the given time index.
+        Get the id for the first neighbor with a type_name in neighbor_types at
+        the given time index.
         """
         particles = self.trajectory[time_ix].particles
         for neighbor_id in particles[particle_id].neighbor_ids:
@@ -78,17 +69,17 @@ class ReaddyPostProcessor:
         self,
         time_ix: int,
         start_particle_id: int,
-        chain_particle_types: List[List[str]],
+        chain_particle_types: list[list[str]],
         current_polymer_number: int,
         chain_length: int = 0,
-        last_particle_id: int = None,
-        result: List[int] = None,
-    ) -> List[int]:
+        last_particle_id: Optional[int] = None,
+        result: Optional[list[int]] = None,
+    ) -> list[int]:
         """
-        Starting from the particle with start_particle_id,
-        get ids for a chain of particles with chain_particle_types
-        in the given frame of data,
+        Get IDs for a chain of particles with chain_particle_types in the given
+        frame of data, starting from the particle with start_particle_id and
         avoiding the particle with last_particle_id.
+
         If chain_length = 0, return entire chain.
         """
         if result is None:
@@ -120,8 +111,8 @@ class ReaddyPostProcessor:
         self, position1: np.ndarray, position2: np.ndarray
     ) -> np.ndarray:
         """
-        If the distance between two positions is greater than box_size,
-        move the second position across the box.
+        If the distance between two positions is greater than box_size, move the
+        second position across the box.
         """
         if not self.periodic_boundary:
             return position2
@@ -146,14 +137,15 @@ class ReaddyPostProcessor:
     @staticmethod
     def _orientation_from_positions(positions: np.ndarray) -> np.ndarray:
         """
-        orthonormalize and cross the vectors from a particle position
-        to prev and next particle positions to get a basis local to the particle.
+        Orthonormalize and cross the vectors from a particle position to prev
+        and next particle positions to get a basis local to the particle.
 
-        positions = [
-            prev particle's position,
-            this particle's position,
-            next particle's position
-        ]
+        The positions array is structured as:
+            [
+                prev particle's position,
+                this particle's position,
+                next particle's position,
+            ]
         """
         v1 = ReaddyPostProcessor._normalize(positions[0] - positions[1])
         v2 = ReaddyPostProcessor._normalize(positions[2] - positions[1])
@@ -167,14 +159,15 @@ class ReaddyPostProcessor:
         self, positions: np.ndarray, ideal_positions: np.ndarray
     ) -> np.ndarray:
         """
-        get the difference in the particles's current orientation
-        compared to the initial orientation as a rotation matrix.
+        Get the difference in the particles's current orientation compared to
+        the initial orientation as a rotation matrix.
 
-        positions = [
-            prev particle's position,
-            this particle's position,
-            next particle's position
-        ]
+        The positions array is structured as:
+            [
+                prev particle's position,
+                this particle's position,
+                next particle's position,
+            ]
         """
         positions[0] = self._non_periodic_position(positions[1], positions[0])
         positions[2] = self._non_periodic_position(positions[1], positions[2])
@@ -185,35 +178,32 @@ class ReaddyPostProcessor:
 
     def linear_fiber_chain_ids(
         self,
-        start_particle_phrases: List[str],
-        other_particle_types: List[str],
+        start_particle_phrases: list[str],
+        other_particle_types: list[str],
         polymer_number_range: int,
-    ) -> List[List[List[int]]]:
+    ) -> list[list[list[int]]]:
         """
-        Get particle IDs for particles
-        in each linear fiber at each timestep.
-
+        Get particle IDs for particles in each linear fiber at each timestep.
 
         Parameters
         ----------
-        start_particle_phrases: List[str]
-            List of phrases in particle type names
-            for the first particles in the linear chain.
-        other_particle_types: List[str]
-            List of particle type names
-            (without polymer numbers at the end)
-            for the particles other than the start particles.
-        polymer_number_range: int
-            How many numbers are used to represent the
-            relative identity of particles in the chain?
+        start_particle_phrases
+            List of phrases in particle type names for the first particles in
+            the linear chain.
+        other_particle_types
+            List of particle type names (without polymer numbers at the end) for
+            the particles other than the start particles.
+        polymer_number_range
+            How many numbers are used to represent the relative identity of
+            particles in the chain?
 
         Returns
         -------
-        chain_ids: List[List[List[int]]]
-            List of lists of lists of the particle IDs
-            for each particle for each fiber at each time.
+        :
+            List of lists of lists of the particle IDs for each particle for
+            each fiber at each time.
         """
-        result: List[List[List[int]]] = []
+        result: list[list[list[int]]] = []
         chain_particle_types = []
         for i in range(polymer_number_range):
             chain_particle_types.append(
@@ -245,39 +235,37 @@ class ReaddyPostProcessor:
 
     def linear_fiber_axis_positions(
         self,
-        fiber_chain_ids: List[List[List[int]]],
+        fiber_chain_ids: list[list[list[int]]],
         ideal_positions: np.ndarray,
         ideal_vector_to_axis: np.ndarray,
-    ) -> Tuple[List[List[np.ndarray]], List[List[List[int]]]]:
+    ) -> tuple[list[list[np.ndarray]], list[list[list[int]]]]:
         """
-        Get XYZ axis positions for each particle
-        in each linear fiber at each timestep.
-
+        Get XYZ axis positions for each particle in each linear fiber at each
+        timestep.
 
         Parameters
         ----------
-        fiber_chain_ids: List[List[List[int]]]
-            List of lists of lists of particle IDs
-            for each particle in each fiber at each time.
-        ideal_positions: np.ndarray (shape = 3 x 3)
-            XYZ positions for 3 particles in an ideal chain.
-        ideal_vector_to_axis: np.ndarray (shape = 3)
-            Vector from the second ideal position
-            to the axis of the fiber.
+        fiber_chain_ids
+            List of list of lists of particle IDs for each particle in each
+            fiber at each time.
+        ideal_positions
+            XYZ positions for 3 particles in an ideal chain (shape = 3 x 3).
+        ideal_vector_to_axis
+            Vector from the second ideal position to the axis of the fiber
+            (shape = 3).
 
         Returns
         -------
-        axis_positions: List[List[np.ndarray (shape = n x 3)]]
-            List of lists of arrays containing the x,y,z positions
-            of the closest point on the fiber axis to the position
-            of each particle in each fiber at each time.
-        new_chain_ids: List[List[List[int]]
-            List of lists of lists of particle IDs
-            matching the axis_positions
+        axis_positions
+            Lists of lists of arrays (shape = n x 3) containing the x,y,z
+            positions of the closest point on the fiber axis to the position of
+            each particle in each fiber at each time.
+        new_chain_ids
+            List of lists of lists of particle IDs matching the axis_positions
             for each particle in each fiber at each time.
         """
-        result: List[List[np.ndarray]] = []
-        ids: List[List[List[int]]] = []
+        result: list[list[np.ndarray]] = []
+        ids: list[list[list[int]]] = []
         for time_ix in range(len(fiber_chain_ids)):
             result.append([])
             ids.append([])
@@ -299,7 +287,7 @@ class ReaddyPostProcessor:
                             break
                     if pos_invalid:
                         break
-                    rotation = self._rotation(positions, ideal_positions)
+                    rotation = self._rotation(np.array(positions), ideal_positions)
                     if rotation is None:
                         break
                     vector_to_axis_local = np.squeeze(
@@ -312,42 +300,40 @@ class ReaddyPostProcessor:
                     new_ids.append(particle_ix)
                 if len(axis_positions) < 2:
                     continue
-                result[time_ix].append(axis_positions)
+                result[time_ix].append(np.array(axis_positions))
                 ids[time_ix].append(new_ids)
         return result, ids
 
     def linear_fiber_normals(
         self,
-        fiber_chain_ids: List[List[List[int]]],
-        axis_positions: List[List[np.ndarray]],
+        fiber_chain_ids: list[list[list[int]]],
+        axis_positions: list[list[np.ndarray]],
         normal_length: float = 5,
-    ) -> List[List[np.ndarray]]:
+    ) -> list[list[np.ndarray]]:
         """
-        Get XYZ positions defining start and end points for normals
-        for each particle in each fiber at each timestep.
-
+        Get XYZ positions defining start and end points for normals for each
+        particle in each fiber at each timestep.
 
         Parameters
         ----------
-        fiber_chain_ids: List[List[List[int]]]
-            List of lists of lists of particle IDs
-            for particles in each fiber at each time.
-        axis_positions: List[List[np.ndarray (shape = n x 3)]]
-            List of lists of arrays containing the x,y,z positions
-            of the closest point on the fiber axis to the position
-            of each particle in each fiber at each time.
-        normal_length: float (optional)
-            Length of the resulting normal vectors
-            in the trajectory's spatial units.
-            Default: 5
+        fiber_chain_ids
+            List of lists of lists of particle IDs for particles in each fiber
+            at each time.
+        axis_positions
+            List of lists of arrays (shape = n x 3) containing the x,y,z
+            positions of the closest point on the fiber axis to the position of
+            each particle in each fiber at each time.
+        normal_length
+            Length of the resulting normal vectors in the trajectory's spatial
+            units.
 
         Returns
         -------
-        normals: List[List[np.ndarray (shape = 2 x 3)]]
-            List of lists of arrays containing the x,y,z normals
+        :
+            List of lists of arrays (shape = 2 x 3) containing the x,y,z normals
             of each particle in each fiber at each time.
         """
-        result: List[List[np.ndarray]] = []
+        result: list[list[np.ndarray]] = []
         for time_ix in range(len(fiber_chain_ids)):
             result.append([])
             particles = self.trajectory[time_ix].particles
@@ -367,33 +353,32 @@ class ReaddyPostProcessor:
 
     @staticmethod
     def linear_fiber_control_points(
-        axis_positions: List[List[np.ndarray]],
+        axis_positions: list[list[np.ndarray]],
         n_points: int,
-    ) -> List[List[np.ndarray]]:
+    ) -> list[list[np.ndarray]]:
         """
-        Resample the fiber line defined by each array of axis positions
-        to get the requested number of points between XYZ control points
-        for each linear fiber at each timestep.
-
+        Resample the fiber line defined by each array of axis positions to get
+        the requested number of points between XYZ control points for each
+        linear fiber at each timestep.
 
         Parameters
         ----------
-        axis_positions: List[List[np.ndarray (shape = n x 3)]]
-            List of lists of arrays containing the x,y,z positions
-            of the closest point on the fiber axis to the position
-            of each particle in each fiber at each time.
-        n_points: int
+        axis_positions
+            List of lists of arrays (shape = n x 3) containing the x,y,z
+            positions of the closest point on the fiber axis to the position of
+            each particle in each fiber at each time.
+        n_points
             Number of control points (spaced evenly) on resulting fibers.
 
         Returns
         -------
-        control_points: List[List[np.ndarray (shape = n x 3)]]
-            Array containing the x,y,z positions
-            of control points for each fiber at each time.
+        :
+            Array (shape = n x 3) containing the x,y,z positions of control
+            points for each fiber at each time.
         """
         if n_points < 2:
             raise Exception("n_points must be > 1 to define a fiber.")
-        result: List[List[np.ndarray]] = []
+        result: list[list[np.ndarray]] = []
         for time_ix in tqdm(range(len(axis_positions))):
             result.append([])
             contour_length = get_contour_length_from_trace(axis_positions[time_ix][0])
@@ -403,11 +388,13 @@ class ReaddyPostProcessor:
                 control_points = np.zeros((n_points, 3))
                 control_points[0] = positions[0]
                 current_position = np.copy(positions[0])
-                leftover_length = 0
+                leftover_length: float = 0
                 for pos_ix in range(1, len(positions)):
                     v_segment = positions[pos_ix] - positions[pos_ix - 1]
                     direction = ReaddyPostProcessor._normalize(v_segment)
-                    remaining_length = np.linalg.norm(v_segment) + leftover_length
+                    remaining_length = (
+                        np.linalg.norm(v_segment).item() + leftover_length
+                    )
                     while remaining_length >= segment_length:
                         current_position += (
                             segment_length - leftover_length
@@ -423,43 +410,40 @@ class ReaddyPostProcessor:
 
     def fiber_bond_energies(
         self,
-        fiber_chain_ids: List[List[List[int]]],
-        ideal_lengths: Dict[int, float],
-        ks: Dict[int, float],
+        fiber_chain_ids: list[list[list[int]]],
+        ideal_lengths: dict[int, float],
+        ks: dict[int, float],
         stride: int = 1,
-    ) -> Tuple[Dict[int, np.ndarray], np.ndarray]:
+    ) -> tuple[dict[int, np.ndarray], np.ndarray]:
         """
-        Get the strain energy using the harmonic spring equation
-        and the bond distance between particles
-        with a given polymer number offset.
-
+        Get the strain energy using the harmonic spring equation and the bond
+        distance between particles with a given polymer number offset.
 
         Parameters
         ----------
-        fiber_chain_ids: List[List[List[int]]]
-            List of lists of lists of particle IDs
-            for particles in each fiber at each time.
-        ideal_lengths: Dict[int,float]
+        fiber_chain_ids
+            List of lists of lists of particle IDs for particles in each fiber
+            at each time.
+        ideal_lengths
             Ideal bond length for each of the polymer number offsets.
-        ks: Dict[int,float]
+        ks
             Bond energy constant for each of the polymer number offsets.
-        stride: int (optional)
+        stride
             Calculate bond energy every stride timesteps.
-            Default: 1
 
         Returns
         -------
-        bond_energies: Dict[int,np.ndarray (shape = time x bonds)]
-            For each polymer number offset, an array of bond energy
-            for each bond at each time.
-        filament_positions: np.ndarray (shape = time x bonds)
-            Position in the filament from the starting end
-            for the first particle in each bond at each time.
+        bond_energies
+            Map of polymer number offset to array (shape = time x bonds) of bond
+            energy for each bond at each time.
+        filament_positions
+            Array (shape = time x bonds) of position in the filament from the
+            starting end for the first particle in each bond at each time.
         """
-        energies: Dict[int, List[List[float]]] = {}
+        energies: dict[int, list[list[float]]] = {}
         for offset in ideal_lengths:
             energies[offset] = []
-        filament_positions: List[List[int]] = []
+        filament_positions: list[list[int]] = []
         for time_ix in range(0, len(self.trajectory), stride):
             for offset in ideal_lengths:
                 energies[offset].append([])
@@ -480,7 +464,7 @@ class ReaddyPostProcessor:
                             particle.position, offset_particle.position
                         )
                         bond_stretch = (
-                            np.linalg.norm(offset_pos - particle.position)
+                            np.linalg.norm(offset_pos - particle.position).item()
                             - ideal_lengths[offset]
                         )
                         energy = 0.5 * ks[offset] * bond_stretch * bond_stretch
@@ -493,13 +477,13 @@ class ReaddyPostProcessor:
             np.array(filament_positions),
         )
 
-    def edge_positions(self) -> List[List[np.ndarray]]:
+    def edge_positions(self) -> list[list[np.ndarray]]:
         """
         Get the edges between particles as start and end positions.
 
         Returns
         -------
-        particle_edges: List[List[np.ndarray]]
+        :
             List of list of edges as position of each of the two particles
             connected by the edge for each edge at each time.
         """

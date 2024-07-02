@@ -1,6 +1,6 @@
 """Methods to calculate metrics from polymer trace data."""
 
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple
 
 import numpy as np
 from sklearn.decomposition import PCA
@@ -61,7 +61,7 @@ def get_end_to_end_axis_distances_and_projections(
 def get_average_distance_from_end_to_end_axis(
     polymer_trace: np.ndarray,
     **options: Dict[str, Any],
-) -> Union[float, np.floating[Any]]:
+) -> float:
     """
     Calculate the average perpendicular distance of polymer trace points from
     the end-to-end axis.
@@ -152,7 +152,7 @@ def get_pca_polymer_trace_projection(
 def get_contour_length_from_trace(
     polymer_trace: np.ndarray,
     **options: Dict[str, Any],
-) -> Union[float, np.floating[Any]]:
+) -> float:
     """
     Calculate the sum of inter-monomer distances in the trace.
 
@@ -172,13 +172,13 @@ def get_contour_length_from_trace(
     total_distance = np.float_(0)
     for i in range(len(polymer_trace) - 1):
         total_distance += np.linalg.norm(polymer_trace[i] - polymer_trace[i + 1])
-    return total_distance
+    return total_distance.item()
 
 
 def get_bending_energy_from_trace(
     polymer_trace: np.ndarray,
     **options: Dict[str, Any],
-) -> Union[float, np.floating[Any]]:
+) -> float:
     """
     Calculate the bending energy per monomer of a polymer trace.
 
@@ -221,7 +221,7 @@ def get_bending_energy_from_trace(
     # the type checker is unable to infer its type
     energy = bending_constant * (1 - np.nanmean(cos_angle))
 
-    return energy
+    return energy.item()
 
 
 def get_total_fiber_twist(
@@ -460,7 +460,7 @@ def get_sum_bending_energy(
 def get_compression_ratio(
     polymer_trace: np.ndarray,
     **options: Dict[str, Any],
-) -> Union[float, np.floating[Any]]:
+) -> float:
     """
     Calculate the compression ratio of a polymer trace.
 
@@ -480,5 +480,5 @@ def get_compression_ratio(
     :
         The compression ratio of the polymer trace.
     """
-    end_to_end_axis_length = np.linalg.norm(polymer_trace[-1] - polymer_trace[0])
+    end_to_end_axis_length = np.linalg.norm(polymer_trace[-1] - polymer_trace[0]).item()
     return 1 - end_to_end_axis_length / get_contour_length_from_trace(polymer_trace)
