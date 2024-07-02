@@ -35,7 +35,7 @@ actin fiber with a free barbed end across five replicates.
 
 # %%
 # Name of the simulation series
-series_name: str = "ACTIN_COMPRESSION_VELOCITY"
+series_name: str = "ACTIN_NO_COMPRESSION"
 
 # Template for simulation output files
 source_template: str = "outputs/actin_compression_baseline_%d.h5"
