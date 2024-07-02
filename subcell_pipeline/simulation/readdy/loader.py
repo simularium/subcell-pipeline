@@ -1,19 +1,51 @@
-#!/usr/bin/env python
-
-import os
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import numpy as np
 import readdy
-from tqdm import tqdm
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_pickle import load_pickle
 from io_collection.save.save_pickle import save_pickle
+from tqdm import tqdm
 
 from .data_structures import FrameData, ParticleData, TopologyData
 
 
 class ReaddyLoader:
+    """
+    Load and shape data from a ReaDDy trajectory.
+
+    Trajectory is loaded from the simulation output h5 file of the .dat pickle
+    file. If a .dat pickle location and key are provided, the loaded trajectory
+    is saved to the given location for faster reloads.
+    """
+
+    _readdy_trajectory: Optional[readdy.Trajectory]
+    """ReaDDy trajectory object."""
+
+    _trajectory: Optional[list[FrameData]]
+    """List of FrameData for trajectory."""
+
+    h5_file_path: str
+    """Path to the ReaDDy .h5 file or .dat pickle file."""
+
+    min_time_ix: int
+    """First time index to include."""
+
+    max_time_ix: int
+    """Last time index to include."""
+
+    time_inc: int
+    """Include every time_inc timestep."""
+
+    timestep: float
+    """Real time for each simulation timestep."""
+
+    pickle_location: Optional[str]
+    """Location to save pickle file (AWS S3 bucket or local path)."""
+
+    pickle_key: Optional[str]
+    """Name of pickle file (AWS S3 bucket or local path)."""
+
     def __init__(
         self,
         h5_file_path: str,
@@ -21,42 +53,11 @@ class ReaddyLoader:
         max_time_ix: int = -1,
         time_inc: int = 1,
         timestep: float = 100.0,
-        pickle_location: str = None,
-        pickle_key: str = None,
+        pickle_location: Optional[str] = None,
+        pickle_key: Optional[str] = None,
     ):
-        """
-        Load and shape data from a ReaDDy trajectory.
-
-
-        Parameters
-        ----------
-        h5_file_path: str
-            Path to the ReaDDy .h5 file. If a .dat pickle file exists
-            at this path, load from that instead.
-        min_time_ix: int = 0 (optional)
-            First time index to include.
-            Default: 0
-        max_time_ix: int = -1 (optional)
-            Last time index to include.
-            Default: -1 (include all timesteps after min_time_ix)
-        time_inc: int = 1 (optional)
-            Include every time_inc timestep.
-            Default: 1
-        timestep: float = 100. (optional)
-            How much time passes each timestep?
-            (In any time units, resulting time measurements
-            will be in the same units.)
-            Default: 100.
-        pickle_location: str (optional)
-            If provided along with pickle_key, 
-            save a pickle file for easy reload.
-            This can be an AWS S3 bucket or a local path.
-        pickle_key: str (optional)
-            If provided along with pickle_location, 
-            save a pickle file for easy reload.
-        """
-        self._readdy_trajectory: readdy.Trajectory = None
-        self._trajectory: Optional[List[FrameData]] = None
+        self._readdy_trajectory = None
+        self._trajectory = None
         self.h5_file_path = h5_file_path
         self.min_time_ix = min_time_ix
         self.max_time_ix = max_time_ix
@@ -69,25 +70,25 @@ class ReaddyLoader:
         """
         Lazy load the ReaDDy trajectory object.
 
+        Note that loading ReaDDy trajectories requires a path to a local file.
+        Loading currently does not support S3 locations.
 
         Returns
         -------
-        readdy_trajectory: readdy.Trajectory
+        :
             The ReaDDy trajectory object.
         """
         if self._readdy_trajectory is None:
-            # this line requires a path to a local file, does not support S3 paths
             self._readdy_trajectory = readdy.Trajectory(self.h5_file_path)
         return self._readdy_trajectory
 
     @staticmethod
-    def _frame_edges(time_ix: int, topology_records: Any) -> List[List[int]]:
+    def _frame_edges(time_ix: int, topology_records: Any) -> list[list[int]]:
         """
-        After a simulation has finished, get all the edges
-        at the given time index as [particle1 id, particle2 id].
+        Get all edges at the given time index as [particle1 id, particle2 id].
 
-        topology_records from
-        readdy.Trajectory(h5_file_path).read_observable_topologies()
+        The ``topology_records`` object is output from
+        ``readdy.Trajectory(h5_file_path).read_observable_topologies()``.
         """
         result = []
         for top in topology_records[time_ix]:
@@ -98,7 +99,7 @@ class ReaddyLoader:
                     result.append([ix1, ix2])
         return result
 
-    def _shape_trajectory_data(self) -> List[FrameData]:
+    def _shape_trajectory_data(self) -> list[FrameData]:
         """Shape data from a ReaDDy trajectory for analysis."""
         (
             _,
@@ -154,28 +155,31 @@ class ReaddyLoader:
                 )
             result.append(frame)
         return result
-    
-    def _use_pickle(self) -> bool:
-        return self.pickle_location is not None and self.pickle_key is not None
 
-    def trajectory(self) -> List[FrameData]:
+    def trajectory(self) -> list[FrameData]:
         """
         Lazy load the shaped trajectory.
 
-
         Returns
         -------
-        trajectory: List[FrameData]
+        :
             The trajectory of data shaped for analysis.
         """
+
         if self._trajectory is not None:
             return self._trajectory
-        if self._use_pickle() and check_key(self.pickle_location, self.pickle_key):
-            print(f"Loading pickle file for ReaDDy data from {self.h5_file_path}")
-            self._trajectory = load_pickle(self.pickle_location, self.pickle_key)
+
+        if self.pickle_location is not None and self.pickle_key is not None:
+            if check_key(self.pickle_location, self.pickle_key):
+                print(f"Loading pickle file for ReaDDy data from {self.h5_file_path}")
+                self._trajectory = load_pickle(self.pickle_location, self.pickle_key)
+            else:
+                print(f"Loading ReaDDy data from h5 file {self.h5_file_path}")
+                print(f"Saving pickle file for ReaDDy data to {self.h5_file_path}")
+                self._trajectory = self._shape_trajectory_data()
+                save_pickle(self.pickle_location, self.pickle_key, self._trajectory)
         else:
             print(f"Loading ReaDDy data from h5 file {self.h5_file_path}")
             self._trajectory = self._shape_trajectory_data()
-            if self._use_pickle() and not check_key(self.pickle_location, self.pickle_key):
-                save_pickle(self.pickle_location, self.pickle_key, self._trajectory)
+
         return self._trajectory
