@@ -1,35 +1,26 @@
-#!/usr/bin/env python
-
-from typing import Dict, List
+from typing import Optional
 
 import numpy as np
 
 
 class TopologyData:
+    """Data class representing a ReaDDy topology of connected particles."""
+
     uid: int
+    """Unique ID of the topology from ReaDDy."""
+
     type_name: str
-    particle_ids: List[int]
+    """ReaDDy type name of the topology."""
 
-    def __init__(self, uid: int, type_name: str, particle_ids: List[int]):
-        """
-        Data class representing a ReaDDy topology of connected particles.
+    particle_ids: list[int]
+    """List of unique IDs of each particle in the topology."""
 
-
-        Parameters
-        ----------
-        uid: int
-            Unique ID of the topology from ReaDDy.
-        type_name: str
-            ReaDDy type name of the topology.
-        particle_ids: List[int]
-            List of unique IDs of each particle in the topology.
-        """
+    def __init__(self, uid: int, type_name: str, particle_ids: list[int]):
         self.uid = uid
         self.type_name = type_name
         self.particle_ids = particle_ids
 
     def __str__(self) -> str:
-        """String with all data."""
         return (
             "Topology(\n"
             f"  id = {self.uid}\n"
@@ -40,37 +31,29 @@ class TopologyData:
 
 
 class ParticleData:
+    """Data class representing a ReaDDy particle."""
+
     uid: int
+    """Unique ID of the particle from ReaDDy."""
+
     type_name: str
+    """ReaDDy type name of the particle."""
+
     position: np.ndarray
-    neighbor_ids: List[int]
+    """XYZ position of the particle."""
+
+    neighbor_ids: list[int]
+    """List of unique IDs of each neighbor particle connected by an edge."""
 
     def __init__(
-        self, uid: int, type_name: str, position: np.ndarray, neighbor_ids: List[int]
+        self, uid: int, type_name: str, position: np.ndarray, neighbor_ids: list[int]
     ):
-        """
-        Data class representing a ReaDDy particle.
-
-
-        Parameters
-        ----------
-        uid: int
-            Unique ID of the particle from ReaDDy.
-        type_name: str
-            ReaDDy type name of the particle.
-        position: np.ndarray
-            XYZ position of the particle.
-        neighbor_ids: List[int]
-            List of unique IDs of each neighbor particle
-            connected by an edge.
-        """
         self.uid = uid
         self.type_name = type_name
         self.position = position
         self.neighbor_ids = neighbor_ids
 
     def __str__(self) -> str:
-        """String with all data."""
         return (
             f"Particle(\n"
             f"  id = {self.uid}\n"
@@ -82,44 +65,33 @@ class ParticleData:
 
 
 class FrameData:
+    """Data class representing one ReaDDy timestep."""
+
     time: float
-    topologies: Dict[int, TopologyData]
-    particles: Dict[int, ParticleData]
-    edges: List[np.ndarray]
+    """Current time of the simulation for this frame."""
+
+    topologies: dict[int, TopologyData]
+    """Mapping of topology ID to a TopologyData for each topology."""
+
+    particles: dict[int, ParticleData]
+    """Mapping of particle ID to a ParticleData for each particle."""
+
+    edges: list[np.ndarray]
+    """List of edges as position of each of the two particles connected by the edge."""
 
     def __init__(
         self,
         time: float,
-        topologies: Dict[int, TopologyData] = None,
-        particles: Dict[int, ParticleData] = None,
-        edges: List[np.ndarray] = None,
+        topologies: Optional[dict[int, TopologyData]] = None,
+        particles: Optional[dict[int, ParticleData]] = None,
+        edges: Optional[list[np.ndarray]] = None,
     ):
-        """
-        Data class representing one ReaDDy timestep.
-
-
-        Parameters
-        ----------
-        time: float
-            Current time of the simulation for this frame.
-        topologies: Dict[int, TopologyData] (optional)
-            Mapping of topology ID to a TopologyData for each topology.
-            Default: {} (added by ReaddyLoader._shape_trajectory_data())
-        particles: Dict[int, ParticleData] (optional)
-            Mapping of particle ID to a ParticleData for each particle.
-            Default: {} (added by ReaddyLoader._shape_trajectory_data())
-        edges: List[np.ndarray (shape = 2 x 3)] (optional)
-            List of edges as position of each of the two particles
-            connected by the edge.
-            Default: [] (added by ReaddyLoader._shape_trajectory_data())
-        """
         self.time = time
         self.topologies = topologies if topologies is not None else {}
         self.particles = particles if particles is not None else {}
         self.edges = edges if edges is not None else []
 
     def __str__(self) -> str:
-        """String with topology and particle data."""
         top_str = "\n"
         for top_id in self.topologies:
             top_str += f"{top_id} : \n{self.topologies[top_id]}\n"
