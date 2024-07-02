@@ -21,7 +21,7 @@ if __name__ != "__main__":
 
 Iterate through all condition keys and replicates to load simulation 
 output files and visualize them. If the visualization file for a given
-condition key and replicate already exists and overwrite_existing is False, 
+condition key and replicate already exists and recalculate is False, 
 parsing is skipped.
 
 - Input: `(series_name)/outputs/(series_name)_(condition_key)_(index+1).h5`
@@ -58,7 +58,7 @@ visualize_individual_readdy_trajectories(
     n_replicates,
     n_timepoints,
     n_monomer_points,
-    overwrite_existing=True,
+    recalculate=True,
 )
 
 visualize_individual_readdy_trajectories(
@@ -68,7 +68,7 @@ visualize_individual_readdy_trajectories(
     n_replicates,
     n_timepoints,
     n_monomer_points,
-    overwrite_existing=True,
+    recalculate=True,
 )
 
 # %% [markdown]
@@ -77,7 +77,8 @@ visualize_individual_readdy_trajectories(
 
 Iterate through all condition keys and random seeds to load simulation output
 dataframes and visualize them. If the visualization file for a given
-condition key and random seed already exists, parsing is skipped.
+condition key and random seed already exists and recalculate is False, 
+parsing is skipped.
 
 - Input: `(series_name)/samples/(series_name)_(condition_key)_(seed)/`
 - Output: `(series_name)/viz/(series_name)_(condition_key)_(seed).simularium`
@@ -106,7 +107,7 @@ visualize_individual_cytosim_trajectories(
     [""],
     random_seeds,
     n_timepoints,
-    overwrite_existing=True,
+    recalculate=True,
 )
 
 visualize_individual_cytosim_trajectories(
@@ -115,5 +116,5 @@ visualize_individual_cytosim_trajectories(
     condition_keys,
     random_seeds,
     n_timepoints,
-    overwrite_existing=True,
+    recalculate=True,
 )

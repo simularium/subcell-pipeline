@@ -77,8 +77,6 @@ unbranched_df = get_unbranched_tomography_data(
     bucket, name, repository, unbranched_datasets, TOMOGRAPHY_SCALE_FACTOR
 )
 
-# TODO run metric analysis on tomography data
-
 # %% [markdown]
 """
 ## Plot branched tomography fibers

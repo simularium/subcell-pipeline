@@ -49,23 +49,17 @@ from ..constants import (
     READDY_TOTAL_STEPS, 
     CYTOSIM_SCALE_FACTOR,
 )
-from ..analysis.compression_metrics.compression_analysis import (
-    COMPRESSIONMETRIC,
-    get_asymmetry_of_peak,
-    get_average_distance_from_end_to_end_axis,
-    get_bending_energy_from_trace,
-    get_contour_length_from_trace,
-    get_third_component_variance,
+from subcell_pipeline.analysis.compression_metrics.compression_metric import (
+    CompressionMetric,
 )
 from ..simulation.readdy import ReaddyPostProcessor, load_readdy_fiber_points
 from .spatial_annotator import SpatialAnnotator
-
 
 def _empty_scatter_plots(
     total_steps: int = -1,
     times: np.ndarray = None,
     time_units: str = None,
-) -> Dict[COMPRESSIONMETRIC, ScatterPlotData]:
+) -> Dict[CompressionMetric, ScatterPlotData]:
     if total_steps < 0 and times is None:
         raise Exception("Either total_steps or times array is required for plots")
     elif times is None:
@@ -78,7 +72,7 @@ def _empty_scatter_plots(
         xtrace = times
         total_steps = times.shape[0]
     return {
-        COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: ScatterPlotData(
+        CompressionMetric.AVERAGE_PERP_DISTANCE: ScatterPlotData(
             title="Average Perpendicular Distance",
             xaxis_title=xlabel,
             yaxis_title="distance (nm)",
@@ -89,7 +83,7 @@ def _empty_scatter_plots(
             },
             render_mode="lines",
         ),
-        COMPRESSIONMETRIC.CALC_BENDING_ENERGY: ScatterPlotData(
+        CompressionMetric.CALC_BENDING_ENERGY: ScatterPlotData(
             title="Bending Energy",
             xaxis_title=xlabel,
             yaxis_title="energy",
@@ -100,7 +94,7 @@ def _empty_scatter_plots(
             },
             render_mode="lines",
         ),
-        COMPRESSIONMETRIC.NON_COPLANARITY: ScatterPlotData(
+        CompressionMetric.NON_COPLANARITY: ScatterPlotData(
             title="Non-coplanarity",
             xaxis_title=xlabel,
             yaxis_title="3rd component variance from PCA",
@@ -111,7 +105,7 @@ def _empty_scatter_plots(
             },
             render_mode="lines",
         ),
-        COMPRESSIONMETRIC.PEAK_ASYMMETRY: ScatterPlotData(
+        CompressionMetric.PEAK_ASYMMETRY: ScatterPlotData(
             title="Peak Asymmetry",
             xaxis_title=xlabel,
             yaxis_title="normalized peak distance",
@@ -122,7 +116,7 @@ def _empty_scatter_plots(
             },
             render_mode="lines",
         ),
-        COMPRESSIONMETRIC.CONTOUR_LENGTH: ScatterPlotData(
+        CompressionMetric.CONTOUR_LENGTH: ScatterPlotData(
             title="Contour Length",
             xaxis_title=xlabel,
             yaxis_title="filament contour length (nm)",
@@ -136,47 +130,27 @@ def _empty_scatter_plots(
     }
 
 
-def _generate_plot_data(fiber_points: np.ndarray) -> Dict[COMPRESSIONMETRIC, list[float]]:
+def _generate_plot_data(fiber_points: np.ndarray) -> Dict[CompressionMetric, list[float]]:
     """
     Calculate plot traces from fiber_points.
     """
     n_points = int(fiber_points.shape[2] / 3.0)
     result = {
-        COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE: [],
-        COMPRESSIONMETRIC.CALC_BENDING_ENERGY: [],
-        COMPRESSIONMETRIC.NON_COPLANARITY: [],
-        COMPRESSIONMETRIC.PEAK_ASYMMETRY: [],
-        COMPRESSIONMETRIC.CONTOUR_LENGTH: [],
+        CompressionMetric.AVERAGE_PERP_DISTANCE: [],
+        CompressionMetric.CALC_BENDING_ENERGY: [],
+        CompressionMetric.NON_COPLANARITY: [],
+        CompressionMetric.PEAK_ASYMMETRY: [],
+        CompressionMetric.CONTOUR_LENGTH: [],
     }
     total_steps = fiber_points.shape[0]
     for time_ix in range(total_steps):
         points = fiber_points[time_ix][0].reshape((n_points, 3))
-        result[COMPRESSIONMETRIC.AVERAGE_PERP_DISTANCE].append(
-            get_average_distance_from_end_to_end_axis(
-                polymer_trace=points,
+        for metric in result.keys():
+            result[metric].append(
+                metric.calculate_metric(
+                    polymer_trace=points
+                )
             )
-        )
-        result[COMPRESSIONMETRIC.CALC_BENDING_ENERGY].append(
-            CYTOSIM_SCALE_FACTOR
-            * get_bending_energy_from_trace(
-                polymer_trace=points,
-            )
-        )
-        result[COMPRESSIONMETRIC.NON_COPLANARITY].append(
-            get_third_component_variance(
-                polymer_trace=points,
-            )
-        )
-        result[COMPRESSIONMETRIC.PEAK_ASYMMETRY].append(
-            get_asymmetry_of_peak(
-                polymer_trace=points,
-            )
-        )
-        result[COMPRESSIONMETRIC.CONTOUR_LENGTH].append(
-            get_contour_length_from_trace(
-                polymer_trace=points,
-            )
-        )
     return result
 
 
@@ -303,7 +277,7 @@ def visualize_individual_readdy_trajectories(
     n_replicates: int,
     n_timepoints: int,
     n_monomer_points: int,
-    overwrite_existing: bool = True,
+    recalculate: bool = True,
 ) -> None:
     """
     Visualize individual ReaDDy simulations for select conditions and replicates.
@@ -322,7 +296,7 @@ def visualize_individual_readdy_trajectories(
         Number of timepoints to visualize.
     n_monomer_points
         Number of control points for each polymer trace.
-    overwrite_existing
+    recalculate
         Overwrite any outputs that already exist?
     """
     for condition_key in condition_keys:
@@ -334,7 +308,7 @@ def visualize_individual_readdy_trajectories(
             output_key = f"{series_name}/viz/{series_key}_{rep_id:06d}.simularium"
 
             # Skip if output file already exists.
-            if not overwrite_existing and check_key(bucket, output_key):
+            if not recalculate and check_key(bucket, output_key):
                 print(f"Simularium visualization [ { output_key } ] already exists. Skipping.")
                 continue
 
@@ -459,7 +433,7 @@ def visualize_individual_cytosim_trajectories(
     condition_keys: list[str],
     random_seeds: list[int],
     n_timepoints: int,
-    overwrite_existing: bool = True,
+    recalculate: bool = True,
 ) -> None:
     """
     Visualize individual Cytosim simulations for select conditions and replicates.
@@ -476,7 +450,7 @@ def visualize_individual_cytosim_trajectories(
         Random seeds for simulations.
     n_timepoints
         Number of timepoints to visualize.
-    overwrite_existing
+    recalculate
         Overwrite any outputs that already exist?
     """
     for condition_key in condition_keys:
@@ -486,7 +460,7 @@ def visualize_individual_cytosim_trajectories(
             output_key = f"{series_name}/viz/{series_key}_{seed:06d}.simularium"
             
             # Skip if output file already exists.
-            if not overwrite_existing and check_key(bucket, output_key):
+            if not recalculate and check_key(bucket, output_key):
                 print(f"Simularium visualization [ { output_key } ] already exists. Skipping.")
                 continue
             
@@ -668,34 +642,34 @@ def visualize_all_compressed_trajectories_together(
     upload_file_to_s3(subcell_bucket, local_output_path, output_key)
 
 
-def _empty_tomography_plots():
+def _empty_tomography_plots() -> Dict[CompressionMetric, HistogramPlotData]:
     return {
-        "CONTOUR_LENGTH" : HistogramPlotData(
+        CompressionMetric.CONTOUR_LENGTH : HistogramPlotData(
             title="Contour Length",
             xaxis_title="filament contour length (nm)",
             traces={},
         ),
-        "COMPRESSION_RATIO" : HistogramPlotData(
+        CompressionMetric.COMPRESSION_RATIO : HistogramPlotData(
             title="Compression Percentage",
             xaxis_title="percent (%)",
             traces={},
         ),
-        "AVERAGE_PERP_DISTANCE" : HistogramPlotData(
+        CompressionMetric.AVERAGE_PERP_DISTANCE : HistogramPlotData(
             title="Average Perpendicular Distance",
             xaxis_title="distance (nm)",
             traces={},
         ),
-        "CALC_BENDING_ENERGY" : HistogramPlotData(
+        CompressionMetric.CALC_BENDING_ENERGY : HistogramPlotData(
             title="Bending Energy",
             xaxis_title="energy",
             traces={},
         ),
-        "NON_COPLANARITY" : HistogramPlotData(
+        CompressionMetric.NON_COPLANARITY : HistogramPlotData(
             title="Non-coplanarity",
             xaxis_title="3rd component variance from PCA",
             traces={},
         ),
-        "PEAK_ASYMMETRY" : HistogramPlotData(
+        CompressionMetric.PEAK_ASYMMETRY : HistogramPlotData(
             title="Peak Asymmetry",
             xaxis_title="normalized peak distance",
             traces={},
@@ -703,20 +677,25 @@ def _empty_tomography_plots():
     }
 
 
-def _add_tomography_plots(tomo_df, converter):
+def _add_tomography_plots(tomo_df: pd.DataFrame, converter: TrajectoryConverter) -> None:
     """
     Add plots to tomography data using pre-calculated metrics.
     """
     plots = _empty_tomography_plots()
-    for metric_name in plots:
-        col_ix = list(tomo_df.columns).index(metric_name)
-        plots[metric_name].traces["actin"] = np.array(list(list(map(set, tomo_df.values.T))[col_ix]))
-        if metric_name == "COMPRESSION_RATIO":
-            plots[metric_name].traces["actin"] *= 100.
-        converter.add_plot(plots[metric_name], "histogram")
+    for metric in plots:
+        values = []
+        for _, fiber in tomo_df.groupby("id"):
+            polymer_trace = fiber[["xpos", "ypos", "zpos"]].values
+            values.append(metric.calculate_metric(
+                polymer_trace=polymer_trace
+            ))
+        plots[metric].traces["actin"] = np.array(values)
+        if metric == CompressionMetric.COMPRESSION_RATIO:
+            plots[metric].traces["actin"] *= 100.
+        converter.add_plot(plots[metric], "histogram")
 
 
-def _get_tomography_spatial_center_and_size(tomo_df):
+def _get_tomography_spatial_center_and_size(tomo_df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     """
     Get the center and size of the tomography dataset in 3D space.
     """

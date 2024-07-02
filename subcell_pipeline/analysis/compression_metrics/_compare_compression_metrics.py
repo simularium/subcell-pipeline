@@ -107,7 +107,7 @@ cytosim_metrics["simulator"] = "cytosim"
 # %%
 readdy_metrics = get_compression_metric_data(
     bucket=readdy_bucket,
-    series_name=series_name,
+    series_name=f"ACTIN_{series_name}",
     condition_keys=condition_keys,
     random_seeds=random_seeds,
     metrics=metrics,
