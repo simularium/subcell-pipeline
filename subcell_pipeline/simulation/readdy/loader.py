@@ -1,3 +1,5 @@
+"""Class for loading and shaping ReaDDy trajectories."""
+
 from typing import Any, Optional
 
 import numpy as np

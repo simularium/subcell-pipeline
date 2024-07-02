@@ -1,3 +1,5 @@
+"""Class for post processing ReaDDy trajectories."""
+
 import math
 from typing import Optional
 

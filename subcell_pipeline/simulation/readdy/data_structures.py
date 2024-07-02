@@ -1,3 +1,5 @@
+"""Data structures for ReaDDy simulations."""
+
 from typing import Optional
 
 import numpy as np
