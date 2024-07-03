@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from typing import List
 
 import numpy as np
@@ -172,7 +170,9 @@ class SpatialAnnotator:
             new_agent_data.viz_types[time_ix][start_ix:end_ix] = n_spheres * [
                 VIZ_TYPE.DEFAULT
             ]
-            new_agent_data.types[time_ix] += [f"{type_name} {ix}" for ix in range(n_spheres)]
+            new_agent_data.types[time_ix] += [
+                f"{type_name} {ix}" for ix in range(n_spheres)
+            ]
             new_agent_data.positions[time_ix][start_ix:end_ix] = sphere_positions[
                 time_ix
             ][:n_spheres]
@@ -182,7 +182,7 @@ class SpatialAnnotator:
         colors = ["#0000ff", "#00ff00", "#ffff00", "#ff0000", "#ff00ff"]
         
         for ix in range(max_spheres):
-            tn = f"{type_name} {ix}" 
+            tn = f"{type_name} {ix}"
             new_agent_data.display_data[tn] = DisplayData(
                 name=tn,
                 display_type=DISPLAY_TYPE.SPHERE,
