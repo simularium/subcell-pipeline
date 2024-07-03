@@ -430,7 +430,10 @@ class ReaddyPostProcessor:
                     remaining_length = (
                         np.linalg.norm(v_segment).item() + leftover_length
                     )
-                    while remaining_length >= segment_length:
+                    # Rounding to 9 decimal places to avoid floating point error
+                    # where the remaining length is very close to the segment
+                    # length, causeing the final control point to be skipped.
+                    while round(remaining_length, 9) >= round(segment_length, 9):
                         current_position += (
                             segment_length - leftover_length
                         ) * direction
