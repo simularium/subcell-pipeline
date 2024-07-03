@@ -373,11 +373,15 @@ class ReaddyPostProcessor:
             result.append([])
             particles = self.trajectory[time_ix].particles
             for chain_ix in range(len(fiber_chain_ids[time_ix])):
+                n_particles = len(fiber_chain_ids[time_ix][chain_ix])
                 for particle_ix, particle_id in enumerate(
                     fiber_chain_ids[time_ix][chain_ix]
                 ):
+                    # Skip first and last particle
+                    if particle_ix == 0 or particle_ix == n_particles - 1:
+                        continue
                     position = particles[particle_id].position
-                    axis_position = axis_positions[time_ix][chain_ix][particle_ix]
+                    axis_position = axis_positions[time_ix][chain_ix][particle_ix - 1]
                     direction = ReaddyPostProcessor._normalize(position - axis_position)
                     result[time_ix].append(
                         np.array(
