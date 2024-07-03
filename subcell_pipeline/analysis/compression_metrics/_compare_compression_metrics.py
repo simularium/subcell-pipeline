@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Compare metrics across simulators
+# # Compare compression metrics between simulators
 
 # %% [markdown]
 """
@@ -39,12 +39,14 @@ from subcell_pipeline.analysis.compression_metrics.compression_metric import (
 
 Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each (random seeds 1, 2, 3, 4, and 5).
+five replicates each and the baseline `NO_COMPRESSION` simulation series, which
+simulates a single actin fiber with a free barbed end across five replicates.
 """
 
 # %%
 # Name of the simulation series
-series_name: str = "COMPRESSION_VELOCITY"
+compression_series_name: str = "COMPRESSION_VELOCITY"
+no_compression_series_name: str = "NO_COMPRESSION"
 
 # S3 bucket Cytosim for input and output files
 cytosim_bucket: str = "s3://cytosim-working-bucket"
@@ -89,15 +91,26 @@ metrics = [
 """
 
 # %%
-cytosim_metrics = get_compression_metric_data(
+cytosim_metrics_compression = get_compression_metric_data(
     bucket=cytosim_bucket,
-    series_name=series_name,
+    series_name=compression_series_name,
     condition_keys=condition_keys,
     random_seeds=random_seeds,
     metrics=metrics,
     recalculate=recalculate,
 )
-cytosim_metrics["simulator"] = "cytosim"
+cytosim_metrics_compression["simulator"] = "cytosim"
+
+# %%
+cytosim_metrics_no_compression = get_compression_metric_data(
+    bucket=cytosim_bucket,
+    series_name=no_compression_series_name,
+    condition_keys=[""],
+    random_seeds=random_seeds,
+    metrics=metrics,
+    recalculate=recalculate,
+)
+cytosim_metrics_no_compression["simulator"] = "cytosim"
 
 # %% [markdown]
 """
@@ -105,15 +118,26 @@ cytosim_metrics["simulator"] = "cytosim"
 """
 
 # %%
-readdy_metrics = get_compression_metric_data(
+readdy_metrics_compression = get_compression_metric_data(
     bucket=readdy_bucket,
-    series_name=f"ACTIN_{series_name}",
+    series_name=f"ACTIN_{compression_series_name}",
     condition_keys=condition_keys,
     random_seeds=random_seeds,
     metrics=metrics,
     recalculate=recalculate,
 )
-readdy_metrics["simulator"] = "readdy"
+readdy_metrics_compression["simulator"] = "readdy"
+
+# %%
+readdy_metrics_no_compression = get_compression_metric_data(
+    bucket=readdy_bucket,
+    series_name=f"ACTIN_{no_compression_series_name}",
+    condition_keys=[""],
+    random_seeds=random_seeds,
+    metrics=metrics,
+    recalculate=recalculate,
+)
+readdy_metrics_no_compression["simulator"] = "readdy"
 
 # %% [markdown]
 """
@@ -121,7 +145,7 @@ readdy_metrics["simulator"] = "readdy"
 """
 
 # %%
-combined_metrics = pd.concat([cytosim_metrics, readdy_metrics])
+combined_metrics = pd.concat([cytosim_metrics_compression, readdy_metrics_compression])
 combined_metrics["repeat"] = combined_metrics["seed"] - 1
 combined_metrics["velocity"] = combined_metrics["key"].astype("int") / 10
 
@@ -134,7 +158,6 @@ combined_metrics["velocity"] = combined_metrics["key"].astype("int") / 10
 save_compression_metrics(
     combined_metrics, str(save_location), "actin_compression_combined_metrics.csv"
 )
-
 
 # %% [markdown]
 """
