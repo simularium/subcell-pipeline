@@ -20,7 +20,7 @@ from ...constants import (
     ACTIN_PARTICLE_TYPES,
     IDEAL_ACTIN_POSITIONS,
     IDEAL_ACTIN_VECTOR_TO_AXIS,
-    LOCAL_DOWNLOADS_PATH,
+    WORKING_DIR_PATH,
 )
 from ...temporary_file_io import download_readdy_hdf5
 
@@ -49,7 +49,7 @@ def readdy_post_processor(
     n_timepoints
         Number of timepoints to visualize.
     """
-    h5_file_path = os.path.join(LOCAL_DOWNLOADS_PATH, f"{series_key}_{rep_ix}.h5")
+    h5_file_path = os.path.join(WORKING_DIR_PATH, f"{series_key}_{rep_ix}.h5")
     rep_id = rep_ix + 1
     pickle_key = f"{series_name}/data/{series_key}_{rep_id:06d}.pkl"
     time_inc = READDY_TOTAL_STEPS[series_key] / n_timepoints

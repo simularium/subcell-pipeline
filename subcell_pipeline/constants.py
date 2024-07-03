@@ -7,7 +7,7 @@ import numpy as np
 from simulariumio import DisplayData, DISPLAY_TYPE
 
 
-LOCAL_DOWNLOADS_PATH: str = "aws_downloads/"
+WORKING_DIR_PATH: str = "data/"
 
 COLUMN_NAMES: List[str] = [
     "fiber_id",
@@ -199,7 +199,7 @@ SIMULATOR_COLORS: Dict[str, str] = {
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
 
 
-TOMOGRAPHY_VIZ_SCALE: float = 0.1
+TOMOGRAPHY_VIZ_SCALE: float = 1000.
 
 
 TOMOGRAPHY_MIN_COMPRESSION: int = 2

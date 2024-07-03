@@ -8,7 +8,7 @@ import pandas as pd
 from numpy import ndarray
 from tqdm import tqdm
 
-from ..compression_analysis import get_contour_length_from_trace
+from ...analysis.compression_metrics.polymer_trace import get_contour_length_from_trace
 from .data_structures import FrameData
 
 

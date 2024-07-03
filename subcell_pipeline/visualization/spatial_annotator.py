@@ -158,9 +158,12 @@ class SpatialAnnotator:
             SpatialAnnotator._added_dimensions_for_spheres(sphere_positions)
         )
         max_used_uid = max(list(np.unique(traj_data.agent_data.unique_ids)))
+        max_spheres = 0
         for time_ix in range(total_steps):
             start_ix = int(traj_data.agent_data.n_agents[time_ix])
             n_spheres = len(sphere_positions[time_ix])
+            if n_spheres > max_spheres:
+                max_spheres = n_spheres
             end_ix = start_ix + n_spheres
             new_agent_data.unique_ids[time_ix][start_ix:end_ix] = np.arange(
                 max_used_uid + 1, max_used_uid + 1 + n_spheres
@@ -169,15 +172,18 @@ class SpatialAnnotator:
             new_agent_data.viz_types[time_ix][start_ix:end_ix] = n_spheres * [
                 VIZ_TYPE.DEFAULT
             ]
-            new_agent_data.types[time_ix] += n_spheres * [type_name]
+            new_agent_data.types[time_ix] += [f"{type_name} {ix}" for ix in range(n_spheres)]
             new_agent_data.positions[time_ix][start_ix:end_ix] = sphere_positions[
                 time_ix
             ][:n_spheres]
             new_agent_data.radii[time_ix][start_ix:end_ix] = n_spheres * [radius]
-        new_agent_data.display_data[type_name] = DisplayData(
-            name=type_name,
-            display_type=DISPLAY_TYPE.SPHERE,
-            color=color,
-        )
+        colors = ["#0000ff", "#00ff00", "#ffff00", "#ff0000", "#ff00ff"]
+        for ix in range(max_spheres):
+            tn = f"{type_name} {ix}" 
+            new_agent_data.display_data[tn] = DisplayData(
+                name=tn,
+                display_type=DISPLAY_TYPE.SPHERE,
+                color=colors[ix % len(colors)],
+            )
         traj_data.agent_data = new_agent_data
         return traj_data

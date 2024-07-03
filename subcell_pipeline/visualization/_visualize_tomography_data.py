@@ -21,7 +21,7 @@ if __name__ != "__main__":
 Visualize segmented tomography data for actin fibers.
 
 - Input: `(name)/(name)_coordinates_sampled.csv`
-- Output: `(name).simularium`
+- Output: `(name)/(name).simularium`
 """
 
 # %% 

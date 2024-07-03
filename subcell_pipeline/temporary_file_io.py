@@ -6,15 +6,19 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-from .constants import LOCAL_DOWNLOADS_PATH
+from .constants import WORKING_DIR_PATH
 
 
 s3_client = boto3.client("s3")
 
 
-def _make_download_dir() -> None:
-    if not os.path.isdir(LOCAL_DOWNLOADS_PATH):
-        os.makedirs(LOCAL_DOWNLOADS_PATH)
+def make_working_directory() -> None:
+    """
+    Make a local working directory at the 
+    WORKING_DIR_PATH.
+    """
+    if not os.path.isdir(WORKING_DIR_PATH):
+        os.makedirs(WORKING_DIR_PATH)
 
 
 def _download_s3_file(
@@ -62,8 +66,9 @@ def download_readdy_hdf5(
     replicate_ix
         Replicate index.
     """
+    make_working_directory()
     aws_h5_key = f"{series_name}/outputs/{series_key}_{rep_ix}.h5"
-    local_h5_path = os.path.join(LOCAL_DOWNLOADS_PATH, f"{series_key}_{rep_ix}.h5")
+    local_h5_path = os.path.join(WORKING_DIR_PATH, f"{series_key}_{rep_ix}.h5")
     return _download_s3_file(bucket, aws_h5_key, local_h5_path)
 
 
@@ -87,14 +92,14 @@ def download_all_readdy_outputs(
     n_replicates
         Number of simulation replicates.
     """
-    _make_download_dir()
+    make_working_directory()
     
     for condition_key in condition_keys:
         series_key = f"{series_name}_{condition_key}" if condition_key else series_name
 
         for rep_ix in range(n_replicates):
 
-            local_h5_path = os.path.join(LOCAL_DOWNLOADS_PATH, f"{series_key}_{rep_ix}.h5")
+            local_h5_path = os.path.join(WORKING_DIR_PATH, f"{series_key}_{rep_ix}.h5")
             
             # Skip if file already exists.
             if os.path.isfile(local_h5_path):
@@ -102,7 +107,7 @@ def download_all_readdy_outputs(
                 continue
             
             aws_h5_key = f"{series_name}/outputs/{series_key}_{rep_ix}.h5"
-            download_s3_file(bucket, aws_h5_key, local_h5_path)
+            _download_s3_file(bucket, aws_h5_key, local_h5_path)
 
             print(f"Downloaded data for [ {condition_key} ] replicate [ {rep_ix} ]")
 
@@ -124,6 +129,7 @@ def upload_file_to_s3(bucket: str, src_path: str, s3_path: str) -> bool:
         print(f"!!! File does not exist to upload {src_path}")
         return False
     try:
+        bucket = bucket.split("s3://")[-1]
         s3_client.upload_file(src_path, bucket, s3_path)
         print(f"Uploaded to {s3_path}")
         return True

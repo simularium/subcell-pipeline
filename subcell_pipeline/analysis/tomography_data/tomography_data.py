@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -5,7 +7,8 @@ from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
 
-from ...constants import TOMOGRAPHY_SAMPLE_COLUMNS
+from ...constants import TOMOGRAPHY_SAMPLE_COLUMNS, WORKING_DIR_PATH
+from ...temporary_file_io import make_working_directory, upload_file_to_s3
 
 
 def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
@@ -32,7 +35,7 @@ def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
     elif len(coordinates.columns) == 5:
         coordinates.columns = ["object", label, "xpos", "ypos", "zpos"]
     else:
-        print("Data file [ {file} ] has an unexpected number of columns")
+        print(f"Data file [ {file} ] has an unexpected number of columns")
 
     return coordinates
 
@@ -58,7 +61,7 @@ def get_branched_tomography_data(
     bucket: str,
     name: str,
     repository: str,
-    datasets: "list[tuple[str, str]]",
+    datasets: list[tuple[str, str]],
     scale_factor: float = 1.0,
 ) -> pd.DataFrame:
     """
@@ -92,7 +95,7 @@ def get_unbranched_tomography_data(
     bucket: str,
     name: str,
     repository: str,
-    datasets: "list[tuple[str, str]]",
+    datasets: list[tuple[str, str]],
     scale_factor: float = 1.0,
 ) -> pd.DataFrame:
     """
@@ -126,7 +129,7 @@ def get_tomography_data(
     bucket: str,
     name: str,
     repository: str,
-    datasets: "list[tuple[str, str]]",
+    datasets: list[tuple[str, str]],
     group: str,
     scale_factor: float = 1.0,
 ) -> pd.DataFrame:
@@ -187,7 +190,7 @@ def sample_tomography_data(
     save_key: str,
     n_monomer_points: int,
     minimum_points: int,
-    sampled_columns: list[str] = SAMPLE_COLUMNS,
+    sampled_columns: list[str] = TOMOGRAPHY_SAMPLE_COLUMNS,
 ) -> pd.DataFrame:
     """
     Sample selected columns from tomography data at given resolution.
@@ -219,9 +222,15 @@ def sample_tomography_data(
     else:
         all_sampled_points = []
 
+        # TODO sort experimental samples in order along the fiber before resampling 
+        # (see simularium visualization)
+        
         for fiber_id, group in data.groupby("id"):
             if len(group) < minimum_points:
                 continue
+            
+            # TODO resample uniformly along the fiber length rather than 
+            # uniformly between experimental samples
 
             sampled_points = pd.DataFrame()
             sampled_points["monomer_ids"] = np.arange(n_monomer_points)
@@ -245,7 +254,7 @@ def sample_tomography_data(
         return all_sampled_df
 
 
-def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
+def plot_tomography_data_by_dataset(data: pd.DataFrame, bucket: str, output_key: str) -> None:
     """
     Plot tomography data for each dataset.
 
@@ -253,8 +262,14 @@ def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
     ----------
     data
         Tomography data.
+    bucket:
+        Where to upload the results.
+    output_key
+        File key for results.
     """
-
+    make_working_directory()
+    local_save_path = os.path.join(WORKING_DIR_PATH, os.path.basename(output_key))
+    
     for dataset, group in data.groupby("dataset"):
         _, ax = plt.subplots(1, 3, figsize=(6, 2))
 
@@ -272,4 +287,5 @@ def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
             ax[1].plot(fiber["xpos"], fiber["zpos"], marker="o", ms=1, lw=1)
             ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
 
-        plt.show()
+    plt.savefig(local_save_path)
+    upload_file_to_s3(bucket, local_save_path, output_key)

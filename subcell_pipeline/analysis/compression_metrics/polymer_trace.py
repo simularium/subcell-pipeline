@@ -207,6 +207,12 @@ def get_bending_energy_from_trace(
         vec1 = polymer_trace[ind + 1] - polymer_trace[ind]
         vec2 = polymer_trace[ind + 2] - polymer_trace[ind + 1]
 
+        if np.isclose(np.linalg.norm(vec1), 0.) or np.isclose(np.linalg.norm(vec2), 0.):
+            # TODO handle this differently?
+            cos_angle[ind] = 0.
+            print("Warning: zero vector in bending energy calculation.")
+            continue
+        
         cos_angle[ind] = (
             np.dot(vec1, vec2) / np.linalg.norm(vec1) / np.linalg.norm(vec2)
         )
