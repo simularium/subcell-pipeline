@@ -81,7 +81,9 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 """
 
 # %%
-readdy_data = get_merged_data(readdy_bucket, f"ACTIN_{series_name}", condition_keys, random_seeds)
+readdy_data = get_merged_data(
+    readdy_bucket, f"ACTIN_{series_name}", condition_keys, random_seeds
+)
 readdy_data["simulator"] = "readdy"
 
 # %%
