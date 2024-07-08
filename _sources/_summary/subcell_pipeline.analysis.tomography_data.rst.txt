@@ -1,7 +1,7 @@
-﻿analysis
-========
+analysis.tomography\_data
+=========================
 
-.. automodule:: subcell_pipeline.analysis
+.. automodule:: subcell_pipeline.analysis.tomography_data
    :members:
    :undoc-members:
 
@@ -31,8 +31,5 @@
    :template: custom_summary.rst
    :recursive:
 
-   analysis.compression_metrics
-   analysis.dimensionality_reduction
-   analysis.tomography_data
-   analysis.wall_clock_time
+   analysis.tomography_data.tomography_data
 

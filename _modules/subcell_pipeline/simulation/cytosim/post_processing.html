@@ -246,7 +246,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../_summary/subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.html">analysis.dimensionality_reduction.pca_dim_reduction</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_summary/subcell_pipeline.analysis.wall_clock_time.html">analysis.wall_clock_time</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of analysis.wall_clock_time</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_summary/subcell_pipeline.analysis.tomography_data.html">analysis.tomography_data</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of analysis.tomography_data</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_summary/subcell_pipeline.analysis.tomography_data.tomography_data.html">analysis.tomography_data.tomography_data</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_summary/subcell_pipeline.analysis.wall_clock_time.html">analysis.wall_clock_time</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of analysis.wall_clock_time</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../_summary/subcell_pipeline.analysis.wall_clock_time.log_data.html">analysis.wall_clock_time.log_data</a></li>
 </ul>
 </li>
@@ -301,7 +305,7 @@
 <span class="kn">from</span> <span class="nn">io_collection.load.load_text</span> <span class="kn">import</span> <span class="n">load_text</span>
 <span class="kn">from</span> <span class="nn">io_collection.save.save_dataframe</span> <span class="kn">import</span> <span class="n">save_dataframe</span>
 
-<span class="n">COLUMN_NAMES</span> <span class="o">=</span> <span class="p">[</span>
+<span class="n">COLUMN_NAMES</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;fiber_id&quot;</span><span class="p">,</span>
     <span class="s2">&quot;xpos&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ypos&quot;</span><span class="p">,</span>
@@ -313,9 +317,9 @@
     <span class="s2">&quot;time&quot;</span><span class="p">,</span>
     <span class="s2">&quot;fiber_point&quot;</span><span class="p">,</span>
 <span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Parsed tidy data column names.&quot;&quot;&quot;</span>
 
-
-<span class="n">COLUMN_DTYPES</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">COLUMN_DTYPES</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">type</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;fiber_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="s2">&quot;xpos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="s2">&quot;ypos&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -327,10 +331,13 @@
     <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="s2">&quot;fiber_point&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;Parsed tidy data column data types.&quot;&quot;&quot;</span>
 
 <span class="n">CYTOSIM_SCALE_FACTOR</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="sd">&quot;&quot;&quot;Default Cytosim position scaling factor.&quot;&quot;&quot;</span>
 
 <span class="n">CYTOSIM_RIGIDITY</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.041</span>
+<span class="sd">&quot;&quot;&quot;Default Cytosim rigidity.&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="parse_cytosim_simulation_data">

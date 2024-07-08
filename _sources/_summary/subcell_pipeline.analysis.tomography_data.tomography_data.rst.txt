@@ -1,0 +1,37 @@
+analysis.tomography\_data.tomography\_data
+==========================================
+
+.. automodule:: subcell_pipeline.analysis.tomography_data.tomography_data
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_branched_tomography_data
+      get_tomography_data
+      get_unbranched_tomography_data
+      plot_tomography_data_by_dataset
+      read_tomography_data
+      rescale_tomography_data
+      sample_tomography_data
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

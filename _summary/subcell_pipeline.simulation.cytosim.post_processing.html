@@ -247,7 +247,11 @@
 <li class="toctree-l3"><a class="reference internal" href="subcell_pipeline.analysis.dimensionality_reduction.pca_dim_reduction.html">analysis.dimensionality_reduction.pca_dim_reduction</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="subcell_pipeline.analysis.wall_clock_time.html">analysis.wall_clock_time</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of analysis.wall_clock_time</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="subcell_pipeline.analysis.tomography_data.html">analysis.tomography_data</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of analysis.tomography_data</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="subcell_pipeline.analysis.tomography_data.tomography_data.html">analysis.tomography_data.tomography_data</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="subcell_pipeline.analysis.wall_clock_time.html">analysis.wall_clock_time</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of analysis.wall_clock_time</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="subcell_pipeline.analysis.wall_clock_time.log_data.html">analysis.wall_clock_time.log_data</a></li>
 </ul>
 </li>
@@ -300,6 +304,25 @@
           <section id="module-subcell_pipeline.simulation.cytosim.post_processing">
 <span id="simulation-cytosim-post-processing"></span><h1>simulation.cytosim.post_processing<a class="headerlink" href="#module-subcell_pipeline.simulation.cytosim.post_processing" title="Link to this heading">¶</a></h1>
 <p>Methods for processing Cytosim simulations.</p>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.COLUMN_NAMES" title="subcell_pipeline.simulation.cytosim.post_processing.COLUMN_NAMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COLUMN_NAMES</span></code></a></p></td>
+<td><p>Parsed tidy data column names.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.COLUMN_DTYPES" title="subcell_pipeline.simulation.cytosim.post_processing.COLUMN_DTYPES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COLUMN_DTYPES</span></code></a></p></td>
+<td><p>Parsed tidy data column data types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_SCALE_FACTOR" title="subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_SCALE_FACTOR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CYTOSIM_SCALE_FACTOR</span></code></a></p></td>
+<td><p>Default Cytosim position scaling factor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_RIGIDITY" title="subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_RIGIDITY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CYTOSIM_RIGIDITY</span></code></a></p></td>
+<td><p>Default Cytosim rigidity.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -313,6 +336,30 @@
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="subcell_pipeline.simulation.cytosim.post_processing.COLUMN_NAMES">
+<span class="sig-name descname"><span class="pre">COLUMN_NAMES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['fiber_id',</span> <span class="pre">'xpos',</span> <span class="pre">'ypos',</span> <span class="pre">'zpos',</span> <span class="pre">'xforce',</span> <span class="pre">'yforce',</span> <span class="pre">'zforce',</span> <span class="pre">'segment_curvature',</span> <span class="pre">'time',</span> <span class="pre">'fiber_point']</span></em><a class="headerlink" href="#subcell_pipeline.simulation.cytosim.post_processing.COLUMN_NAMES" title="Link to this definition">¶</a></dt>
+<dd><p>Parsed tidy data column names.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="subcell_pipeline.simulation.cytosim.post_processing.COLUMN_DTYPES">
+<span class="sig-name descname"><span class="pre">COLUMN_DTYPES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'fiber_id':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'fiber_point':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'segment_curvature':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'time':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'xforce':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'xpos':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'yforce':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'ypos':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'zforce':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">'zpos':</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;}</span></em><a class="headerlink" href="#subcell_pipeline.simulation.cytosim.post_processing.COLUMN_DTYPES" title="Link to this definition">¶</a></dt>
+<dd><p>Parsed tidy data column data types.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_SCALE_FACTOR">
+<span class="sig-name descname"><span class="pre">CYTOSIM_SCALE_FACTOR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></em><a class="headerlink" href="#subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_SCALE_FACTOR" title="Link to this definition">¶</a></dt>
+<dd><p>Default Cytosim position scaling factor.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_RIGIDITY">
+<span class="sig-name descname"><span class="pre">CYTOSIM_RIGIDITY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.041</span></em><a class="headerlink" href="#subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_RIGIDITY" title="Link to this definition">¶</a></dt>
+<dd><p>Default Cytosim rigidity.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.cytosim.post_processing.parse_cytosim_simulation_data">
 <span class="sig-name descname"><span class="pre">parse_cytosim_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_seeds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/cytosim/post_processing.html#parse_cytosim_simulation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.cytosim.post_processing.parse_cytosim_simulation_data" title="Link to this definition">¶</a></dt>
@@ -405,6 +452,10 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">simulation.cytosim.post_processing</a><ul>
+<li><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.COLUMN_NAMES"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAMES</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.COLUMN_DTYPES"><code class="docutils literal notranslate"><span class="pre">COLUMN_DTYPES</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_SCALE_FACTOR"><code class="docutils literal notranslate"><span class="pre">CYTOSIM_SCALE_FACTOR</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.CYTOSIM_RIGIDITY"><code class="docutils literal notranslate"><span class="pre">CYTOSIM_RIGIDITY</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.parse_cytosim_simulation_data"><code class="docutils literal notranslate"><span class="pre">parse_cytosim_simulation_data()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.simulation.cytosim.post_processing.parse_cytosim_simulation_curvature_data"><code class="docutils literal notranslate"><span class="pre">parse_cytosim_simulation_curvature_data()</span></code></a></li>
 </ul>
