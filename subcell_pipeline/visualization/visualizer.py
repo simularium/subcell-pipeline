@@ -5,10 +5,12 @@ from typing import Tuple, Dict, List
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from pint import UnitRegistry
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_text import load_text
 from io_collection.load.load_dataframe import load_dataframe
+from io_collection.load.load_pickle import load_pickle
 from simulariumio import (
     TrajectoryConverter,
     MetaData,
@@ -33,6 +35,7 @@ from ..constants import (
     READDY_TOTAL_STEPS, 
     READDY_SAVED_FRAMES,
     READDY_DISPLAY_DATA,
+    CYTOSIM_SCALE_FACTOR,
     SIMULATOR_COLORS,
     TOMOGRAPHY_SAMPLE_COLUMNS,
     TOMOGRAPHY_VIZ_SCALE,
@@ -44,11 +47,6 @@ from ..temporary_file_io import (
     download_readdy_hdf5, 
     upload_file_to_s3,
     make_working_directory,
-)
-from ..constants import (
-    BOX_SIZE, 
-    READDY_TOTAL_STEPS, 
-    CYTOSIM_SCALE_FACTOR,
 )
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
@@ -248,7 +246,7 @@ def _visualize_readdy_trajectory(
     rep_ix: int,
     n_timepoints: int,
     n_monomer_points: int,
-) -> None:
+) -> TrajectoryConverter:
     """
     Save a Simularium file for a single ReaDDy trajectory with plots and spatial annotations.
     """
@@ -263,12 +261,25 @@ def _visualize_readdy_trajectory(
     _add_readdy_spatial_annotations(
         converter, post_processor, fiber_chain_ids, axis_positions, fiber_points
     )
-
-    # save simularium file
-    converter.save(
-        output_path=path_to_readdy_h5,
-        validate_ids=False,  # for performance
-    )
+    
+    return converter
+    
+    
+def _save_and_upload_simularium_file(
+    converter: TrajectoryConverter, 
+    bucket: str, 
+    output_key: str
+) -> None:
+    """
+    Save a local simularium file and upload it to s3.
+    """
+    local_key = os.path.splitext(os.path.basename(output_key))[0]
+    local_output_path = os.path.join(WORKING_DIR_PATH, local_key)
+    make_working_directory()
+    
+    converter.save(local_output_path)
+            
+    # upload_file_to_s3(bucket, f"{local_output_path}.simularium", output_key) TODO
 
 
 def visualize_individual_readdy_trajectories(
@@ -304,7 +315,6 @@ def visualize_individual_readdy_trajectories(
         series_key = f"{series_name}_{condition_key}" if condition_key else series_name
 
         for rep_ix in range(n_replicates):
-            local_h5_path = os.path.join(WORKING_DIR_PATH, f"{series_key}_{rep_ix}.h5")
             rep_id = rep_ix + 1
             output_key = f"{series_name}/viz/{series_key}_{rep_id:06d}.simularium"
 
@@ -316,8 +326,7 @@ def visualize_individual_readdy_trajectories(
             print(f"Visualizing data for [ {condition_key} ] replicate [ {rep_ix} ]")
             
             download_readdy_hdf5(bucket, series_name, series_key, rep_ix)
-    
-            _visualize_readdy_trajectory(
+            converter = _visualize_readdy_trajectory(
                 bucket,
                 series_name,
                 series_key,
@@ -325,8 +334,7 @@ def visualize_individual_readdy_trajectories(
                 n_timepoints,
                 n_monomer_points,
             )
-            
-            upload_file_to_s3(bucket, f"{local_h5_path}.simularium", output_key)
+            _save_and_upload_simularium_file(converter, bucket, output_key)
 
 
 ureg = UnitRegistry()
@@ -415,7 +423,7 @@ def _visualize_cytosim_trajectory(
     singles_data: str,
     local_output_path: str,
     n_timepoints: int,
-) -> None:
+) -> TrajectoryConverter:
     """
     Save a Simularium file for a single Cytosim trajectory with plots.
     """
@@ -425,7 +433,7 @@ def _visualize_cytosim_trajectory(
         converter._data.agent_data.subpoints, 
         converter._data.agent_data.times
     )
-    converter.save(local_output_path)
+    return converter
 
 
 def visualize_individual_cytosim_trajectories(
@@ -473,11 +481,10 @@ def visualize_individual_cytosim_trajectories(
                 bucket, output_key_template % "singles.txt"
             )
             local_output_path = os.path.join(WORKING_DIR_PATH, output_key)
-            _visualize_cytosim_trajectory(
+            converter = _visualize_cytosim_trajectory(
                 fiber_points_data, singles_data, local_output_path, n_timepoints
             )
-            
-            upload_file_to_s3(bucket, local_output_path, output_key)
+            _save_and_upload_simularium_file(converter, bucket, output_key)
 
 
 def _load_fiber_points_from_dataframe(
@@ -507,7 +514,49 @@ def _load_fiber_points_from_dataframe(
             )
         )
     return np.array(result)
-     
+
+
+def _generate_simularium_for_fiber_points(
+    fiber_points: list[np.ndarray],
+    type_names: list[str],
+    meta_data: MetaData,
+    display_data: Dict[str, DisplayData],
+    time_units: UnitData,
+    spatial_units: UnitData,
+) -> TrajectoryConverter:
+    """
+    Generate a TrajectoryConverter for the fiber_points 
+    (list of fibers, each = timesteps X points X 3)
+    """
+    # build subpoints array with correct dimensions
+    n_fibers = len(fiber_points)
+    total_steps = fiber_points[0].shape[0]
+    n_points = fiber_points[0].shape[1]
+    subpoints = np.zeros((total_steps, n_fibers, n_points, 3))
+    for time_ix in range(total_steps):
+        for fiber_ix in range(n_fibers):
+            subpoints[time_ix][fiber_ix] = fiber_points[fiber_ix][time_ix]
+    subpoints = subpoints.reshape((total_steps, n_fibers, 3 * n_points))
+    # convert to simularium
+    traj_data = TrajectoryData(
+        meta_data=meta_data,
+        agent_data=AgentData(
+            times=np.arange(total_steps),
+            n_agents=n_fibers * np.ones((total_steps)),
+            viz_types=1001 * np.ones((total_steps, n_fibers)),  # fiber viz type = 1001
+            unique_ids=np.array(total_steps * [list(range(n_fibers))]),
+            types=total_steps * [type_names],
+            positions=np.zeros((total_steps, n_fibers, 3)),
+            radii=0.5 * np.ones((total_steps, n_fibers)),
+            n_subpoints=3 * n_points * np.ones((total_steps, n_fibers)),
+            subpoints=subpoints,
+            display_data=display_data,
+        ),
+        time_units=time_units,  
+        spatial_units=spatial_units, 
+    )
+    return TrajectoryConverter(traj_data)
+    
             
 def _load_all_together_simularium(
     fiber_points: list[np.ndarray],
@@ -517,37 +566,25 @@ def _load_all_together_simularium(
     """
     Generate a TrajectoryConverter with all simulations from ReaDDy and Cytosim together.
     """
-    total_conditions = len(fiber_points)
-    total_steps = fiber_points[0].shape[0]
-    n_monomer_points = fiber_points[0].shape[1]
-    subpoints = []
-    traj_data = TrajectoryData(
-        meta_data=MetaData(
-            box_size=np.array([BOX_SIZE, BOX_SIZE, BOX_SIZE]),
-            camera_defaults=CameraData(
-                position=np.array([10.0, 0.0, 200.0]),
-                look_at_position=np.array([10.0, 0.0, 0.0]),
-                fov_degrees=60.0,
-            ),
-            trajectory_title="Actin compression in Cytosim and Readdy",
+    meta_data=MetaData(
+        box_size=BOX_SIZE,
+        camera_defaults=CameraData(
+            position=np.array([10.0, 0.0, 200.0]),
+            look_at_position=np.array([10.0, 0.0, 0.0]),
+            fov_degrees=60.0,
         ),
-        agent_data=AgentData(
-            times=np.arange(total_steps),
-            n_agents=total_conditions * np.ones((total_steps)),
-            viz_types=1001
-            * np.ones((total_steps, total_conditions)),  # fiber viz type = 1001
-            unique_ids=np.array(total_steps * [list(range(total_conditions))]),
-            types=total_steps * [type_names],
-            positions=np.zeros((total_steps, total_conditions, 3)),
-            radii=np.ones((total_steps, total_conditions)),
-            n_subpoints=3 * n_monomer_points * np.ones((total_steps, total_conditions)),
-            subpoints=align(subpoints),
-            display_data=display_data,
-        ),
-        time_units=UnitData("count"),  # frames
-        spatial_units=UnitData("nm"),  # nanometer
+        trajectory_title="Actin compression in Cytosim and Readdy",
     )
-    return TrajectoryConverter(traj_data)
+    time_units=UnitData("count")  # frames
+    spatial_units=UnitData("nm")  # nanometer
+    return _generate_simularium_for_fiber_points(
+        fiber_points,
+        type_names,
+        meta_data,
+        display_data,
+        time_units,
+        spatial_units,
+    )
 
 
 def _add_combined_plots(
@@ -637,10 +674,7 @@ def visualize_all_compressed_trajectories_together(
     converter = _load_all_together_simularium(fiber_points, type_names, display_data)
     _add_combined_plots(converter, fiber_points, type_names, n_timepoints)
     output_key = "actin_compression_cytosim_readdy.simularium"
-    local_output_path = os.path.join(WORKING_DIR_PATH, output_key)
-    converter.save(local_output_path)
-            
-    upload_file_to_s3(subcell_bucket, local_output_path, output_key)
+    _save_and_upload_simularium_file(converter, subcell_bucket, output_key)
 
 
 def _empty_tomography_plots() -> Dict[CompressionMetric, HistogramPlotData]:
@@ -678,17 +712,16 @@ def _empty_tomography_plots() -> Dict[CompressionMetric, HistogramPlotData]:
     }
 
 
-def _add_tomography_plots(tomo_df: pd.DataFrame, converter: TrajectoryConverter) -> None:
+def _add_tomography_plots(fiber_points: list[np.ndarray], converter: TrajectoryConverter) -> None:
     """
     Add plots to tomography data using pre-calculated metrics.
     """
     plots = _empty_tomography_plots()
     for metric in plots:
         values = []
-        for _, fiber in tomo_df.groupby("id"):
-            polymer_trace = fiber[["xpos", "ypos", "zpos"]].values
+        for fiber in fiber_points:
             values.append(metric.calculate_metric(
-                polymer_trace=polymer_trace
+                polymer_trace=fiber
             ))
         plots[metric].traces["actin"] = np.array(values)
         if metric == CompressionMetric.COMPRESSION_RATIO:
@@ -715,98 +748,6 @@ def _get_tomography_spatial_center_and_size(tomo_df: pd.DataFrame) -> Tuple[np.n
     mins = np.array(mins)
     maxs = np.array(maxs)
     return mins + 0.5 * (maxs - mins), maxs - mins
-    
-    
-def _load_tomography_simularium(bucket: str, name: str) -> TrajectoryConverter:
-    """
-    Load sampled tomography data and generate a TrajectoryConverter 
-    to visualize it in Simularium.
-    """
-    tomo_key = f"{name}/{name}_coordinates_sampled.csv"
-    tomo_df = load_dataframe(bucket, tomo_key)
-    tomo_df = tomo_df.sort_values(by=["id", "monomer_ids"])
-    tomo_df = tomo_df.reset_index(drop=True)
-    names, ids = np.unique(np.array(list(tomo_df["id"])), return_index=True)
-    traj_ids = names[np.argsort(ids)]
-    center, box_size = _get_tomography_spatial_center_and_size(tomo_df)
-    max_points = 0
-    subpoints = []
-    compression_ratios = []
-    test_points = []
-    for traj_id in traj_ids:
-        fiber_df = tomo_df.loc[tomo_df["id"] == traj_id]
-        points = TOMOGRAPHY_VIZ_SCALE * (np.array(fiber_df[["xpos", "ypos", "zpos"]]) - center)
-        subpoints.append(points.flatten())
-        compression_ratio = CompressionMetric.COMPRESSION_RATIO.calculate_metric(points)
-        compression_ratios.append(compression_ratio)
-        if compression_ratio > 0.75:
-            test_points.append(points)
-        if len(fiber_df) > max_points:
-            max_points = len(fiber_df)
-    n_agents = len(subpoints)
-    compression_percents = 100. * np.array(compression_ratios)
-    min_compression_ratio = np.amin(compression_percents)
-    max_compression_ratio = np.amax(compression_percents)
-    bins = np.linspace(min_compression_ratio, max_compression_ratio, 20)
-    digitized = np.digitize(compression_percents, bins)
-    type_names = []
-    display_data = {}
-    type_name_min = f"actin less than {TOMOGRAPHY_MIN_COMPRESSION} percent compressed"
-    for agent_ix in range(n_agents):
-        bin_percent = int(10 * bins[digitized[agent_ix] - 1]) / 10.
-        if bin_percent < TOMOGRAPHY_MIN_COMPRESSION:
-            type_name = type_name_min
-        else:
-            bin_percent_name = str(round(bin_percent))
-            type_name = f"actin {bin_percent_name} percent compressed"
-        type_names.append(type_name)
-        if type_name not in display_data:
-            display_data[type_name] = DisplayData(
-                name=type_name,
-                display_type=DISPLAY_TYPE.FIBER,
-            )
-    display_data[type_name_min] = DisplayData(
-        name=type_name_min,
-        display_type=DISPLAY_TYPE.FIBER,
-        color="#222222",
-    )
-    agent_data = AgentData.from_dimensions(DimensionData(
-        total_steps=1,
-        max_agents=n_agents,
-        max_subpoints=3 * max_points,
-    ))
-    agent_data.n_agents[0] = n_agents
-    agent_data.viz_types[0] = 1001.0 * np.ones(n_agents)
-    agent_data.unique_ids[0] = np.arange(n_agents)
-    agent_data.types[0] = type_names
-    agent_data.radii *= 0.5
-    for agent_ix in range(n_agents):
-        n_subpoints = subpoints[agent_ix].shape[0]
-        agent_data.n_subpoints[0][agent_ix] = n_subpoints
-        agent_data.subpoints[0][agent_ix][:n_subpoints] = subpoints[agent_ix]
-    agent_data.display_data = display_data
-    UNIT_SCALE_FACTOR = 1 / 20.  # TODO not sure where this factor came from or if it is still needed
-    traj_data = TrajectoryData(
-        meta_data=MetaData(
-            box_size=TOMOGRAPHY_VIZ_SCALE * box_size,
-            camera_defaults=CameraData(position=np.array([0.0, 0.0, 70.0]))
-        ),
-        agent_data=agent_data,
-        spatial_units=UnitData("um", UNIT_SCALE_FACTOR * TOMOGRAPHY_SCALE_FACTOR / TOMOGRAPHY_VIZ_SCALE),  # 0.003?
-    )
-    converter = TrajectoryConverter(traj_data)
-    _add_tomography_plots(tomo_df, converter)
-    
-    # TODO remove after debugging fiber point sampling order
-    for ix, points in enumerate(test_points):
-        converter._data = SpatialAnnotator.add_sphere_agents(
-            converter._data,
-            [points],
-            type_name=f"fiber point",
-            radius=0.8,
-        )
-    
-    return converter
 
 
 def visualize_tomography(bucket: str, name: str) -> None:
@@ -815,15 +756,109 @@ def visualize_tomography(bucket: str, name: str) -> None:
 
     Parameters
     ----------
-    data
-        Tomography data.
+    bucket
+        Name of S3 bucket for input and output files.
+    name
+        Name of tomography dataset.
     """
-    output_key = f"{name}/{name}"
-    local_output_path = os.path.join(WORKING_DIR_PATH, name)
-    make_working_directory()
+    tomo_key = f"{name}/{name}_coordinates_sampled.csv"
+    tomo_df = load_dataframe(bucket, tomo_key)
+    tomo_df = tomo_df.sort_values(by=["id", "monomer_ids"])
+    tomo_df = tomo_df.reset_index(drop=True)
+    time_units = UnitData("count")
+    spatial_units = UnitData("um", 0.003)
+    names, ids = np.unique(np.array(list(tomo_df["id"])), return_index=True)
+    traj_ids = names[np.argsort(ids)]
+    for traj_id in traj_ids:
+        fiber_df = tomo_df.loc[tomo_df["id"] == traj_id]
+        center, box_size = _get_tomography_spatial_center_and_size(fiber_df)
+        fiber_points = TOMOGRAPHY_VIZ_SCALE * (np.array([fiber_df[["xpos", "ypos", "zpos"]]]) - center)
+        type_names = ["Raw data"]
+        display_data = {
+            "Raw data" : DisplayData(
+                name="Raw data",
+                display_type=DISPLAY_TYPE.FIBER,
+                color="#888888",
+            )
+        }
+        converter = _generate_simularium_for_fiber_points(
+            [fiber_points],
+            type_names,
+            MetaData(
+                box_size=TOMOGRAPHY_VIZ_SCALE * box_size,
+                camera_defaults=CameraData(position=np.array([0.0, 0.0, 70.0]))
+            ),
+            display_data,
+            time_units,
+            spatial_units,
+        )
+        
+        # TODO remove after debugging fiber point order
+        converter._data = SpatialAnnotator.add_sphere_agents(
+            converter._data,
+            [fiber_points[0]],
+            type_name="point",
+            radius=0.8,
+        )
+        
+        _add_tomography_plots([fiber_points[0]], converter)
+        _save_and_upload_simularium_file(converter, bucket, f"{name}/{name}_{traj_id}.simularium")
+
+
+def visualize_dimensionality_reduction(bucket: str, pca_results_key: str, pca_pickle_key: str) -> None:
+    """
+    Visualize PCA space for actin fibers.
+
+    Parameters
+    ----------
     
-    converter = _load_tomography_simularium(bucket, name)
-    converter.save(local_output_path)
-            
-    upload_file_to_s3(bucket, f"{local_output_path}.simularium", f"{output_key}.simularium")
-                
+    """
+    pca_results = load_dataframe(bucket, pca_results_key)
+    pca = load_pickle(bucket, pca_pickle_key)
+    
+    samples = np.arange(-2, 2, 0.5)
+    stdev_pc1 = pca_results["PCA1"].std(ddof=0)
+    stdev_pc2 = pca_results["PCA2"].std(ddof=0)
+
+    fiber_points = []
+    type_names = []
+    display_data = {}
+    
+    for sample in samples:
+        data = {
+            "PC1" : [sample * stdev_pc1, 0],
+            "PC2" : [0, sample * stdev_pc2],
+        }
+        for pc in data:
+            fiber_points.append(pca.inverse_transform(data[pc]).reshape(1, -1, 3))
+            type_name = f"{pc}#{sample}"
+            type_names.append(type_name)
+            if type_name not in display_data:
+                display_data[type_name] = DisplayData(
+                    name=type_name,
+                    display_type=DISPLAY_TYPE.FIBER,
+                )
+    
+    meta_data=MetaData(
+        box_size=BOX_SIZE,
+        camera_defaults=CameraData(
+            position=np.array([10.0, 0.0, 200.0]),
+            look_at_position=np.array([10.0, 0.0, 0.0]),
+            fov_degrees=60.0,
+        ),
+        trajectory_title="Actin Compression Dimensionality Reduction",
+    )
+    time_units=UnitData("count")  # frames
+    spatial_units=UnitData("nm")  # nanometers
+        
+    converter = _generate_simularium_for_fiber_points(
+        fiber_points,
+        type_names,
+        meta_data,
+        display_data,
+        time_units,
+        spatial_units,
+    )
+    
+    output_key = os.path.splitext(pca_pickle_key)[0]
+    _save_and_upload_simularium_file(converter, bucket, f"{output_key}.simularium")

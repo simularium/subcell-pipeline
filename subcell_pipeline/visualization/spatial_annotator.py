@@ -177,7 +177,10 @@ class SpatialAnnotator:
                 time_ix
             ][:n_spheres]
             new_agent_data.radii[time_ix][start_ix:end_ix] = n_spheres * [radius]
+            
+        # TODO use color parameter after finished debugging
         colors = ["#0000ff", "#00ff00", "#ffff00", "#ff0000", "#ff00ff"]
+        
         for ix in range(max_spheres):
             tn = f"{type_name} {ix}" 
             new_agent_data.display_data[tn] = DisplayData(
