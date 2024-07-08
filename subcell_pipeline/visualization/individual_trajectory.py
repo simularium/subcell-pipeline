@@ -15,7 +15,6 @@ from simulariumio import (
     DisplayData,
     InputFileData,
     MetaData,
-    ScatterPlotData,
     TrajectoryConverter,
     UnitData,
 )
@@ -38,6 +37,7 @@ from subcell_pipeline.simulation.readdy.parser import (
 )
 from subcell_pipeline.simulation.readdy.post_processor import ReaddyPostProcessor
 from subcell_pipeline.visualization.display_data import get_readdy_display_data
+from subcell_pipeline.visualization.scatter_plots import make_empty_scatter_plots
 from subcell_pipeline.visualization.spatial_annotator import SpatialAnnotator
 
 READDY_SAVED_FRAMES: int = 1000
@@ -47,45 +47,6 @@ BOX_SIZE: np.ndarray = np.array(3 * [600.0])
 UNIT_REGISTRY = UnitRegistry()
 
 
-def _empty_scatter_plots(
-    metrics: list[CompressionMetric],
-    total_steps: int = -1,
-    times: Optional[np.ndarray] = None,
-    time_units: Optional[str] = None,
-) -> dict[CompressionMetric, ScatterPlotData]:
-    """Create empty scatter plot placeholders for list of metrics."""
-
-    if total_steps < 0 and times is None:
-        raise Exception("Either total_steps or times array is required for plots")
-    elif times is None:
-        # use normalized time
-        xlabel = "T (normalized)"
-        xtrace = (1 / float(total_steps)) * np.arange(total_steps)
-    else:
-        # use actual time
-        xlabel = f"T ({time_units})"
-        xtrace = times
-        total_steps = times.shape[0]
-
-    plots = {}
-
-    for metric in metrics:
-        lower_bound, upper_bound = metric.bounds()
-        plots[metric] = ScatterPlotData(
-            title=metric.label(),
-            xaxis_title=xlabel,
-            yaxis_title=metric.description(),
-            xtrace=xtrace,
-            ytraces={
-                "<<<": lower_bound * np.ones(total_steps),
-                ">>>": upper_bound * np.ones(total_steps),
-            },
-            render_mode="lines",
-        )
-
-    return plots
-
-
 def _add_individual_plots(
     converter: TrajectoryConverter,
     metrics: list[CompressionMetric],
@@ -93,7 +54,7 @@ def _add_individual_plots(
 ) -> None:
     """Add plots to individual trajectory with calculated metrics."""
     times = metrics_data["time"].values
-    scatter_plots = _empty_scatter_plots(metrics, times=times)
+    scatter_plots = make_empty_scatter_plots(metrics, times=times)
     for metric, plot in scatter_plots.items():
         plot.ytraces["filament"] = np.array(metrics_data[metric.value])
         converter.add_plot(plot, "scatter")
@@ -152,7 +113,7 @@ def _add_readdy_spatial_annotations(
     )
 
 
-def get_readdy_simularium_converter(
+def _get_readdy_simularium_converter(
     path_to_readdy_h5: str, total_steps: int
 ) -> TrajectoryConverter:
     """
@@ -195,6 +156,29 @@ def visualize_individual_readdy_trajectory(
     """
     Save a Simularium file for a single ReaDDy trajectory with plots and spatial
     annotations.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    series_key
+        Combination of series and condition names.
+    rep_ix
+        Replicate index.
+    n_timepoints
+        Number of equally spaced timepoints to visualize.
+    n_monomer_points
+        Number of equally spaced monomer points to visualize.
+    total_steps
+        Total number of steps for each simulation key.
+    temp_path
+        Local path for saving visualization output files.
+    metrics
+        List of metrics to include in visualization plots.
+    metrics_data
+        Calculated compression metrics data.
     """
 
     h5_file_path = download_readdy_hdf5(
@@ -203,7 +187,7 @@ def visualize_individual_readdy_trajectory(
 
     assert isinstance(h5_file_path, str)
 
-    converter = get_readdy_simularium_converter(h5_file_path, total_steps)
+    converter = _get_readdy_simularium_converter(h5_file_path, total_steps)
 
     if metrics:
         _add_individual_plots(converter, metrics, metrics_data)
@@ -268,7 +252,7 @@ def visualize_individual_readdy_trajectories(
     total_steps
         Total number of steps for each simulation key.
     temp_path
-        Path for saving temporary h5 files.
+        Local path for saving visualization output files.
     metrics
         List of metrics to include in visualization plots.
     recalculate
@@ -276,7 +260,6 @@ def visualize_individual_readdy_trajectories(
     """
 
     if metrics is not None:
-        print(bucket, series_name, condition_keys)
         all_metrics_data = get_compression_metric_data(
             bucket,
             series_name,
@@ -350,7 +333,7 @@ def _filter_time(
     return converter
 
 
-def get_cytosim_simularium_converter(
+def _get_cytosim_simularium_converter(
     fiber_points_data: str,
     singles_data: str,
     n_timepoints: int,
@@ -419,13 +402,35 @@ def visualize_individual_cytosim_trajectory(
     metrics: list[CompressionMetric],
     metrics_data: pd.DataFrame,
 ) -> None:
-    """Save a Simularium file for a single Cytosim trajectory with plots."""
+    """
+    Save a Simularium file for a single Cytosim trajectory with plots and
+    spatial annotations.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    series_key
+        Combination of series and condition names.
+    index
+        Simulation replicate index.
+    n_timepoints
+        Number of equally spaced timepoints to visualize.
+    temp_path
+        Local path for saving visualization output files.
+    metrics
+        List of metrics to include in visualization plots.
+    metrics_data
+        Calculated compression metrics data.
+    """
 
     output_key_template = f"{series_name}/outputs/{series_key}_{index}/%s"
     fiber_points_data = load_text(bucket, output_key_template % "fiber_points.txt")
     singles_data = load_text(bucket, output_key_template % "singles.txt")
 
-    converter = get_cytosim_simularium_converter(
+    converter = _get_cytosim_simularium_converter(
         fiber_points_data, singles_data, n_timepoints
     )
 
@@ -472,7 +477,6 @@ def visualize_individual_cytosim_trajectories(
     """
 
     if metrics is not None:
-        print(bucket, series_name, condition_keys)
         all_metrics_data = get_compression_metric_data(
             bucket,
             series_name,
@@ -522,5 +526,3 @@ def visualize_individual_cytosim_trajectories(
 
             temp_key = f"{series_key}_{index}.simularium"
             save_buffer(bucket, output_key, load_buffer(temp_path, temp_key))
-            break
-        break
