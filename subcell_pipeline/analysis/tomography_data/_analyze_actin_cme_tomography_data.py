@@ -22,6 +22,10 @@ _Developmental Cell_, 57(9), P1132-1145.e5. DOI: 10.1016/j.devcel.2022.04.012
 """
 
 # %%
+if __name__ != "__main__":
+    raise ImportError("This module is a notebook and is not meant to be imported")
+
+# %%
 from subcell_pipeline.analysis.tomography_data.tomography_data import (
     get_branched_tomography_data,
     get_unbranched_tomography_data,

@@ -71,9 +71,10 @@ The module is further organized by simulator.
 The `analysis` module contains code for different analyses.
 Each analysis type contains a README with additional information:
 
-- [analysis.compression_metrics](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics)
+- [analysis.compression_metrics](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics) -- Analysis and plotting for compression metrics on individual fiber shapes
 - [analysis.dimensionality_reduction](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction) -- Analysis and plotting for dimensionality reduction on individual fiber shapes
-- [analysis.tomography_data](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data)
+- [analysis.tomography_data](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data) -- Processing and analysis of cryo-electron tomography data
+- [analysis.wall_clock_time](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/wall_clock_time) -- Analysis of simulation wall clock times
 
 ### Visualization
 

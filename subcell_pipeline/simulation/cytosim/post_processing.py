@@ -8,7 +8,7 @@ from io_collection.keys.check_key import check_key
 from io_collection.load.load_text import load_text
 from io_collection.save.save_dataframe import save_dataframe
 
-COLUMN_NAMES = [
+COLUMN_NAMES: list[str] = [
     "fiber_id",
     "xpos",
     "ypos",
@@ -20,9 +20,9 @@ COLUMN_NAMES = [
     "time",
     "fiber_point",
 ]
+"""Parsed tidy data column names."""
 
-
-COLUMN_DTYPES = {
+COLUMN_DTYPES: dict[str, Union[type[float], type[int]]] = {
     "fiber_id": int,
     "xpos": float,
     "ypos": float,
@@ -34,10 +34,13 @@ COLUMN_DTYPES = {
     "time": float,
     "fiber_point": int,
 }
+"""Parsed tidy data column data types."""
 
 CYTOSIM_SCALE_FACTOR: int = 1000
+"""Default Cytosim position scaling factor."""
 
 CYTOSIM_RIGIDITY: float = 0.041
+"""Default Cytosim rigidity."""
 
 
 def parse_cytosim_simulation_data(
