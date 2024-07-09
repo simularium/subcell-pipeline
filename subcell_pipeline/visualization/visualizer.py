@@ -48,9 +48,7 @@ from ..temporary_file_io import (
     upload_file_to_s3,
     make_working_directory,
 )
-from subcell_pipeline.analysis.compression_metrics.compression_metric import (
-    CompressionMetric,
-)
+from ..analysis.compression_metrics.compression_metric import CompressionMetric
 from ..simulation.readdy import ReaddyPostProcessor, load_readdy_fiber_points
 from .spatial_annotator import SpatialAnnotator
 
@@ -805,39 +803,81 @@ def visualize_tomography(bucket: str, name: str) -> None:
         _save_and_upload_simularium_file(converter, bucket, f"{name}/{name}_{traj_id}.simularium")
 
 
-def visualize_dimensionality_reduction(bucket: str, pca_results_key: str, pca_pickle_key: str) -> None:
+def visualize_dimensionality_reduction(
+    bucket: str, 
+    pca_results_key: str, 
+    pca_pickle_key: str,
+    distribution_over_time: bool, 
+    simulator_detail: bool,
+    std_devs: float,
+    sample_resolution: int,
+) -> None:
     """
     Visualize PCA space for actin fibers.
 
     Parameters
     ----------
-    
+    bucket
+        Name of S3 bucket for input and output files.
+    pca_results_key
+        File key for PCA results dataframe.
+    pca_pickle_key
+        File key for PCA object pickle.
+    distribution_over_time
+        Scroll through the PC distributions over time?
+        Otherwise show all together in one timestep.
+    simulator_detail
+        Also show distributions for ReaDDy and Cytosim? 
+        Otherwise just all together.
+    std_devs
+        How many standard deviations to visualize?
+    sample_resolution
+        How many samples to visualize for each PC distribution?
+        (should be an odd number)
     """
+    if sample_resolution % 2 == 0:
+        sample_resolution += 1
+    
     pca_results = load_dataframe(bucket, pca_results_key)
     pca = load_pickle(bucket, pca_pickle_key)
-    
-    samples = np.arange(-2, 2, 0.5)
-    stdev_pc1 = pca_results["PCA1"].std(ddof=0)
-    stdev_pc2 = pca_results["PCA2"].std(ddof=0)
 
     fiber_points = []
     type_names = []
     display_data = {}
+        
+    inc = 2 * std_devs / (sample_resolution - 1)
+    samples = np.arange(-std_devs, std_devs + inc, inc)
+    stdev_pc1 = pca_results["PCA1"].std(ddof=0)
+    stdev_pc2 = pca_results["PCA2"].std(ddof=0)
+    data = {
+        "PC1" : [sample * stdev_pc1, 0],
+        "PC2" : [0, sample * stdev_pc2],
+    }
     
-    for sample in samples:
-        data = {
-            "PC1" : [sample * stdev_pc1, 0],
-            "PC2" : [0, sample * stdev_pc2],
-        }
-        for pc in data:
-            fiber_points.append(pca.inverse_transform(data[pc]).reshape(1, -1, 3))
-            type_name = f"{pc}#{sample}"
-            type_names.append(type_name)
-            if type_name not in display_data:
-                display_data[type_name] = DisplayData(
-                    name=type_name,
-                    display_type=DISPLAY_TYPE.FIBER,
-                )
+    if distribution_over_time:
+        
+        for pc_ix, pc in enumerate(data):
+            fiber_points.append([])
+            pca.inverse_transform(data[pc]).reshape(-1, 3)
+            for sample in samples:
+                fiber_points[pc_ix].append()
+            fiber_points[pc_ix] = np.array(fiber_points[pc_ix])
+        
+    else:
+    
+        for sample in samples:
+            for pc in data:
+                
+                import ipdb; ipdb.set_trace()
+                
+                fiber_points.append(pca.inverse_transform(data[pc]).reshape(1, -1, 3))
+                type_name = f"{pc}#{sample}"
+                type_names.append(type_name)
+                if type_name not in display_data:
+                    display_data[type_name] = DisplayData(
+                        name=type_name,
+                        display_type=DISPLAY_TYPE.FIBER,
+                    )
     
     meta_data=MetaData(
         box_size=BOX_SIZE,

@@ -104,4 +104,12 @@ pca_results_key = "actin_compression_pca_results.csv"
 # File key for PCA object pickle
 pca_pickle_key = "actin_compression_pca.pkl"
 
-visualize_dimensionality_reduction(bucket, pca_results_key, pca_pickle_key)
+# Scroll through the PC distributions over time if True, otherwise show all together in one timestep
+distribution_over_time = False
+
+# Also show distributions for ReaDDy and Cytosim if True, otherwise just all together
+simulator_detail = False
+
+visualize_dimensionality_reduction(
+    bucket, pca_results_key, pca_pickle_key, distribution_over_time, simulator_detail
+)
