@@ -191,6 +191,7 @@ def sample_tomography_data(
     n_monomer_points: int,
     minimum_points: int,
     sampled_columns: list[str] = TOMOGRAPHY_SAMPLE_COLUMNS,
+    recalculate: bool = False,
 ) -> pd.DataFrame:
     """
     Sample selected columns from tomography data at given resolution.
@@ -209,6 +210,8 @@ def sample_tomography_data(
         Minimum number of points for valid fiber.
     sampled_columns
         List of column names to sample.
+    recalculate
+        True to recalculate the sampled tomography data, False otherwise.
 
     Returns
     -------
@@ -216,21 +219,17 @@ def sample_tomography_data(
         Sampled tomography data.
     """
 
-    if check_key(save_location, save_key):
+    if check_key(save_location, save_key) and not recalculate:
         print(f"Loading existing sampled tomogram data from [ { save_key } ]")
         return load_dataframe(save_location, save_key)
     else:
         all_sampled_points = []
 
-        # TODO sort experimental samples in order along the fiber before resampling 
+        # TODO sort experimental samples in order along the fiber before resampling
         # (see simularium visualization)
-        
         for fiber_id, group in data.groupby("id"):
             if len(group) < minimum_points:
                 continue
-            
-            # TODO resample uniformly along the fiber length rather than 
-            # uniformly between experimental samples
 
             sampled_points = pd.DataFrame()
             sampled_points["monomer_ids"] = np.arange(n_monomer_points)
@@ -254,7 +253,9 @@ def sample_tomography_data(
         return all_sampled_df
 
 
-def plot_tomography_data_by_dataset(data: pd.DataFrame, bucket: str, output_key: str) -> None:
+def plot_tomography_data_by_dataset(
+    data: pd.DataFrame, bucket: str, output_key: str
+) -> None:
     """
     Plot tomography data for each dataset.
 
@@ -269,7 +270,7 @@ def plot_tomography_data_by_dataset(data: pd.DataFrame, bucket: str, output_key:
     """
     make_working_directory()
     local_save_path = os.path.join(WORKING_DIR_PATH, os.path.basename(output_key))
-    
+
     for dataset, group in data.groupby("dataset"):
         _, ax = plt.subplots(1, 3, figsize=(6, 2))
 

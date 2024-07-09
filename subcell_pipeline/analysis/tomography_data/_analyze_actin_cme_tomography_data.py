@@ -30,7 +30,9 @@ from subcell_pipeline.analysis.tomography_data.tomography_data import (
     plot_tomography_data_by_dataset,
     sample_tomography_data,
 )
-from subcell_pipeline.constants import TOMOGRAPHY_SCALE_FACTOR
+
+# pixels to um
+TOMOGRAPHY_SCALE_FACTOR: float = 0.0006
 
 # %% [markdown]
 """
@@ -70,12 +72,19 @@ unbranched_datasets = [
 ]
 
 # %%
-# TODO These datasets have different scales (see plots), which is correct? 
 branched_df = get_branched_tomography_data(
-    bucket, name, repository, branched_datasets, TOMOGRAPHY_SCALE_FACTOR
+    bucket=bucket,
+    name=name,
+    repository=repository,
+    datasets=branched_datasets,
+    scale_factor=TOMOGRAPHY_SCALE_FACTOR,
 )
 unbranched_df = get_unbranched_tomography_data(
-    bucket, name, repository, unbranched_datasets, TOMOGRAPHY_SCALE_FACTOR
+    bucket=bucket,
+    name=name,
+    repository=repository,
+    datasets=unbranched_datasets,
+    scale_factor=TOMOGRAPHY_SCALE_FACTOR,
 )
 
 # %% [markdown]
@@ -84,7 +93,9 @@ unbranched_df = get_unbranched_tomography_data(
 """
 
 # %%
-plot_tomography_data_by_dataset(branched_df, bucket, f"{name}/{name}_plots_branched.png")
+plot_tomography_data_by_dataset(
+    branched_df, bucket, f"{name}/{name}_plots_branched.png"
+)
 
 # %% [markdown]
 """
@@ -92,7 +103,9 @@ plot_tomography_data_by_dataset(branched_df, bucket, f"{name}/{name}_plots_branc
 """
 
 # %%
-plot_tomography_data_by_dataset(unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png")
+plot_tomography_data_by_dataset(
+    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png"
+)
 
 # %% [markdown]
 """
@@ -108,6 +121,8 @@ n_monomer_points = 20
 # Minimum number of points for valid fiber
 minimum_points = 3
 
+# True to recalculate the sampled tomography data, False otherwise.
+recalculate = True
 
 # %% [markdown]
 """
@@ -120,10 +135,14 @@ sampling.
 
 # %%
 sampled_key = f"{name}/{name}_coordinates_sampled.csv"
-# TODO scale properly before concat (or do we not want to analyze both datasets?)
 all_tomogram_df = pd.concat([branched_df, unbranched_df])
 sampled_data = sample_tomography_data(
-    all_tomogram_df, bucket, sampled_key, n_monomer_points, minimum_points
+    all_tomogram_df,
+    bucket,
+    sampled_key,
+    n_monomer_points,
+    minimum_points,
+    recalculate=recalculate,
 )
 
 # %% [markdown]
@@ -132,4 +151,8 @@ sampled_data = sample_tomography_data(
 """
 
 # %%
-plot_tomography_data_by_dataset(sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png")
+plot_tomography_data_by_dataset(
+    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
+)
+
+# %%

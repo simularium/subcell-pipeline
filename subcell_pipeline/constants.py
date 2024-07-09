@@ -3,9 +3,7 @@
 from typing import Dict, List, Union
 
 import numpy as np
-
-from simulariumio import DisplayData, DISPLAY_TYPE
-
+from simulariumio import DISPLAY_TYPE, DisplayData
 
 WORKING_DIR_PATH: str = "data/"
 
@@ -42,11 +40,11 @@ READDY_TIMESTEP: float = 0.1  # ns
 READDY_SAVED_FRAMES: int = 1000
 
 READDY_TOTAL_STEPS: Dict[str, int] = {
-    "ACTIN_NO_COMPRESSION" : 1e7,
-    "ACTIN_COMPRESSION_VELOCITY_0047" : 3.2e8,
-    "ACTIN_COMPRESSION_VELOCITY_0150" : 1e8, 
-    "ACTIN_COMPRESSION_VELOCITY_0470" : 3.2e7, 
-    "ACTIN_COMPRESSION_VELOCITY_1500" : 1e7,
+    "ACTIN_NO_COMPRESSION": 1e7,
+    "ACTIN_COMPRESSION_VELOCITY_0047": 3.2e8,
+    "ACTIN_COMPRESSION_VELOCITY_0150": 1e8,
+    "ACTIN_COMPRESSION_VELOCITY_0470": 3.2e7,
+    "ACTIN_COMPRESSION_VELOCITY_1500": 1e7,
 }
 
 # particle types correspond to types from simularium/readdy-models
@@ -199,10 +197,7 @@ SIMULATOR_COLORS: Dict[str, str] = {
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
 
 
-TOMOGRAPHY_VIZ_SCALE: float = 1000.
+TOMOGRAPHY_VIZ_SCALE: float = 1000.0
 
 
 TOMOGRAPHY_MIN_COMPRESSION: int = 2
-
-# pixels to um
-TOMOGRAPHY_SCALE_FACTOR: float = 0.00006
