@@ -1,15 +1,15 @@
 import os
-from typing import Dict, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
+from io_collection.load.load_buffer import load_buffer
 from io_collection.load.load_dataframe import load_dataframe
+from io_collection.save.save_buffer import save_buffer
 from simulariumio import (
-    DISPLAY_TYPE,
     AgentData,
     CameraData,
     DisplayData,
-    HistogramPlotData,
     MetaData,
     TrajectoryConverter,
     TrajectoryData,
@@ -19,43 +19,29 @@ from simulariumio import (
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
 )
+from subcell_pipeline.visualization.histogram_plots import make_empty_histogram_plots
+from subcell_pipeline.visualization.spatial_annotator import SpatialAnnotator
 
-from ..constants import (
-    TOMOGRAPHY_SAMPLE_COLUMNS,
-    TOMOGRAPHY_VIZ_SCALE,
-    WORKING_DIR_PATH,
-)
-from ..temporary_file_io import make_working_directory
-from .spatial_annotator import SpatialAnnotator
+TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
 
-
-def _save_and_upload_simularium_file(
-    converter: TrajectoryConverter, bucket: str, output_key: str
-) -> None:
-    """
-    Save a local simularium file and upload it to s3.
-    """
-    local_key = os.path.splitext(os.path.basename(output_key))[0]
-    local_output_path = os.path.join(WORKING_DIR_PATH, local_key)
-    make_working_directory()
-
-    converter.save(local_output_path)
-
-    # upload_file_to_s3(bucket, f"{local_output_path}.simularium", output_key) TODO
+TOMOGRAPHY_VIZ_SCALE: float = 100.0
 
 
 def _generate_simularium_for_fiber_points(
     fiber_points: list[np.ndarray],
     type_names: list[str],
     meta_data: MetaData,
-    display_data: Dict[str, DisplayData],
+    display_data: dict[str, DisplayData],
     time_units: UnitData,
     spatial_units: UnitData,
 ) -> TrajectoryConverter:
     """
-    Generate a TrajectoryConverter for the fiber_points
-    (list of fibers, each = timesteps X points X 3)
+    Generate a TrajectoryConverter for the given fiber points.
+
+    Fiber points is a list of fibers, where each fiber has the shape (timesteps
+    x points x 3).
     """
+
     # build subpoints array with correct dimensions
     n_fibers = len(fiber_points)
     total_steps = fiber_points[0].shape[0]
@@ -65,12 +51,13 @@ def _generate_simularium_for_fiber_points(
         for fiber_ix in range(n_fibers):
             subpoints[time_ix][fiber_ix] = fiber_points[fiber_ix][time_ix]
     subpoints = subpoints.reshape((total_steps, n_fibers, 3 * n_points))
+
     # convert to simularium
     traj_data = TrajectoryData(
         meta_data=meta_data,
         agent_data=AgentData(
             times=np.arange(total_steps),
-            n_agents=n_fibers * np.ones((total_steps)),
+            n_agents=n_fibers * np.ones(total_steps),
             viz_types=1001 * np.ones((total_steps, n_fibers)),  # fiber viz type = 1001
             unique_ids=np.array(total_steps * [list(range(n_fibers))]),
             types=total_steps * [type_names],
@@ -86,82 +73,53 @@ def _generate_simularium_for_fiber_points(
     return TrajectoryConverter(traj_data)
 
 
-def _empty_tomography_plots() -> Dict[CompressionMetric, HistogramPlotData]:
-    return {
-        CompressionMetric.CONTOUR_LENGTH: HistogramPlotData(
-            title="Contour Length",
-            xaxis_title="filament contour length (nm)",
-            traces={},
-        ),
-        CompressionMetric.COMPRESSION_RATIO: HistogramPlotData(
-            title="Compression Percentage",
-            xaxis_title="percent (%)",
-            traces={},
-        ),
-        CompressionMetric.AVERAGE_PERP_DISTANCE: HistogramPlotData(
-            title="Average Perpendicular Distance",
-            xaxis_title="distance (nm)",
-            traces={},
-        ),
-        CompressionMetric.CALC_BENDING_ENERGY: HistogramPlotData(
-            title="Bending Energy",
-            xaxis_title="energy",
-            traces={},
-        ),
-        CompressionMetric.NON_COPLANARITY: HistogramPlotData(
-            title="Non-coplanarity",
-            xaxis_title="3rd component variance from PCA",
-            traces={},
-        ),
-        CompressionMetric.PEAK_ASYMMETRY: HistogramPlotData(
-            title="Peak Asymmetry",
-            xaxis_title="normalized peak distance",
-            traces={},
-        ),
-    }
-
-
 def _add_tomography_plots(
-    fiber_points: list[np.ndarray], converter: TrajectoryConverter
+    converter: TrajectoryConverter,
+    metrics: list[CompressionMetric],
+    fiber_points: list[np.ndarray],
 ) -> None:
-    """
-    Add plots to tomography data using pre-calculated metrics.
-    """
-    plots = _empty_tomography_plots()
-    for metric in plots:
-        values = []
-        for fiber in fiber_points:
-            values.append(metric.calculate_metric(polymer_trace=fiber))
-        plots[metric].traces["actin"] = np.array(values)
+    """Add plots to tomography data with calculated metrics."""
+
+    histogram_plots = make_empty_histogram_plots(metrics)
+
+    for metric, plot in histogram_plots.items():
+        values = [
+            metric.calculate_metric(polymer_trace=fiber[0, :, :])
+            for fiber in fiber_points
+        ]
+
         if metric == CompressionMetric.COMPRESSION_RATIO:
-            plots[metric].traces["actin"] *= 100.0
-        converter.add_plot(plots[metric], "histogram")
+            plot.traces["actin"] = np.array(values) * 100
+        else:
+            plot.traces["actin"] = np.array(values)
+
+        converter.add_plot(plot, "histogram")
 
 
 def _get_tomography_spatial_center_and_size(
     tomo_df: pd.DataFrame,
-) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Get the center and size of the tomography dataset in 3D space.
-    """
-    ixs = [
-        list(tomo_df.columns).index(TOMOGRAPHY_SAMPLE_COLUMNS[0]),
-        list(tomo_df.columns).index(TOMOGRAPHY_SAMPLE_COLUMNS[1]),
-        list(tomo_df.columns).index(TOMOGRAPHY_SAMPLE_COLUMNS[2]),
-    ]
-    unique_values = list(map(set, tomo_df.values.T))
-    mins = []
-    maxs = []
-    for dim_ix in range(3):
-        d_values = np.array(list(unique_values[ixs[dim_ix]]))
-        mins.append(np.amin(d_values))
-        maxs.append(np.amax(d_values))
-    mins = np.array(mins)
-    maxs = np.array(maxs)
+) -> tuple[np.ndarray, np.ndarray]:
+    """Get the center and size of the tomography dataset in 3D space."""
+
+    all_mins = []
+    all_maxs = []
+
+    for column in TOMOGRAPHY_SAMPLE_COLUMNS:
+        all_mins.append(tomo_df[column].min())
+        all_maxs.append(tomo_df[column].max())
+
+    mins = np.array(all_mins)
+    maxs = np.array(all_maxs)
+
     return mins + 0.5 * (maxs - mins), maxs - mins
 
 
-def visualize_tomography(bucket: str, name: str) -> None:
+def visualize_tomography(
+    bucket: str,
+    name: str,
+    temp_path: str,
+    metrics: Optional[list[CompressionMetric]] = None,
+) -> None:
     """
     Visualize segmented tomography data for actin fibers.
 
@@ -171,50 +129,58 @@ def visualize_tomography(bucket: str, name: str) -> None:
         Name of S3 bucket for input and output files.
     name
         Name of tomography dataset.
+    temp_path
+        Local path for saving visualization output files.
+    metrics
+        List of metrics to include in visualization plots.
     """
+
     tomo_key = f"{name}/{name}_coordinates_sampled.csv"
     tomo_df = load_dataframe(bucket, tomo_key)
     tomo_df = tomo_df.sort_values(by=["id", "monomer_ids"])
     tomo_df = tomo_df.reset_index(drop=True)
+
     time_units = UnitData("count")
     spatial_units = UnitData("um", 0.003)
-    names, ids = np.unique(np.array(list(tomo_df["id"])), return_index=True)
-    traj_ids = names[np.argsort(ids)]
-    for traj_id in traj_ids:
-        fiber_df = tomo_df.loc[tomo_df["id"] == traj_id]
-        center, box_size = _get_tomography_spatial_center_and_size(fiber_df)
+
+    center, box_size = _get_tomography_spatial_center_and_size(tomo_df)
+
+    all_fiber_points = []
+    all_type_names = []
+
+    for fiber_id, fiber_df in tomo_df.groupby("id"):
+        fiber_index, dataset = fiber_id.split("_", 1)
         fiber_points = TOMOGRAPHY_VIZ_SCALE * (
-            np.array([fiber_df[["xpos", "ypos", "zpos"]]]) - center
+            np.array([fiber_df[TOMOGRAPHY_SAMPLE_COLUMNS]]) - center
         )
-        type_names = ["Raw data"]
-        display_data = {
-            "Raw data": DisplayData(
-                name="Raw data",
-                display_type=DISPLAY_TYPE.FIBER,
-                color="#888888",
-            )
-        }
-        converter = _generate_simularium_for_fiber_points(
-            [fiber_points],
-            type_names,
-            MetaData(
-                box_size=TOMOGRAPHY_VIZ_SCALE * box_size,
-                camera_defaults=CameraData(position=np.array([0.0, 0.0, 70.0])),
-            ),
-            display_data,
-            time_units,
-            spatial_units,
-        )
+        all_fiber_points.append(fiber_points)
+        all_type_names.append(f"{dataset}#{fiber_index}")
 
-        # TODO remove after debugging fiber point order
-        converter._data = SpatialAnnotator.add_sphere_agents(
-            converter._data,
-            [fiber_points[0]],
-            type_name="point",
-            radius=0.8,
-        )
+    converter = _generate_simularium_for_fiber_points(
+        all_fiber_points,
+        all_type_names,
+        MetaData(
+            box_size=TOMOGRAPHY_VIZ_SCALE * box_size,
+            camera_defaults=CameraData(position=np.array([0.0, 0.0, 70.0])),
+        ),
+        {},
+        time_units,
+        spatial_units,
+    )
 
-        _add_tomography_plots([fiber_points[0]], converter)
-        _save_and_upload_simularium_file(
-            converter, bucket, f"{name}/{name}_{traj_id}.simularium"
-        )
+    # TODO remove after debugging fiber point order
+    converter._data = SpatialAnnotator.add_sphere_agents(
+        converter._data,
+        fiber_points,
+        type_name="point",
+        radius=0.8,
+    )
+
+    if metrics:
+        _add_tomography_plots(converter, metrics, all_fiber_points)
+
+    # Save locally and copy to bucket.
+    local_file_path = os.path.join(temp_path, name)
+    converter.save(output_path=local_file_path)
+    output_key = f"{name}/{name}.simularium"
+    save_buffer(bucket, output_key, load_buffer(temp_path, f"{name}.simularium"))

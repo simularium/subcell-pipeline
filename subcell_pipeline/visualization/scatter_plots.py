@@ -31,7 +31,7 @@ def make_empty_scatter_plots(
     Returns
     -------
     :
-        Map of metric to mpty scatter plot placeholder.
+        Map of metric to empty scatter plot placeholder.
     """
 
     if total_steps < 0 and times is None:
