@@ -108,10 +108,10 @@ time_map = {
     ("cytosim", "0150"): 0.01,
     ("cytosim", "0470"): 0.00316,
     ("cytosim", "1500"): 0.001,
-    ("readdy", "0047"): 1000,
-    ("readdy", "0150"): 1000,
-    ("readdy", "0470"): 1000,
-    ("readdy", "1500"): 1000,
+    ("readdy", "0047"): 100,
+    ("readdy", "0150"): 100,
+    ("readdy", "0470"): 100,
+    ("readdy", "1500"): 100,
 }
 
 save_aligned_fibers(
@@ -162,8 +162,8 @@ save_pca_trajectories(
 """
 # %%
 points: list[list[float]] = [
-    [-600, -300, 0, 300, 600, 900],
-    [-200, 0, 200, 400],
+    [-900, -600, -300, 0, 300, 600],
+    [-600, -400, -200, 0, 200],
 ]
 
 save_pca_transforms(pca, points, save_location, "actin_compression_pca_transforms.json")
