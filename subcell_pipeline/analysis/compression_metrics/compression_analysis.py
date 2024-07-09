@@ -131,7 +131,10 @@ def calculate_compression_metrics(
                 polymer_trace=polymer_trace, **options
             )
 
-    return df_metrics.reset_index().rename(columns={"index": "time"})
+    metrics = df_metrics.reset_index().rename(columns={"index": "time"})
+    metrics["normalized_time"] = metrics["time"] / metrics["time"].max()
+
+    return metrics
 
 
 def save_compression_metrics(
