@@ -11,6 +11,30 @@ from ...constants import TOMOGRAPHY_SAMPLE_COLUMNS, WORKING_DIR_PATH
 from ...temporary_file_io import make_working_directory, upload_file_to_s3
 
 
+def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> np.bool_:
+    """
+    Test whether the angles between consecutive segments of a polymer
+    trace are less than 90 degrees.
+
+    Parameters
+    ----------
+    polymer_trace
+        A 2D array where each row is a point in 3D space.
+
+    Returns
+    -------
+    bool
+        True if all consecutive angles are less than 180 degrees.
+    """
+    vectors = polymer_trace[1:] - polymer_trace[:-1]
+
+    vectors /= np.linalg.norm(vectors, axis=1)[:, np.newaxis]
+    dot_products = np.dot(vectors[1:], vectors[:-1].T)
+
+    # Check if any angle is greater than 90 degrees
+    return np.all(dot_products > 0)
+
+
 def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
     """
     Read tomography data from file as dataframe.
@@ -240,8 +264,12 @@ def sample_tomography_data(
                 sampled_points[column] = np.interp(
                     np.linspace(0, 1, n_monomer_points),
                     np.linspace(0, 1, group.shape[0]),
-                    group[column].values,
+                    group[column].to_numpy(),
                 )
+
+            sampled_points["ordered"] = test_consecutive_segment_angles(
+                sampled_points[sampled_columns].to_numpy()
+            )
 
             all_sampled_points.append(sampled_points)
 
