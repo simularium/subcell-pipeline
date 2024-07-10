@@ -25,9 +25,8 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
-from pathlib import Path
-
 import pandas as pd
+from io_collection.save.save_pickle import save_pickle
 
 from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import (
     get_merged_data,
@@ -69,7 +68,7 @@ random_seeds: list[int] = [1, 2, 3, 4, 5]
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
 # Location to save analysis results (S3 bucket or local path)
-save_location: str = str(Path(__file__).parents[3] / "analysis_outputs")
+save_location: str = "s3://subcell-working-bucket"
 
 # %% [markdown]
 """
@@ -136,6 +135,14 @@ pca_results, pca = run_pca(data)
 
 # %% [markdown]
 """
+## Save PCA object
+"""
+
+# %%
+save_pickle(save_location, "actin_compression_pca.pkl", pca)
+
+# %% [markdown]
+"""
 ## Save PCA results
 
 The PCA results are saved with resampled rows, which shuffles the order of the
@@ -151,6 +158,7 @@ save_pca_results(
 """
 ## Save PCA trajectories
 """
+
 # %%
 save_pca_trajectories(
     pca_results, save_location, "actin_compression_pca_trajectories.json"
@@ -160,6 +168,7 @@ save_pca_trajectories(
 """
 ## Save PCA transforms
 """
+
 # %%
 points: list[list[float]] = [
     [-900, -600, -300, 0, 300, 600],
