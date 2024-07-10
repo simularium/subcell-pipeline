@@ -87,7 +87,7 @@ class CompressionMetric(Enum):
         }
         return units.get(self.value, "")
 
-    def bounds(self: Enum) -> tuple[float,float]:
+    def bounds(self: Enum) -> tuple[float, float]:
         """
         Return the default bounds for the compression metric.
 
@@ -104,12 +104,12 @@ class CompressionMetric(Enum):
         bounds = {
             CompressionMetric.NON_COPLANARITY.value: (0, 0.03),
             CompressionMetric.PEAK_ASYMMETRY.value: (0, 0.5),
-            CompressionMetric.SUM_BENDING_ENERGY.value: (0, 0), # TODO
+            CompressionMetric.SUM_BENDING_ENERGY.value: (0, 0),  # TODO
             CompressionMetric.AVERAGE_PERP_DISTANCE.value: (0, 85.0),
-            CompressionMetric.TOTAL_FIBER_TWIST.value: (0, 0), # TODO
+            CompressionMetric.TOTAL_FIBER_TWIST.value: (0, 0),  # TODO
             CompressionMetric.CALC_BENDING_ENERGY.value: (0, 10),
             CompressionMetric.CONTOUR_LENGTH.value: (480, 505),
-            CompressionMetric.COMPRESSION_RATIO.value: (0, 0), # TODO
+            CompressionMetric.COMPRESSION_RATIO.value: (0, 0),  # TODO
         }
         return bounds.get(self.value, (0, 0))
 
