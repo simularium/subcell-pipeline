@@ -6,18 +6,13 @@ import pandas as pd
 from io_collection.load.load_buffer import load_buffer
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_buffer import save_buffer
-from simulariumio import (
-    AgentData,
-    CameraData,
-    DisplayData,
-    MetaData,
-    TrajectoryConverter,
-    TrajectoryData,
-    UnitData,
-)
+from simulariumio import CameraData, MetaData, TrajectoryConverter, UnitData
 
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
+)
+from subcell_pipeline.visualization.fiber_points import (
+    generate_trajectory_converter_for_fiber_points,
 )
 from subcell_pipeline.visualization.histogram_plots import make_empty_histogram_plots
 from subcell_pipeline.visualization.spatial_annotator import SpatialAnnotator
@@ -25,52 +20,6 @@ from subcell_pipeline.visualization.spatial_annotator import SpatialAnnotator
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
 
 TOMOGRAPHY_VIZ_SCALE: float = 100.0
-
-
-def _generate_simularium_for_fiber_points(
-    fiber_points: list[np.ndarray],
-    type_names: list[str],
-    meta_data: MetaData,
-    display_data: dict[str, DisplayData],
-    time_units: UnitData,
-    spatial_units: UnitData,
-) -> TrajectoryConverter:
-    """
-    Generate a TrajectoryConverter for the given fiber points.
-
-    Fiber points is a list of fibers, where each fiber has the shape (timesteps
-    x points x 3).
-    """
-
-    # build subpoints array with correct dimensions
-    n_fibers = len(fiber_points)
-    total_steps = fiber_points[0].shape[0]
-    n_points = fiber_points[0].shape[1]
-    subpoints = np.zeros((total_steps, n_fibers, n_points, 3))
-    for time_ix in range(total_steps):
-        for fiber_ix in range(n_fibers):
-            subpoints[time_ix][fiber_ix] = fiber_points[fiber_ix][time_ix]
-    subpoints = subpoints.reshape((total_steps, n_fibers, 3 * n_points))
-
-    # convert to simularium
-    traj_data = TrajectoryData(
-        meta_data=meta_data,
-        agent_data=AgentData(
-            times=np.arange(total_steps),
-            n_agents=n_fibers * np.ones(total_steps),
-            viz_types=1001 * np.ones((total_steps, n_fibers)),  # fiber viz type = 1001
-            unique_ids=np.array(total_steps * [list(range(n_fibers))]),
-            types=total_steps * [type_names],
-            positions=np.zeros((total_steps, n_fibers, 3)),
-            radii=0.5 * np.ones((total_steps, n_fibers)),
-            n_subpoints=3 * n_points * np.ones((total_steps, n_fibers)),
-            subpoints=subpoints,
-            display_data=display_data,
-        ),
-        time_units=time_units,
-        spatial_units=spatial_units,
-    )
-    return TrajectoryConverter(traj_data)
 
 
 def _add_tomography_plots(
@@ -156,7 +105,7 @@ def visualize_tomography(
         all_fiber_points.append(fiber_points)
         all_type_names.append(f"{dataset}#{fiber_index}")
 
-    converter = _generate_simularium_for_fiber_points(
+    converter = generate_trajectory_converter_for_fiber_points(
         all_fiber_points,
         all_type_names,
         MetaData(
