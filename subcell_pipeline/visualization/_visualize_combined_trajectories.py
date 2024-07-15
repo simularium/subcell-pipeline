@@ -54,8 +54,8 @@ n_timepoints = 201
 
 # List of simulators and colors
 simulator_colors = {
-    "cytosim": "#1cbfa4",
-    "readdy": "#ffae52",
+    "cytosim": "#1cbfaa",
+    "readdy": "#ff8f52",
 }
 
 # Temporary path to save visualization files

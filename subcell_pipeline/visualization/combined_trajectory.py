@@ -78,8 +78,8 @@ def get_combined_trajectory_converter(
         meta_data=MetaData(
             box_size=BOX_SIZE,
             camera_defaults=CameraData(
-                position=np.array([10.0, 0.0, 200.0]),
-                look_at_position=np.array([10.0, 0.0, 0.0]),
+                position=np.array([75.0, 220.0, 15.0]),
+                look_at_position=np.array([75.0, 75.0, 0.0]),
                 fov_degrees=60.0,
             ),
             trajectory_title="Actin compression in Cytosim and Readdy",
@@ -134,6 +134,7 @@ def visualize_combined_trajectories(
     simulator_colors: dict[str, str],
     temp_path: str,
     metrics: Optional[list[CompressionMetric]] = None,
+    recalculate: bool = False,
 ) -> None:
     """
     Visualize combined simulations from ReaDDy and Cytosim for select conditions
@@ -180,7 +181,7 @@ def visualize_combined_trajectories(
                 condition_keys,
                 replicates,
                 metrics,
-                recalculate=False,
+                recalculate=recalculate,
             )
         else:
             metrics = []
