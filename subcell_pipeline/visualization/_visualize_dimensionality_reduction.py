@@ -6,7 +6,7 @@
 Notebook contains steps for visualizing dimensionality reduction using PCA for
 actin fibers.
 
-- [Pre-process Inputs](#pre-process-inputs)
+- [Define visualization settings](#define-visualization-settings)
 - [Visualize inverse PCA](#visualize-inverse-pca)
 """
 
@@ -44,7 +44,7 @@ temp_path: Path = Path(__file__).parents[2] / "viz_outputs"
 temp_path.mkdir(parents=True, exist_ok=True)
 
 # Select how PC distributions are shown
-# - True to scroll through the PC distributions over time if True
+# - True to scroll through the PC distributions over time
 # - False to show all together in one timestep
 distribution_over_time = False
 
