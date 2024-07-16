@@ -46,18 +46,24 @@ temp_path.mkdir(parents=True, exist_ok=True)
 # Select how PC distributions are shown
 # - True to scroll through the PC distributions over time
 # - False to show all together in one timestep
-distribution_over_time = False
+distribution_over_time = True
 
 # Select if simulator distributions are shown
 # - True to show ReaDDy and Cytosim separately
 # - False to show all together
 simulator_detail = False
 
-# Number of standard deviations to visualize
-std_devs = 2.0
+# Ranges to sample for each PC
+range_pc1 = [-1200, 900]
+range_pc2 = [-550, 250]
+
+# Select how PCs are saved
+# - True to save each PC in a separate file
+# - False to save all together
+separate_pcs = True
 
 # Number of samples for each PC distribution
-sample_resolution = 5
+sample_resolution = 200
 
 # %% [markdown]
 """
@@ -76,7 +82,9 @@ visualize_dimensionality_reduction(
     pca_pickle_key,
     distribution_over_time,
     simulator_detail,
-    std_devs,
+    range_pc1,
+    range_pc2,
+    separate_pcs,
     sample_resolution,
     str(temp_path),
 )
