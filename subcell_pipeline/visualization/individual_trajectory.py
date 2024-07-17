@@ -375,6 +375,8 @@ def _get_cytosim_simularium_converter(
         CytosimData(
             meta_data=MetaData(
                 box_size=BOX_SIZE,
+                camera_defaults=CameraData(
+                    position=np.array([70.0, 70.0, 300.0]),
                     look_at_position=np.array([70.0, 70.0, 0.0]),
                     fov_degrees=60.0,
                 ),
