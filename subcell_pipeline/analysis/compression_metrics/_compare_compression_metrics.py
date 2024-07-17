@@ -26,6 +26,7 @@ import pandas as pd
 
 from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
     get_compression_metric_data,
+    plot_metric_distribution,
     plot_metrics_vs_time,
     save_compression_metrics,
 )
@@ -66,7 +67,7 @@ save_location.mkdir(parents=True, exist_ok=True)
 
 # Specify whether the metrics should be recalculated. Set this to true if you
 # make changes to any metric calculation functions.
-recalculate: bool = False
+recalculate: bool = True
 
 # %% [markdown]
 """
@@ -83,6 +84,8 @@ metrics = [
     CompressionMetric.CALC_BENDING_ENERGY,
     CompressionMetric.CONTOUR_LENGTH,
     CompressionMetric.COMPRESSION_RATIO,
+    CompressionMetric.TOTAL_FIBER_TWIST,
+    CompressionMetric.TWIST_ANGLE,
 ]
 
 # %% [markdown]
@@ -166,6 +169,14 @@ save_compression_metrics(
 
 # %%
 plot_metrics_vs_time(
+    df=combined_metrics,
+    metrics=metrics,
+    figure_path=save_location,
+    suffix="_subsampled",
+)
+
+# %%
+plot_metric_distribution(
     df=combined_metrics,
     metrics=metrics,
     figure_path=save_location,

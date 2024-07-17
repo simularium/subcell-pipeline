@@ -61,7 +61,7 @@ def get_end_to_end_axis_distances_and_projections(
 def get_average_distance_from_end_to_end_axis(
     polymer_trace: np.ndarray,
     **options: Dict[str, Any],
-) -> float:
+) -> np.float_:
     """
     Calculate the average perpendicular distance of polymer trace points from
     the end-to-end axis.
@@ -169,10 +169,7 @@ def get_contour_length_from_trace(
     :
         sum of inter-monomer distances in the trace
     """
-    total_distance = np.float_(0)
-    for i in range(len(polymer_trace) - 1):
-        total_distance += np.linalg.norm(polymer_trace[i] - polymer_trace[i + 1])
-    return total_distance.item()
+    return np.sum(np.linalg.norm(np.diff(polymer_trace, axis=0), axis=1))
 
 
 def get_bending_energy_from_trace(
@@ -226,7 +223,180 @@ def get_bending_energy_from_trace(
     return energy.item()
 
 
+def get_2d_polymer_trace(
+    polymer_trace: np.ndarray,
+    compression_axis: int = 0,
+) -> np.ndarray:
+    """
+    Get the 2D projection of the polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace
+        The polymer trace as an Nx3 numpy array.
+
+    compression_axis
+        The axis along which the polymer trace is compressed.
+
+    Returns
+    -------
+    return1: type
+        return variable description
+    """
+    if polymer_trace.shape[1] == 2:
+        return polymer_trace
+
+    return polymer_trace[
+        :, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]
+    ]
+
+
+def get_normalized_tangent_vectors(
+    polymer_trace: np.ndarray,
+) -> np.ndarray:
+    """
+    Calculate the normalized tangent vectors for a polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace
+        The polymer trace as an Nx3 numpy array.
+
+    Returns
+    -------
+    return1: type
+        return variable description
+    """
+    tangents = np.diff(polymer_trace, axis=0)
+
+    tangents /= np.linalg.norm(tangents, axis=1)[:, np.newaxis]
+
+    return tangents
+
+
+def get_twist_angle(
+    polymer_trace: np.ndarray,
+    **options: Dict[str, Any],
+) -> float:
+    """
+    Calculate the twist angle of the polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace
+        array containing the x,y,z positions of the polymer trace
+
+    **options: Dict[str, Any]
+        Additional options as key-value pairs.
+
+    Returns
+    -------
+    :
+        twist angle of the polymer trace
+    """
+    compression_axis = options.get("compression_axis", 0)
+    assert isinstance(compression_axis, int)
+
+    trace_2d = get_2d_polymer_trace(
+        polymer_trace=polymer_trace, compression_axis=compression_axis
+    )
+
+    tangents = get_normalized_tangent_vectors(
+        polymer_trace=trace_2d,
+    )
+
+    angle = get_angle_between_vectors(tangents[0], -tangents[-1], signed=False)
+    chirality = get_chirality(polymer_trace=polymer_trace)
+
+    return chirality * angle * 180 / np.pi
+
+
+def get_chirality(
+    polymer_trace: np.ndarray,
+    **options: Dict[str, Any],
+) -> float:
+    """
+    Calculate the chirality of a polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace
+        array containing the x,y,z positions of the polymer trace
+
+    **options: Dict[str, Any]
+        Additional options as key-value pairs.
+
+    Returns
+    -------
+    :
+        chirality of the polymer trace
+    """
+    trace_2d = get_2d_polymer_trace(polymer_trace=polymer_trace)
+    tangents = get_normalized_tangent_vectors(polymer_trace=trace_2d)
+
+    chirality = 0
+    for i in range(len(tangents) - 1):
+        cross_product = np.cross(tangents[i], tangents[i + 1])
+        if cross_product > 0:
+            chirality += 1
+        elif cross_product < 0:
+            chirality -= 1
+
+    return np.sign(chirality)
+
+
 def get_total_fiber_twist(
+    polymer_trace: np.ndarray,
+    **options: Dict[str, Any],
+) -> float:
+    """
+    Calculate the total twist of a polymer trace using the normal
+    vectors.
+
+    Parameters
+    ----------
+    polymer_trace
+        array containing the x,y,z positions of the polymer trace
+
+    **options: Dict[str, Any]
+        Additional options as key-value pairs:
+
+        signed: bool
+            whether to return the signed or unsigned total twist
+
+    Returns
+    -------
+    :
+        total twist of the polymer trace
+    """
+    signed = options.get("signed", False)
+    assert isinstance(signed, bool)
+
+    tangents = np.diff(polymer_trace, axis=0)
+    tangents /= np.linalg.norm(tangents, axis=1)[:, np.newaxis]
+
+    normals = np.cross(tangents[:-1], tangents[1:])
+    normal_lengths = np.linalg.norm(normals, axis=1)
+    if np.all(normal_lengths < ABSOLUTE_TOLERANCE):
+        return 0
+    normals = normals / normal_lengths[:, np.newaxis]
+
+    twists = []
+    for i in range(1, len(normals)):
+        angle = get_angle_between_vectors(normals[i - 1], normals[i], signed=signed)
+
+        twists.append(angle)
+
+    # Sum the twist angles to get the total twist
+    total_twist = np.sum(twists)
+
+    # Normalize by the contour length
+    total_twist /= get_contour_length_from_trace(polymer_trace)
+
+    return total_twist
+
+
+def get_total_fiber_twist_project(
     polymer_trace: np.ndarray,
     **options: Dict[str, Any],
 ) -> float:
@@ -260,10 +430,11 @@ def get_total_fiber_twist(
 
     assert isinstance(signed, bool)
     assert isinstance(tolerance, (float, np.floating))
+    assert isinstance(compression_axis, int)
 
-    trace_2d = polymer_trace[
-        :, [ax for ax in range(polymer_trace.shape[1]) if ax != compression_axis]
-    ]
+    trace_2d = get_2d_polymer_trace(
+        polymer_trace=polymer_trace, compression_axis=compression_axis
+    )
     trace_2d = trace_2d - np.mean(trace_2d, axis=0)
 
     return get_total_fiber_twist_2d(trace_2d, signed=signed, tolerance=tolerance)
