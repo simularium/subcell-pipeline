@@ -78,20 +78,20 @@ class FrameData:
     particles: dict[int, ParticleData]
     """Mapping of particle ID to a ParticleData for each particle."""
 
-    edges: list[np.ndarray]
-    """List of edges as position of each of the two particles connected by the edge."""
+    edge_ids: list[list[int]]
+    """List of edges, each is a list of the IDs of the two connected particles."""
 
     def __init__(
         self,
         time: float,
         topologies: Optional[dict[int, TopologyData]] = None,
         particles: Optional[dict[int, ParticleData]] = None,
-        edges: Optional[list[np.ndarray]] = None,
+        edge_ids: Optional[list[list[int]]] = None,
     ):
         self.time = time
         self.topologies = topologies if topologies is not None else {}
         self.particles = particles if particles is not None else {}
-        self.edges = edges if edges is not None else []
+        self.edge_ids = edge_ids if edge_ids is not None else []
 
     def __str__(self) -> str:
         top_str = "\n"

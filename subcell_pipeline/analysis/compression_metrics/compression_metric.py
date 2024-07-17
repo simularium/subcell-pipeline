@@ -109,7 +109,7 @@ class CompressionMetric(Enum):
             CompressionMetric.TOTAL_FIBER_TWIST.value: (0, 0),  # TODO
             CompressionMetric.CALC_BENDING_ENERGY.value: (0, 10),
             CompressionMetric.CONTOUR_LENGTH.value: (480, 505),
-            CompressionMetric.COMPRESSION_RATIO.value: (0, 0),  # TODO
+            CompressionMetric.COMPRESSION_RATIO.value: (0, 1),  # TODO
         }
         return bounds.get(self.value, (0, 0))
 

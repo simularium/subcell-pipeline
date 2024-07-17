@@ -123,3 +123,4 @@ ENV/
 *.cym
 *.simularium
 **/analysis_outputs/**
+*.h5

@@ -51,10 +51,11 @@ def _add_individual_plots(
     converter: TrajectoryConverter,
     metrics: list[CompressionMetric],
     metrics_data: pd.DataFrame,
+    times: np.ndarray,
+    time_units: UnitData,
 ) -> None:
     """Add plots to individual trajectory with calculated metrics."""
-    times = metrics_data["time"].values
-    scatter_plots = make_empty_scatter_plots(metrics, times=times)
+    scatter_plots = make_empty_scatter_plots(metrics, times=times, time_units=time_units)
     for metric, plot in scatter_plots.items():
         plot.ytraces["filament"] = np.array(metrics_data[metric.value])
         converter.add_plot(plot, "scatter")
@@ -69,21 +70,23 @@ def _add_readdy_spatial_annotations(
     Add visualizations of edges, normals, and control points to the ReaDDy
     Simularium data.
     """
-    # edges
+    fiber_chain_ids = post_processor.linear_fiber_chain_ids(polymer_number_range=5)
+    axis_positions, _ = post_processor.linear_fiber_axis_positions(fiber_chain_ids)
+    fiber_points = post_processor.linear_fiber_control_points(
+        axis_positions=axis_positions,
+        n_points=n_monomer_points,
+    )
+    converter._data.agent_data.positions, fiber_points = post_processor.align_trajectory(fiber_points)
+    axis_positions, _ = post_processor.linear_fiber_axis_positions(fiber_chain_ids)
     edges = post_processor.edge_positions()
+    
+    # edges
     converter._data = SpatialAnnotator.add_fiber_agents(
         converter._data,
         fiber_points=edges,
         type_name="edge",
         fiber_width=0.5,
         color="#eaeaea",
-    )
-
-    fiber_chain_ids = post_processor.linear_fiber_chain_ids(polymer_number_range=5)
-    axis_positions, _ = post_processor.linear_fiber_axis_positions(fiber_chain_ids)
-    fiber_points = post_processor.linear_fiber_control_points(
-        axis_positions=axis_positions,
-        n_points=n_monomer_points,
     )
 
     # normals
@@ -109,18 +112,18 @@ def _add_readdy_spatial_annotations(
         sphere_positions,
         type_name="fiber point",
         radius=0.8,
-        color="#eaeaea",
+        rainbow_colors=True,
     )
 
 
 def _get_readdy_simularium_converter(
-    path_to_readdy_h5: str, total_steps: int
+    path_to_readdy_h5: str, total_steps: int, n_timepoints: int,
 ) -> TrajectoryConverter:
     """
     Load from ReaDDy outputs and generate a TrajectoryConverter to visualize an
     actin trajectory in Simularium.
     """
-    return ReaddyConverter(
+    converter = ReaddyConverter(
         ReaddyData(
             timestep=1e-6 * (READDY_TIMESTEP * total_steps / READDY_SAVED_FRAMES),
             path_to_readdy_h5=path_to_readdy_h5,
@@ -139,6 +142,7 @@ def _get_readdy_simularium_converter(
             spatial_units=UnitData("nm"),
         )
     )
+    return _filter_time(converter, n_timepoints)
 
 
 def visualize_individual_readdy_trajectory(
@@ -187,10 +191,12 @@ def visualize_individual_readdy_trajectory(
 
     assert isinstance(h5_file_path, str)
 
-    converter = _get_readdy_simularium_converter(h5_file_path, total_steps)
+    converter = _get_readdy_simularium_converter(h5_file_path, total_steps, n_timepoints)
 
     if metrics:
-        _add_individual_plots(converter, metrics, metrics_data)
+        times = 2 * metrics_data["time"].values  # "time" seems to range (0, 0.5)
+        times *= 1e-6 * (READDY_TIMESTEP * total_steps / n_timepoints)
+        _add_individual_plots(converter, metrics, metrics_data, times, converter._data.time_units)
 
     assert isinstance(h5_file_path, str)
 
@@ -313,6 +319,8 @@ def visualize_individual_readdy_trajectories(
             # Upload saved file to S3.
             temp_key = f"{series_key}_{rep_ix}.h5.simularium"
             save_buffer(bucket, output_key, load_buffer(temp_path, temp_key))
+            
+            return
 
 
 def _find_time_units(raw_time: float, units: str = "s") -> tuple[str, float]:
@@ -435,7 +443,7 @@ def visualize_individual_cytosim_trajectory(
     )
 
     if metrics:
-        _add_individual_plots(converter, metrics, metrics_data)
+        _add_individual_plots(converter, metrics, metrics_data, metrics_data["time"].values, converter._data.time_units)
 
     # Save simularium file. Turn off validate IDs for performance.
     local_file_path = f"{temp_path}/{series_key}_{index}"
