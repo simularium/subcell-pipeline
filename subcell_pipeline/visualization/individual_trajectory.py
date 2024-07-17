@@ -28,6 +28,7 @@ from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
 )
+from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import align_fiber
 from subcell_pipeline.simulation.cytosim.post_processing import CYTOSIM_SCALE_FACTOR
 from subcell_pipeline.simulation.readdy.loader import ReaddyLoader
 from subcell_pipeline.simulation.readdy.parser import BOX_SIZE as READDY_BOX_SIZE
@@ -319,8 +320,6 @@ def visualize_individual_readdy_trajectories(
             # Upload saved file to S3.
             temp_key = f"{series_key}_{rep_ix}.h5.simularium"
             save_buffer(bucket, output_key, load_buffer(temp_path, temp_key))
-            
-            return
 
 
 def _find_time_units(raw_time: float, units: str = "s") -> tuple[str, float]:
@@ -341,6 +340,23 @@ def _filter_time(
     return converter
 
 
+def _align_cytosim_fiber(converter: TrajectoryConverter) -> None:
+    """
+    Align the fiber subpoints so that the furthest point from the x-axis
+    is aligned with the positive y-axis at the last time point.
+    """
+    fiber_points = converter._data.agent_data.subpoints[:, 0, :]
+    n_timesteps = fiber_points.shape[0]
+    n_points = int(fiber_points.shape[1] / 3)
+    fiber_points = fiber_points.reshape((n_timesteps, n_points, 3))
+    _, rotation = align_fiber(fiber_points[-1])
+    for time_ix in range(n_timesteps):
+        rotated = np.dot(fiber_points[time_ix][:, 1:], rotation)
+        converter._data.agent_data.subpoints[time_ix, 0, :] = np.concatenate(
+            (fiber_points[time_ix][:, 0:1], rotated), axis=1
+        ).reshape(n_points * 3)
+
+
 def _get_cytosim_simularium_converter(
     fiber_points_data: str,
     singles_data: str,
@@ -350,21 +366,17 @@ def _get_cytosim_simularium_converter(
     Load from Cytosim outputs and generate a TrajectoryConverter to visualize an
     actin trajectory in Simularium.
     """
-
-    # TODO: fix converter not showing fiber, possible scaling issue
-
     singles_display_data = DisplayData(
         name="linker",
-        radius=0.01,
+        radius=0.004,
         display_type=DISPLAY_TYPE.SPHERE,
-        color="#fff",
+        color="#eaeaea",
     )
-
     converter = CytosimConverter(
         CytosimData(
             meta_data=MetaData(
                 box_size=BOX_SIZE,
-                scale_factor=CYTOSIM_SCALE_FACTOR,
+                scale_factor=1,
             ),
             object_info={
                 "fibers": CytosimObjectInfo(
@@ -374,7 +386,7 @@ def _get_cytosim_simularium_converter(
                     display_data={
                         1: DisplayData(
                             name="actin",
-                            radius=0.02,
+                            radius=0.002,
                             display_type=DISPLAY_TYPE.FIBER,
                         )
                     },
@@ -393,6 +405,10 @@ def _get_cytosim_simularium_converter(
             },
         )
     )
+    _align_cytosim_fiber(converter)
+    converter._data.agent_data.radii *= CYTOSIM_SCALE_FACTOR
+    converter._data.agent_data.positions *= CYTOSIM_SCALE_FACTOR
+    converter._data.agent_data.subpoints *= CYTOSIM_SCALE_FACTOR
     converter = _filter_time(converter, n_timepoints)
     time_units, time_multiplier = _find_time_units(converter._data.agent_data.times[-1])
     converter._data.agent_data.times *= time_multiplier
@@ -443,7 +459,8 @@ def visualize_individual_cytosim_trajectory(
     )
 
     if metrics:
-        _add_individual_plots(converter, metrics, metrics_data, metrics_data["time"].values, converter._data.time_units)
+        times = 1e3 * metrics_data["time"].values  # s --> ms
+        _add_individual_plots(converter, metrics, metrics_data, times, converter._data.time_units)
 
     # Save simularium file. Turn off validate IDs for performance.
     local_file_path = f"{temp_path}/{series_key}_{index}"
