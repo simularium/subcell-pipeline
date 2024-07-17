@@ -113,8 +113,8 @@ def generate_simularium_and_save(
     meta_data = MetaData(
         box_size=BOX_SIZE,
         camera_defaults=CameraData(
-            position=np.array([0.0, 70.0, 350.0]),
-            look_at_position=np.array([0.0, 70.0, 0.0]),
+            position=np.array([-20.0, 350.0, 200.0]),
+            look_at_position=np.array([50.0, 0.0, 0.0]),
             fov_degrees=60.0,
         ),
         trajectory_title="Actin Compression Dimensionality Reduction",
@@ -128,7 +128,7 @@ def generate_simularium_and_save(
         display_data,
         time_units,
         spatial_units,
-        fiber_radius=1.0,
+        fiber_radius=8.0,
     )
     
     # Save locally and copy to bucket.

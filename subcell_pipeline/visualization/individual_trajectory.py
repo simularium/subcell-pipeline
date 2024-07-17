@@ -131,10 +131,9 @@ def _get_readdy_simularium_converter(
             meta_data=MetaData(
                 box_size=READDY_BOX_SIZE,
                 camera_defaults=CameraData(
-                    position=np.array([0.0, 0.0, 300.0]),
-                    look_at_position=np.zeros(3),
-                    up_vector=np.array([0.0, 1.0, 0.0]),
-                    fov_degrees=120.0,
+                    position=np.array([70.0, 70.0, 300.0]),
+                    look_at_position=np.array([70.0, 70.0, 0.0]),
+                    fov_degrees=60.0,
                 ),
                 scale_factor=1.0,
             ),
@@ -376,6 +375,9 @@ def _get_cytosim_simularium_converter(
         CytosimData(
             meta_data=MetaData(
                 box_size=BOX_SIZE,
+                    look_at_position=np.array([70.0, 70.0, 0.0]),
+                    fov_degrees=60.0,
+                ),
                 scale_factor=1,
             ),
             object_info={
