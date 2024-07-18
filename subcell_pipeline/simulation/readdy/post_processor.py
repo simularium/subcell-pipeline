@@ -9,6 +9,7 @@ from tqdm import tqdm
 from subcell_pipeline.analysis.compression_metrics.polymer_trace import (
     get_contour_length_from_trace,
 )
+from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import align_fiber
 from subcell_pipeline.simulation.readdy.data_structures import FrameData
 
 ACTIN_START_PARTICLE_PHRASE: list[str] = ["pointed"]
@@ -211,6 +212,58 @@ class ReaddyPostProcessor:
             np.linalg.inv(self._orientation_from_positions(ideal_positions)),
         )
 
+    def rotate_positions(self, positions: np.ndarray, rotation: np.ndarray) -> np.ndarray:
+        """
+        Rotate an x,y,z position (or an array of them) around the x-axis
+        with the given rotation matrix.
+        """
+        if len(positions.shape) > 1:
+            result = np.dot(positions[:, 1:], rotation)
+            return np.concatenate((positions[:, 0:1], result), axis=1)
+        else:
+            result = np.dot(positions[1:], rotation)
+            return np.concatenate((positions[0:1], result), axis=0)
+    
+    def align_trajectory(
+        self, 
+        fiber_points: list[list[np.ndarray]],
+    ) -> tuple[np.ndarray, list[list[np.ndarray]]]:
+        """
+        Align the positions of particles in the trajectory 
+        so that the furthest point from the x-axis
+        is aligned with the positive y-axis at the last time point.
+
+        Parameters
+        ----------
+        fiber_points
+            How many numbers are used to represent the relative identity of
+            particles in the chain?
+        start_particle_phrases
+            List of phrases in particle type names for the first particles in
+            the linear chain.
+        other_particle_types
+            List of particle type names (without polymer numbers at the end) for
+            the particles other than the start particles.
+
+        Returns
+        -------
+        positions
+            Array (shape = timesteps x 1 x n x 3) containing the x,y,z positions
+            of actin monomer particles at each timestep.
+        fiber_points
+            List of lists of arrays (shape = n x 3) containing the x,y,z positions 
+            of control points for each fiber at each time.
+        """
+        result = []
+        _, rotation = align_fiber(fiber_points[-1][0])
+        for time_ix in range(len(self.trajectory)):
+            result.append([])
+            for _, particle in self.trajectory[time_ix].particles.items():
+                particle.position = self.rotate_positions(particle.position, rotation)
+                result[time_ix].append(particle.position)
+            fiber_points[time_ix][0] = self.rotate_positions(fiber_points[time_ix][0], rotation)
+        return np.array(result), fiber_points
+
     def linear_fiber_chain_ids(
         self,
         polymer_number_range: int,
@@ -412,8 +465,8 @@ class ReaddyPostProcessor:
         Returns
         -------
         :
-            Array (shape = n x 3) containing the x,y,z positions of control
-            points for each fiber at each time.
+            List of lists of arrays (shape = n x 3) containing the x,y,z positions 
+            of control points for each fiber at each time.
         """
         if n_points < 2:
             raise Exception("n_points must be > 1 to define a fiber.")
@@ -526,10 +579,19 @@ class ReaddyPostProcessor:
         Returns
         -------
         :
-            List of list of edges as position of each of the two particles
-            connected by the edge for each edge at each time.
+            List of list of edges as position of each of the two connected particles
+            for each edge at each time.
         """
         edges = []
         for frame in self.trajectory:
-            edges.append(frame.edges)
+            edges.append([])
+            for edge in frame.edge_ids:
+                edges[-1].append(
+                    np.array(
+                        [
+                            frame.particles[edge[0]].position,
+                            frame.particles[edge[1]].position,
+                        ]
+                    )
+                )
         return edges

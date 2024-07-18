@@ -122,7 +122,7 @@ class ReaddyLoader:
             ):
                 continue
             frame = FrameData(time=self.timestep * time_ix)
-            edge_ids = ReaddyLoader._frame_edges(time_ix, topology_records)
+            frame.edge_ids = ReaddyLoader._frame_edges(time_ix, topology_records)
             for index, top in enumerate(topology_records[time_ix]):
                 frame.topologies[index] = TopologyData(
                     uid=index,
@@ -133,7 +133,7 @@ class ReaddyLoader:
                 p_id = ids[time_ix][p]
                 position = positions[time_ix][p]
                 neighbor_ids = []
-                for edge in edge_ids:
+                for edge in frame.edge_ids:
                     if p_id == edge[0]:
                         neighbor_ids.append(edge[1])
                     elif p_id == edge[1]:
@@ -145,15 +145,6 @@ class ReaddyLoader:
                     ),
                     position=np.array([position[0], position[1], position[2]]),
                     neighbor_ids=neighbor_ids,
-                )
-            for edge in edge_ids:
-                frame.edges.append(
-                    np.array(
-                        [
-                            frame.particles[edge[0]].position,
-                            frame.particles[edge[1]].position,
-                        ]
-                    )
                 )
             result.append(frame)
         return result

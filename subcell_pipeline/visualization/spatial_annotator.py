@@ -128,6 +128,7 @@ class SpatialAnnotator:
         sphere_positions: List[np.ndarray],
         type_name: str = "sphere",
         radius: float = 1.0,
+        rainbow_colors: bool = False,
         color: str = "#eaeaea",
     ) -> TrajectoryData:
         """
@@ -147,6 +148,9 @@ class SpatialAnnotator:
         radius: float (optional)
             Radius to draw the spheres.
             Default: 1.
+        rainbow_colors : bool (optional)
+            If True, color the new spheres in rainbow order.
+            If False, use color instead.
         color: str (optional)
             Color for the new spheres.
             Default: "#eaeaea"
@@ -171,22 +175,20 @@ class SpatialAnnotator:
                 VIZ_TYPE.DEFAULT
             ]
             new_agent_data.types[time_ix] += [
-                f"{type_name} {ix}" for ix in range(n_spheres)
+                f"{type_name}#{ix}" for ix in range(n_spheres)
             ]
             new_agent_data.positions[time_ix][start_ix:end_ix] = sphere_positions[
                 time_ix
             ][:n_spheres]
             new_agent_data.radii[time_ix][start_ix:end_ix] = n_spheres * [radius]
 
-        # TODO use color parameter after finished debugging
         colors = ["#0000ff", "#00ff00", "#ffff00", "#ff0000", "#ff00ff"]
-
         for ix in range(max_spheres):
-            tn = f"{type_name} {ix}"
+            tn = f"{type_name}#{ix}"
             new_agent_data.display_data[tn] = DisplayData(
                 name=tn,
                 display_type=DISPLAY_TYPE.SPHERE,
-                color=colors[ix % len(colors)],
+                color=colors[ix % len(colors)] if rainbow_colors else color,
             )
         traj_data.agent_data = new_agent_data
         return traj_data

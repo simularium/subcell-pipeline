@@ -51,7 +51,7 @@ n_monomer_points = 200
 recalculate: bool = True
 
 # Temporary path to save downloaded trajectories
-temp_path: Path = Path(__file__).parents[2] / "aws_downloads"
+temp_path: Path = Path(__file__).parents[2] / "viz_outputs"
 temp_path.mkdir(parents=True, exist_ok=True)
 
 # List of compression metrics to include
@@ -59,7 +59,6 @@ metrics = [
     CompressionMetric.NON_COPLANARITY,
     CompressionMetric.PEAK_ASYMMETRY,
     CompressionMetric.AVERAGE_PERP_DISTANCE,
-    CompressionMetric.CALC_BENDING_ENERGY,
     CompressionMetric.CONTOUR_LENGTH,
     CompressionMetric.COMPRESSION_RATIO,
 ]

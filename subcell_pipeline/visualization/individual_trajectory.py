@@ -28,6 +28,7 @@ from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
 )
+from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import align_fiber
 from subcell_pipeline.simulation.cytosim.post_processing import CYTOSIM_SCALE_FACTOR
 from subcell_pipeline.simulation.readdy.loader import ReaddyLoader
 from subcell_pipeline.simulation.readdy.parser import BOX_SIZE as READDY_BOX_SIZE
@@ -51,10 +52,11 @@ def _add_individual_plots(
     converter: TrajectoryConverter,
     metrics: list[CompressionMetric],
     metrics_data: pd.DataFrame,
+    times: np.ndarray,
+    time_units: UnitData,
 ) -> None:
     """Add plots to individual trajectory with calculated metrics."""
-    times = metrics_data["time"].values
-    scatter_plots = make_empty_scatter_plots(metrics, times=times)
+    scatter_plots = make_empty_scatter_plots(metrics, times=times, time_units=time_units)
     for metric, plot in scatter_plots.items():
         plot.ytraces["filament"] = np.array(metrics_data[metric.value])
         converter.add_plot(plot, "scatter")
@@ -69,21 +71,23 @@ def _add_readdy_spatial_annotations(
     Add visualizations of edges, normals, and control points to the ReaDDy
     Simularium data.
     """
-    # edges
+    fiber_chain_ids = post_processor.linear_fiber_chain_ids(polymer_number_range=5)
+    axis_positions, _ = post_processor.linear_fiber_axis_positions(fiber_chain_ids)
+    fiber_points = post_processor.linear_fiber_control_points(
+        axis_positions=axis_positions,
+        n_points=n_monomer_points,
+    )
+    converter._data.agent_data.positions, fiber_points = post_processor.align_trajectory(fiber_points)
+    axis_positions, _ = post_processor.linear_fiber_axis_positions(fiber_chain_ids)
     edges = post_processor.edge_positions()
+    
+    # edges
     converter._data = SpatialAnnotator.add_fiber_agents(
         converter._data,
         fiber_points=edges,
         type_name="edge",
         fiber_width=0.5,
         color="#eaeaea",
-    )
-
-    fiber_chain_ids = post_processor.linear_fiber_chain_ids(polymer_number_range=5)
-    axis_positions, _ = post_processor.linear_fiber_axis_positions(fiber_chain_ids)
-    fiber_points = post_processor.linear_fiber_control_points(
-        axis_positions=axis_positions,
-        n_points=n_monomer_points,
     )
 
     # normals
@@ -109,28 +113,27 @@ def _add_readdy_spatial_annotations(
         sphere_positions,
         type_name="fiber point",
         radius=0.8,
-        color="#eaeaea",
+        rainbow_colors=True,
     )
 
 
 def _get_readdy_simularium_converter(
-    path_to_readdy_h5: str, total_steps: int
+    path_to_readdy_h5: str, total_steps: int, n_timepoints: int,
 ) -> TrajectoryConverter:
     """
     Load from ReaDDy outputs and generate a TrajectoryConverter to visualize an
     actin trajectory in Simularium.
     """
-    return ReaddyConverter(
+    converter = ReaddyConverter(
         ReaddyData(
             timestep=1e-6 * (READDY_TIMESTEP * total_steps / READDY_SAVED_FRAMES),
             path_to_readdy_h5=path_to_readdy_h5,
             meta_data=MetaData(
                 box_size=READDY_BOX_SIZE,
                 camera_defaults=CameraData(
-                    position=np.array([0.0, 0.0, 300.0]),
-                    look_at_position=np.zeros(3),
-                    up_vector=np.array([0.0, 1.0, 0.0]),
-                    fov_degrees=120.0,
+                    position=np.array([70.0, 70.0, 300.0]),
+                    look_at_position=np.array([70.0, 70.0, 0.0]),
+                    fov_degrees=60.0,
                 ),
                 scale_factor=1.0,
             ),
@@ -139,6 +142,7 @@ def _get_readdy_simularium_converter(
             spatial_units=UnitData("nm"),
         )
     )
+    return _filter_time(converter, n_timepoints)
 
 
 def visualize_individual_readdy_trajectory(
@@ -187,10 +191,12 @@ def visualize_individual_readdy_trajectory(
 
     assert isinstance(h5_file_path, str)
 
-    converter = _get_readdy_simularium_converter(h5_file_path, total_steps)
+    converter = _get_readdy_simularium_converter(h5_file_path, total_steps, n_timepoints)
 
     if metrics:
-        _add_individual_plots(converter, metrics, metrics_data)
+        times = 2 * metrics_data["time"].values  # "time" seems to range (0, 0.5)
+        times *= 1e-6 * (READDY_TIMESTEP * total_steps / n_timepoints)
+        _add_individual_plots(converter, metrics, metrics_data, times, converter._data.time_units)
 
     assert isinstance(h5_file_path, str)
 
@@ -333,6 +339,23 @@ def _filter_time(
     return converter
 
 
+def _align_cytosim_fiber(converter: TrajectoryConverter) -> None:
+    """
+    Align the fiber subpoints so that the furthest point from the x-axis
+    is aligned with the positive y-axis at the last time point.
+    """
+    fiber_points = converter._data.agent_data.subpoints[:, 0, :]
+    n_timesteps = fiber_points.shape[0]
+    n_points = int(fiber_points.shape[1] / 3)
+    fiber_points = fiber_points.reshape((n_timesteps, n_points, 3))
+    _, rotation = align_fiber(fiber_points[-1])
+    for time_ix in range(n_timesteps):
+        rotated = np.dot(fiber_points[time_ix][:, 1:], rotation)
+        converter._data.agent_data.subpoints[time_ix, 0, :] = np.concatenate(
+            (fiber_points[time_ix][:, 0:1], rotated), axis=1
+        ).reshape(n_points * 3)
+
+
 def _get_cytosim_simularium_converter(
     fiber_points_data: str,
     singles_data: str,
@@ -342,21 +365,22 @@ def _get_cytosim_simularium_converter(
     Load from Cytosim outputs and generate a TrajectoryConverter to visualize an
     actin trajectory in Simularium.
     """
-
-    # TODO: fix converter not showing fiber, possible scaling issue
-
     singles_display_data = DisplayData(
         name="linker",
-        radius=0.01,
+        radius=0.004,
         display_type=DISPLAY_TYPE.SPHERE,
-        color="#fff",
+        color="#eaeaea",
     )
-
     converter = CytosimConverter(
         CytosimData(
             meta_data=MetaData(
                 box_size=BOX_SIZE,
-                scale_factor=CYTOSIM_SCALE_FACTOR,
+                camera_defaults=CameraData(
+                    position=np.array([70.0, 70.0, 300.0]),
+                    look_at_position=np.array([70.0, 70.0, 0.0]),
+                    fov_degrees=60.0,
+                ),
+                scale_factor=1,
             ),
             object_info={
                 "fibers": CytosimObjectInfo(
@@ -366,7 +390,7 @@ def _get_cytosim_simularium_converter(
                     display_data={
                         1: DisplayData(
                             name="actin",
-                            radius=0.02,
+                            radius=0.002,
                             display_type=DISPLAY_TYPE.FIBER,
                         )
                     },
@@ -385,6 +409,10 @@ def _get_cytosim_simularium_converter(
             },
         )
     )
+    _align_cytosim_fiber(converter)
+    converter._data.agent_data.radii *= CYTOSIM_SCALE_FACTOR
+    converter._data.agent_data.positions *= CYTOSIM_SCALE_FACTOR
+    converter._data.agent_data.subpoints *= CYTOSIM_SCALE_FACTOR
     converter = _filter_time(converter, n_timepoints)
     time_units, time_multiplier = _find_time_units(converter._data.agent_data.times[-1])
     converter._data.agent_data.times *= time_multiplier
@@ -435,7 +463,8 @@ def visualize_individual_cytosim_trajectory(
     )
 
     if metrics:
-        _add_individual_plots(converter, metrics, metrics_data)
+        times = 1e3 * metrics_data["time"].values  # s --> ms
+        _add_individual_plots(converter, metrics, metrics_data, times, converter._data.time_units)
 
     # Save simularium file. Turn off validate IDs for performance.
     local_file_path = f"{temp_path}/{series_key}_{index}"

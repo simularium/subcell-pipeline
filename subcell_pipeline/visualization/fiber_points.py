@@ -16,6 +16,7 @@ def generate_trajectory_converter_for_fiber_points(
     display_data: dict[str, DisplayData],
     time_units: UnitData,
     spatial_units: UnitData,
+    fiber_radius: float = 0.5,
 ) -> TrajectoryConverter:
     """
     Generate a TrajectoryConverter for the given fiber points.
@@ -61,7 +62,7 @@ def generate_trajectory_converter_for_fiber_points(
             unique_ids=np.array(total_steps * [list(range(n_fibers))]),
             types=total_steps * [type_names],
             positions=np.zeros((total_steps, n_fibers, 3)),
-            radii=0.5 * np.ones((total_steps, n_fibers)),
+            radii=fiber_radius * np.ones((total_steps, n_fibers)),
             n_subpoints=3 * n_points * np.ones((total_steps, n_fibers)),
             subpoints=subpoints,
             display_data=display_data,
