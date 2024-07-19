@@ -212,7 +212,9 @@ class ReaddyPostProcessor:
             np.linalg.inv(self._orientation_from_positions(ideal_positions)),
         )
 
-    def rotate_positions(self, positions: np.ndarray, rotation: np.ndarray) -> np.ndarray:
+    def rotate_positions(
+        self, positions: np.ndarray, rotation: np.ndarray
+    ) -> np.ndarray:
         """
         Rotate an x,y,z position (or an array of them) around the x-axis
         with the given rotation matrix.
@@ -223,13 +225,13 @@ class ReaddyPostProcessor:
         else:
             result = np.dot(positions[1:], rotation)
             return np.concatenate((positions[0:1], result), axis=0)
-    
+
     def align_trajectory(
-        self, 
+        self,
         fiber_points: list[list[np.ndarray]],
     ) -> tuple[np.ndarray, list[list[np.ndarray]]]:
         """
-        Align the positions of particles in the trajectory 
+        Align the positions of particles in the trajectory
         so that the furthest point from the x-axis
         is aligned with the positive y-axis at the last time point.
 
@@ -251,7 +253,7 @@ class ReaddyPostProcessor:
             Array (shape = timesteps x 1 x n x 3) containing the x,y,z positions
             of actin monomer particles at each timestep.
         fiber_points
-            List of lists of arrays (shape = n x 3) containing the x,y,z positions 
+            List of lists of arrays (shape = n x 3) containing the x,y,z positions
             of control points for each fiber at each time.
         """
         result = []
@@ -261,7 +263,9 @@ class ReaddyPostProcessor:
             for _, particle in self.trajectory[time_ix].particles.items():
                 particle.position = self.rotate_positions(particle.position, rotation)
                 result[time_ix].append(particle.position)
-            fiber_points[time_ix][0] = self.rotate_positions(fiber_points[time_ix][0], rotation)
+            fiber_points[time_ix][0] = self.rotate_positions(
+                fiber_points[time_ix][0], rotation
+            )
         return np.array(result), fiber_points
 
     def linear_fiber_chain_ids(
@@ -465,7 +469,7 @@ class ReaddyPostProcessor:
         Returns
         -------
         :
-            List of lists of arrays (shape = n x 3) containing the x,y,z positions 
+            List of lists of arrays (shape = n x 3) containing the x,y,z positions
             of control points for each fiber at each time.
         """
         if n_points < 2:
