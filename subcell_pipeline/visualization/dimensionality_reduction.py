@@ -32,7 +32,7 @@ def pca_fiber_points_over_time(
 ) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
     """
     Get fiber_points for samples of the PC distributions
-    in order to visualize the samples over time
+    in order to visualize the samples over time.
     """
     if simulator_name == "Combined":
         simulator_name = ""
@@ -107,9 +107,7 @@ def generate_simularium_and_save(
     temp_path: str,
     pc: str,
 ) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
-    """
-    Generate a Simulariumio object for the fiber points and save it.
-    """
+    """Generate a Simulariumio object for the fiber points and save it."""
     meta_data = MetaData(
         box_size=BOX_SIZE,
         camera_defaults=CameraData(

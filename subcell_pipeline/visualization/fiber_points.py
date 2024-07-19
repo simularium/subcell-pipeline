@@ -35,6 +35,9 @@ def generate_trajectory_converter_for_fiber_points(
         Time unit data.
     spatial_units
         Spatial unit data.
+    fiber_radius
+        Radius to render fiber
+        Default: 0.5
 
     Returns
     -------
