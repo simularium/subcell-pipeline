@@ -26,6 +26,8 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
+from pathlib import Path
+
 import pandas as pd
 
 from subcell_pipeline.analysis.tomography_data.tomography_data import (
@@ -52,6 +54,10 @@ name = "actin_cme_tomography"
 
 # S3 bucket for input and output files
 bucket = "s3://subcell-working-bucket"
+
+# Temporary path to save visualization files
+temp_path: Path = Path(__file__).parents[3] / "analysis_outputs"
+temp_path.mkdir(parents=True, exist_ok=True)
 
 # Data repository for downloading tomography data
 repository = "https://raw.githubusercontent.com/RangamaniLabUCSD/actincme/master/PolarityAnalysis/"
@@ -98,7 +104,7 @@ unbranched_df = get_unbranched_tomography_data(
 
 # %%
 plot_tomography_data_by_dataset(
-    branched_df, bucket, f"{name}/{name}_plots_branched.png"
+    branched_df, bucket, f"{name}/{name}_plots_branched.png", str(temp_path)
 )
 
 # %% [markdown]
@@ -108,7 +114,7 @@ plot_tomography_data_by_dataset(
 
 # %%
 plot_tomography_data_by_dataset(
-    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png"
+    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png", str(temp_path)
 )
 
 # %% [markdown]
@@ -156,7 +162,7 @@ sampled_data = sample_tomography_data(
 
 # %%
 plot_tomography_data_by_dataset(
-    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
+    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png", str(temp_path)
 )
 
 # %%
