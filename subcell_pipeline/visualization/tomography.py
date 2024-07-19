@@ -15,7 +15,6 @@ from subcell_pipeline.visualization.fiber_points import (
     generate_trajectory_converter_for_fiber_points,
 )
 from subcell_pipeline.visualization.histogram_plots import make_empty_histogram_plots
-from subcell_pipeline.visualization.spatial_annotator import SpatialAnnotator
 
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
 

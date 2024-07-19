@@ -256,7 +256,7 @@ class ReaddyPostProcessor:
             List of lists of arrays (shape = n x 3) containing the x,y,z positions
             of control points for each fiber at each time.
         """
-        result = []
+        result: list[list[np.ndarray]] = []
         _, rotation = align_fiber(fiber_points[-1][0])
         for time_ix in range(len(self.trajectory)):
             result.append([])
@@ -586,7 +586,7 @@ class ReaddyPostProcessor:
             List of list of edges as position of each of the two connected particles
             for each edge at each time.
         """
-        edges = []
+        edges: list[list[np.ndarray]] = []
         for frame in self.trajectory:
             edges.append([])
             for edge in frame.edge_ids:

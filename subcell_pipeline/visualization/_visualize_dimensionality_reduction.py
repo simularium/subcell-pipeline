@@ -54,17 +54,17 @@ distribution_over_time = True
 simulator_detail = True
 
 # Ranges to sample for each PC
-sample_ranges = {
+sample_ranges: dict[str, list[list[float]]] = {
     "Combined": [
-        [-1200, 900], # pc1
+        [-1200, 900],  # pc1
         [-550, 250],  # pc2
     ],
     "ReaDDy": [
-        [-1078, 782], # pc1
+        [-1078, 782],  # pc1
         [-517, 154],  # pc2
     ],
     "Cytosim": [
-        [-1064, 758], # pc1
+        [-1064, 758],  # pc1
         [-174, 173],  # pc2
     ],
 }

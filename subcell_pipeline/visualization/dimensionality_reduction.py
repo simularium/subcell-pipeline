@@ -19,9 +19,9 @@ BOX_SIZE: np.ndarray = np.array(3 * [600.0])
 """Bounding box size for dimensionality reduction trajectory."""
 
 
-def rgb_to_hex_color(color):
+def rgb_to_hex_color(color: tuple[float, float, float]) -> str:
     rgb = (int(255 * color[0]), int(255 * color[1]), int(255 * color[2]))
-    return "#%02x%02x%02x" % rgb
+    return f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}"
 
 
 def pca_fiber_points_over_time(
@@ -39,28 +39,28 @@ def pca_fiber_points_over_time(
         simulator_name = ""
     if simulator_name:
         simulator_name += "#"
-    fiber_points = []
-    display_data = {}
+    fiber_points: list[np.ndarray] = []
+    display_data: dict[str, DisplayData] = {}
     for sample_ix in range(len(samples[0])):
         if pc_ix < 1:
             data = [samples[0][sample_ix], 0]
         else:
             data = [0, samples[1][sample_ix]]
         fiber_points.append(pca.inverse_transform(data).reshape(-1, 3))
-    fiber_points = np.array(fiber_points)
-    type_name = f"{simulator_name}PC{pc_ix + 1}"
+    fiber_points_arr: np.ndarray = np.array(fiber_points)
+    type_name: str = f"{simulator_name}PC{pc_ix + 1}"
     display_data[type_name] = DisplayData(
         name=type_name,
         display_type=DISPLAY_TYPE.FIBER,
         color=color,
     )
-    return [fiber_points], [type_name], display_data
+    return [fiber_points_arr], [type_name], display_data
 
 
 def pca_fiber_points_one_timestep(
     samples: list[np.ndarray],
     pca: PCA,
-    color_maps: list[Colormap],
+    color_maps: dict[str, Colormap],
     pc_ix: int,
     simulator_name: str = "Combined",
 ) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
@@ -107,7 +107,7 @@ def generate_simularium_and_save(
     bucket: str,
     temp_path: str,
     pc: str,
-) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
+) -> None:
     """Generate a Simulariumio object for the fiber points and save it."""
     meta_data = MetaData(
         box_size=BOX_SIZE,
@@ -171,7 +171,7 @@ def visualize_dimensionality_reduction(
     simulator_detail
         True to show individual simulator ranges, False otherwise.
     sample_ranges
-        Min and max values to visualize for each PC 
+        Min and max values to visualize for each PC
         (and each simulator if simulator_detail).
     separate_pcs
         True to Visualize PCs in separate files, False otherwise.
@@ -183,9 +183,9 @@ def visualize_dimensionality_reduction(
     pca_results = load_dataframe(bucket, pca_results_key)
     pca = load_pickle(bucket, pca_pickle_key)
 
-    fiber_points = [[], []] if separate_pcs else []
-    type_names = [[], []] if separate_pcs else []
-    display_data = [{}, {}] if separate_pcs else {}
+    fiber_points: list[list[np.ndarray]] = [[], []]
+    type_names: list[list[str]] = [[], []]
+    display_data: list[dict[str, DisplayData]] = [{}, {}]
     pca_results_simulators = {
         "Combined": pca_results,
     }
@@ -213,12 +213,14 @@ def visualize_dimensionality_reduction(
             np.arange(
                 sample_ranges[simulator][0][0],
                 sample_ranges[simulator][0][1],
-                (sample_ranges[simulator][0][1] - sample_ranges[simulator][0][0]) / float(sample_resolution),
+                (sample_ranges[simulator][0][1] - sample_ranges[simulator][0][0])
+                / float(sample_resolution),
             ),
             np.arange(
                 sample_ranges[simulator][1][0],
                 sample_ranges[simulator][1][1],
-                (sample_ranges[simulator][1][1] - sample_ranges[simulator][1][0]) / float(sample_resolution),
+                (sample_ranges[simulator][1][1] - sample_ranges[simulator][1][0])
+                / float(sample_resolution),
             ),
         ]
         for pc_ix in pc_ixs:
@@ -237,9 +239,9 @@ def visualize_dimensionality_reduction(
                 type_names[pc_ix] += _type_names
                 display_data[pc_ix] = {**display_data[pc_ix], **_display_data}
             else:
-                fiber_points += _fiber_points
-                type_names += _type_names
-                display_data = {**display_data, **_display_data}
+                fiber_points[0] += _fiber_points
+                type_names[0] += _type_names
+                display_data[0] = {**display_data[0], **_display_data}
     if separate_pcs:
         for pc_ix in pc_ixs:
             generate_simularium_and_save(
@@ -256,9 +258,9 @@ def visualize_dimensionality_reduction(
     else:
         generate_simularium_and_save(
             dataset_name,
-            fiber_points,
-            type_names,
-            display_data,
+            fiber_points[0],
+            type_names[0],
+            display_data[0],
             distribution_over_time,
             simulator_detail,
             bucket,

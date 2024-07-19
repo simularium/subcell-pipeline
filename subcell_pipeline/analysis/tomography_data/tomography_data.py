@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
-from io_collection.save.save_dataframe import save_dataframe
 from io_collection.save.save_buffer import save_buffer_to_s3
+from io_collection.save.save_dataframe import save_dataframe
 from PIL import Image
 
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
@@ -291,7 +291,10 @@ def save_image_to_s3(bucket: str, key: str, image: np.ndarray) -> None:
 
 
 def plot_tomography_data_by_dataset(
-    data: pd.DataFrame, bucket: str, output_key: str, temp_path: str,
+    data: pd.DataFrame,
+    bucket: str,
+    output_key: str,
+    temp_path: str,
 ) -> None:
     """
     Plot tomography data for each dataset.
@@ -304,6 +307,8 @@ def plot_tomography_data_by_dataset(
         Where to upload the results.
     output_key
         File key for results.
+    temp_path
+        Local path for saving visualization output files.
     """
     local_save_path = os.path.join(temp_path, os.path.basename(output_key))
 
@@ -325,4 +330,5 @@ def plot_tomography_data_by_dataset(
             ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
 
     plt.savefig(local_save_path)
-    save_image_to_s3(bucket, output_key, imageio.imread(local_save_path))
+    image: np.ndarray = imageio.imread(local_save_path)
+    save_image_to_s3(bucket, output_key, image)
