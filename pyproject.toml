@@ -27,6 +27,7 @@ dependencies = [
     "setuptools>=70.0.0",
     "io-collection>=0.10.2",
     "python-dotenv>=1.0.1",
+    "imageio",
 ]
 
 [project.urls]

@@ -67,7 +67,6 @@ metrics = [
     CompressionMetric.NON_COPLANARITY,
     CompressionMetric.PEAK_ASYMMETRY,
     CompressionMetric.AVERAGE_PERP_DISTANCE,
-    CompressionMetric.CALC_BENDING_ENERGY,
     CompressionMetric.CONTOUR_LENGTH,
     CompressionMetric.COMPRESSION_RATIO,
 ]

@@ -29,6 +29,7 @@ def pca_fiber_points_over_time(
     pca: PCA,
     pc_ix: int,
     simulator_name: str = "Combined",
+    color: str = "#eaeaea",
 ) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
     """
     Get fiber_points for samples of the PC distributions
@@ -51,7 +52,7 @@ def pca_fiber_points_over_time(
     display_data[type_name] = DisplayData(
         name=type_name,
         display_type=DISPLAY_TYPE.FIBER,
-        color="#eaeaea",
+        color=color,
     )
     return [fiber_points], [type_name], display_data
 
@@ -111,8 +112,10 @@ def generate_simularium_and_save(
     meta_data = MetaData(
         box_size=BOX_SIZE,
         camera_defaults=CameraData(
-            position=np.array([-20.0, 350.0, 200.0]),
-            look_at_position=np.array([50.0, 0.0, 0.0]),
+            # position=np.array([-20.0, 350.0, 200.0]),
+            # look_at_position=np.array([50.0, 0.0, 0.0]),
+            position=np.array([70.0, 70.0, 300.0]),
+            look_at_position=np.array([70.0, 70.0, 0.0]),
             fov_degrees=60.0,
         ),
         trajectory_title="Actin Compression Dimensionality Reduction",
@@ -126,7 +129,8 @@ def generate_simularium_and_save(
         display_data,
         time_units,
         spatial_units,
-        fiber_radius=8.0,
+        fiber_radius=1.0,
+        # fiber_radius=6.0,
     )
 
     # Save locally and copy to bucket.
@@ -146,8 +150,7 @@ def visualize_dimensionality_reduction(
     pca_pickle_key: str,
     distribution_over_time: bool,
     simulator_detail: bool,
-    range_pc1: list[float],
-    range_pc2: list[float],
+    sample_ranges: dict[str, list[list[float]]],
     separate_pcs: bool,
     sample_resolution: int,
     temp_path: str,
@@ -167,10 +170,9 @@ def visualize_dimensionality_reduction(
         True to scroll through the PC distributions over time, False otherwise.
     simulator_detail
         True to show individual simulator ranges, False otherwise.
-    range_pc1
-        Min and max values of PC1 to visualize.
-    range_pc2
-        Min and max values of PC2 to visualize.
+    sample_ranges
+        Min and max values to visualize for each PC 
+        (and each simulator if simulator_detail).
     separate_pcs
         True to Visualize PCs in separate files, False otherwise.
     sample_resolution
@@ -199,25 +201,30 @@ def visualize_dimensionality_reduction(
         "ReaDDy": plt.colormaps.get_cmap("YlOrRd"),
         "Cytosim": plt.colormaps.get_cmap("GnBu"),
     }
+    over_time_colors = {
+        "Combined": "#ffffff",
+        "ReaDDy": "#ff8f52",
+        "Cytosim": "#1cbfaa",
+    }
     dataset_name = os.path.splitext(pca_pickle_key)[0]
     pc_ixs = list(range(2))
     for simulator in pca_results_simulators:
         samples = [
             np.arange(
-                range_pc1[0],
-                range_pc1[1],
-                (range_pc1[1] - range_pc1[0]) / float(sample_resolution),
+                sample_ranges[simulator][0][0],
+                sample_ranges[simulator][0][1],
+                (sample_ranges[simulator][0][1] - sample_ranges[simulator][0][0]) / float(sample_resolution),
             ),
             np.arange(
-                range_pc2[0],
-                range_pc2[1],
-                (range_pc2[1] - range_pc2[0]) / float(sample_resolution),
+                sample_ranges[simulator][1][0],
+                sample_ranges[simulator][1][1],
+                (sample_ranges[simulator][1][1] - sample_ranges[simulator][1][0]) / float(sample_resolution),
             ),
         ]
         for pc_ix in pc_ixs:
             if distribution_over_time:
                 _fiber_points, _type_names, _display_data = pca_fiber_points_over_time(
-                    samples, pca, pc_ix, simulator
+                    samples, pca, pc_ix, simulator, over_time_colors[simulator]
                 )
             else:
                 _fiber_points, _type_names, _display_data = (

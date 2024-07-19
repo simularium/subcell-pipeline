@@ -51,11 +51,23 @@ distribution_over_time = True
 # Select if simulator distributions are shown
 # - True to show ReaDDy and Cytosim separately
 # - False to show all together
-simulator_detail = False
+simulator_detail = True
 
 # Ranges to sample for each PC
-range_pc1 = [-1200, 900]
-range_pc2 = [-550, 250]
+sample_ranges = {
+    "Combined": [
+        [-1200, 900], # pc1
+        [-550, 250],  # pc2
+    ],
+    "ReaDDy": [
+        [-1078, 782], # pc1
+        [-517, 154],  # pc2
+    ],
+    "Cytosim": [
+        [-1064, 758], # pc1
+        [-174, 173],  # pc2
+    ],
+}
 
 # Select how PCs are saved
 # - True to save each PC in a separate file
@@ -82,8 +94,7 @@ visualize_dimensionality_reduction(
     pca_pickle_key,
     distribution_over_time,
     simulator_detail,
-    range_pc1,
-    range_pc2,
+    sample_ranges,
     separate_pcs,
     sample_resolution,
     str(temp_path),

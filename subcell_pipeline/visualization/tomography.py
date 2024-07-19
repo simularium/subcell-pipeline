@@ -117,14 +117,6 @@ def visualize_tomography(
         spatial_units,
     )
 
-    converter._data = SpatialAnnotator.add_sphere_agents(
-        converter._data,
-        fiber_points,
-        type_name="point",
-        radius=0.8,
-        rainbow_colors=True,
-    )
-
     if metrics:
         _add_tomography_plots(converter, metrics, all_fiber_points)
 
