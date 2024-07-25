@@ -52,14 +52,6 @@ n_timepoints = 200
 # Number of monomer points per fiber
 n_monomer_points = 200
 
-# Total number of steps for each condition
-total_steps: dict[str, int] = {
-    "0047": int(3.2e8),
-    "0150": int(1e8),
-    "0470": int(3.2e7),
-    "1500": int(1e7),
-}
-
 # Temporary path to save downloaded trajectories
 temp_path: Path = Path(__file__).parents[3] / "aws_downloads"
 temp_path.mkdir(parents=True, exist_ok=True)
@@ -85,6 +77,6 @@ parse_readdy_simulation_data(
     n_replicates,
     n_timepoints,
     n_monomer_points,
-    total_steps,
-    str(temp_path),
+    compression=True,
+    temp_path=str(temp_path),
 )

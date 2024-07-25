@@ -1,6 +1,7 @@
 """Methods for parsing ReaDDy simulations."""
 
 import os
+from math import floor, log10
 from typing import Optional, Union
 
 import boto3
@@ -46,6 +47,9 @@ READDY_TIMESTEP: float = 0.1
 
 BOX_SIZE: np.ndarray = np.array(3 * [600.0])
 """Default simulation volume dimensions (x, y, z)."""
+
+COMPRESSION_DISTANCE: float = 150.0
+"""Total distance the fiber end was displaced in nm."""
 
 
 def _download_s3_file(bucket: str, key: str, dest_path: str) -> Optional[str]:
@@ -205,6 +209,15 @@ def parse_readdy_simulation_single_fiber_trajectory(
     return dataframe
 
 
+def round_2_sig_figs(x: float) -> int:
+    return int(round(x, -int(floor(log10(abs(0.1 * x))))))
+
+
+def velocity_for_cond(condition_key: str) -> float:
+    """'NNNN' -> NNN.N."""
+    return float(condition_key[:3] + "." + condition_key[-1])
+
+
 def parse_readdy_simulation_data(
     bucket: str,
     series_name: str,
@@ -212,7 +225,7 @@ def parse_readdy_simulation_data(
     n_replicates: int,
     n_timepoints: int,
     n_monomer_points: int,
-    total_steps: dict[str, int],
+    compression: bool,
     temp_path: str,
 ) -> None:
     """
@@ -232,11 +245,22 @@ def parse_readdy_simulation_data(
         Number of equally spaced timepoints to sample.
     n_monomer_points
         Number of equally spaced monomer points to sample.
-    total_steps
-        Total number of steps for each simulation key.
+    compression
+        If True, parse compressed trajectories,
+        If False, parse baseline uncompressed trajectories.
     temp_path
         Path for saving temporary h5 files.
     """
+    total_steps: dict[str, int] = {}
+    if compression:
+        total_steps = {
+            cond: round_2_sig_figs(
+                (COMPRESSION_DISTANCE * 1e-3 / velocity_for_cond(cond)) * 1e10
+            )
+            for cond in condition_keys
+        }
+    else:
+        total_steps = {"": int(1e7)}
 
     for condition_key in condition_keys:
         series_key = f"{series_name}_{condition_key}" if condition_key else series_name
