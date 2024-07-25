@@ -1,20 +1,15 @@
-import io
-import os
-
-import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
-from io_collection.save.save_buffer import save_buffer_to_s3
 from io_collection.save.save_dataframe import save_dataframe
-from PIL import Image
+from io_collection.save.save_figure import save_figure
 
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
 
 
-def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> np.bool_:
+def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> bool:
     """
     Test whether the angles between consecutive segments of a polymer
     trace are less than 90 degrees.
@@ -26,7 +21,7 @@ def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> np.bool_:
 
     Returns
     -------
-    bool
+    :
         True if all consecutive angles are less than 180 degrees.
     """
     vectors = polymer_trace[1:] - polymer_trace[:-1]
@@ -35,7 +30,7 @@ def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> np.bool_:
     dot_products = np.dot(vectors[1:], vectors[:-1].T)
 
     # Check if any angle is greater than 90 degrees
-    return np.all(dot_products > 0)
+    return np.all(dot_products > 0).item()
 
 
 def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
@@ -284,17 +279,10 @@ def sample_tomography_data(
         return all_sampled_df
 
 
-def save_image_to_s3(bucket: str, key: str, image: np.ndarray) -> None:
-    with io.BytesIO() as buffer:
-        Image.fromarray(image).save(buffer, format="png")
-        save_buffer_to_s3(bucket[5:], key, buffer, "image/png")
-
-
 def plot_tomography_data_by_dataset(
     data: pd.DataFrame,
     bucket: str,
     output_key: str,
-    temp_path: str,
 ) -> None:
     """
     Plot tomography data for each dataset.
@@ -307,13 +295,9 @@ def plot_tomography_data_by_dataset(
         Where to upload the results.
     output_key
         File key for results.
-    temp_path
-        Local path for saving visualization output files.
     """
-    local_save_path = os.path.join(temp_path, os.path.basename(output_key))
-
+    figure, ax = plt.subplots(1, 3, figsize=(6, 2))
     for dataset, group in data.groupby("dataset"):
-        _, ax = plt.subplots(1, 3, figsize=(6, 2))
 
         ax[1].set_title(dataset)
 
@@ -329,6 +313,4 @@ def plot_tomography_data_by_dataset(
             ax[1].plot(fiber["xpos"], fiber["zpos"], marker="o", ms=1, lw=1)
             ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
 
-    plt.savefig(local_save_path)
-    image: np.ndarray = imageio.imread(local_save_path)
-    save_image_to_s3(bucket, output_key, image)
+    save_figure(bucket, output_key, figure)

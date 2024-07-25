@@ -7,7 +7,7 @@ Notebook contains steps for visualizing segmented tomography data for actin
 fibers using [Simularium](https://simularium.allencell.org/).
 
 - [Define visualization settings](#define-visualization-settings)
-- [Visualize tomography data](#visualize-tomography)
+- [Visualize tomography data](#visualize-tomography-data)
 """
 
 # %%

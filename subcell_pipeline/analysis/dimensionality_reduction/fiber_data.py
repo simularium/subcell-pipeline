@@ -106,7 +106,7 @@ def align_fibers(data: pd.DataFrame) -> None:
 
 def align_fiber(coords: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
-    Align an array of x, y, z coordinates along the positive x axis.
+    Align an array of x, y, z coordinates along the positive y axis.
 
     The function identifies the furthest point in the yz-plane and computes the
     angle needed to rotate this point to lie on the positive y axis. This

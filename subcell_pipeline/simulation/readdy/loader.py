@@ -9,7 +9,11 @@ from io_collection.load.load_pickle import load_pickle
 from io_collection.save.save_pickle import save_pickle
 from tqdm import tqdm
 
-from .data_structures import FrameData, ParticleData, TopologyData
+from subcell_pipeline.simulation.readdy.data_structures import (
+    FrameData,
+    ParticleData,
+    TopologyData,
+)
 
 
 class ReaddyLoader:

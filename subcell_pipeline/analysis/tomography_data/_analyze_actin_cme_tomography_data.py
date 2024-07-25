@@ -26,8 +26,6 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
-from pathlib import Path
-
 import pandas as pd
 
 from subcell_pipeline.analysis.tomography_data.tomography_data import (
@@ -36,9 +34,6 @@ from subcell_pipeline.analysis.tomography_data.tomography_data import (
     plot_tomography_data_by_dataset,
     sample_tomography_data,
 )
-
-# pixels to um
-TOMOGRAPHY_SCALE_FACTOR: float = 0.0006
 
 # %% [markdown]
 """
@@ -55,12 +50,11 @@ name = "actin_cme_tomography"
 # S3 bucket for input and output files
 bucket = "s3://subcell-working-bucket"
 
-# Temporary path to save visualization files
-temp_path: Path = Path(__file__).parents[3] / "analysis_outputs"
-temp_path.mkdir(parents=True, exist_ok=True)
-
 # Data repository for downloading tomography data
 repository = "https://raw.githubusercontent.com/RangamaniLabUCSD/actincme/master/PolarityAnalysis/"
+
+# Conversion factor from pixels to um for this dataset
+tomography_scale_factor: float = 0.0006
 
 # Folders and names of branched actin datasets
 branched_datasets = [
@@ -87,14 +81,14 @@ branched_df = get_branched_tomography_data(
     name=name,
     repository=repository,
     datasets=branched_datasets,
-    scale_factor=TOMOGRAPHY_SCALE_FACTOR,
+    scale_factor=tomography_scale_factor,
 )
 unbranched_df = get_unbranched_tomography_data(
     bucket=bucket,
     name=name,
     repository=repository,
     datasets=unbranched_datasets,
-    scale_factor=TOMOGRAPHY_SCALE_FACTOR,
+    scale_factor=tomography_scale_factor,
 )
 
 # %% [markdown]
@@ -104,7 +98,7 @@ unbranched_df = get_unbranched_tomography_data(
 
 # %%
 plot_tomography_data_by_dataset(
-    branched_df, bucket, f"{name}/{name}_plots_branched.png", str(temp_path)
+    branched_df, bucket, f"{name}/{name}_plots_branched.png"
 )
 
 # %% [markdown]
@@ -114,7 +108,7 @@ plot_tomography_data_by_dataset(
 
 # %%
 plot_tomography_data_by_dataset(
-    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png", str(temp_path)
+    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png"
 )
 
 # %% [markdown]
@@ -162,7 +156,7 @@ sampled_data = sample_tomography_data(
 
 # %%
 plot_tomography_data_by_dataset(
-    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png", str(temp_path)
+    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
 )
 
 # %%
