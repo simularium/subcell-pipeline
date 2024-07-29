@@ -93,7 +93,7 @@ def sample_simulation_data_points(
 
     time_indices = np.rint(
         np.interp(
-            np.linspace(0, 1, n_timepoints),
+            np.linspace(0, 1, n_timepoints + 1),
             np.linspace(0, 1, n_unique_timepoints),
             np.arange(n_unique_timepoints),
         )
@@ -103,7 +103,7 @@ def sample_simulation_data_points(
 
     for time, group in time_data.groupby("time"):
         sampled_points = pd.DataFrame()
-        sampled_points["monomer_ids"] = np.arange(n_monomer_points)
+        sampled_points["fiber_point"] = np.arange(n_monomer_points)
         sampled_points["time"] = time
 
         for column in sampled_columns:

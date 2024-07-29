@@ -25,9 +25,8 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
-from pathlib import Path
-
 import pandas as pd
+from io_collection.save.save_pickle import save_pickle
 
 from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import (
     get_merged_data,
@@ -69,7 +68,7 @@ random_seeds: list[int] = [1, 2, 3, 4, 5]
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
 # Location to save analysis results (S3 bucket or local path)
-save_location: str = str(Path(__file__).parents[3] / "analysis_outputs")
+save_location: str = "s3://subcell-working-bucket"
 
 # %% [markdown]
 """
@@ -81,7 +80,9 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 """
 
 # %%
-readdy_data = get_merged_data(readdy_bucket, series_name, condition_keys, random_seeds)
+readdy_data = get_merged_data(
+    readdy_bucket, f"ACTIN_{series_name}", condition_keys, random_seeds
+)
 readdy_data["simulator"] = "readdy"
 
 # %%
@@ -106,10 +107,10 @@ time_map = {
     ("cytosim", "0150"): 0.01,
     ("cytosim", "0470"): 0.00316,
     ("cytosim", "1500"): 0.001,
-    ("readdy", "0047"): 1000,
-    ("readdy", "0150"): 1000,
-    ("readdy", "0470"): 1000,
-    ("readdy", "1500"): 1000,
+    ("readdy", "0047"): 100,
+    ("readdy", "0150"): 100,
+    ("readdy", "0470"): 100,
+    ("readdy", "1500"): 100,
 }
 
 save_aligned_fibers(
@@ -134,6 +135,14 @@ pca_results, pca = run_pca(data)
 
 # %% [markdown]
 """
+## Save PCA object
+"""
+
+# %%
+save_pickle(save_location, "actin_compression_pca.pkl", pca)
+
+# %% [markdown]
+"""
 ## Save PCA results
 
 The PCA results are saved with resampled rows, which shuffles the order of the
@@ -149,6 +158,7 @@ save_pca_results(
 """
 ## Save PCA trajectories
 """
+
 # %%
 save_pca_trajectories(
     pca_results, save_location, "actin_compression_pca_trajectories.json"
@@ -158,10 +168,11 @@ save_pca_trajectories(
 """
 ## Save PCA transforms
 """
+
 # %%
 points: list[list[float]] = [
-    [-600, -300, 0, 300, 600, 900],
-    [-200, 0, 200, 400],
+    [-900, -600, -300, 0, 300, 600],
+    [-600, -400, -200, 0, 200],
 ]
 
 save_pca_transforms(pca, points, save_location, "actin_compression_pca_transforms.json")

@@ -1,12 +1,14 @@
 """Methods for running simulations on AWS Batch."""
 
 import re
+from typing import Optional
 
 import boto3
 from container_collection.batch.get_batch_logs import get_batch_logs
 from container_collection.batch.make_batch_job import make_batch_job
 from container_collection.batch.register_batch_job import register_batch_job
 from container_collection.batch.submit_batch_job import submit_batch_job
+from io_collection.keys.copy_key import copy_key
 from io_collection.save.save_text import save_text
 
 
@@ -230,3 +232,45 @@ def check_and_save_job_logs(
 
             logs = get_batch_logs(response["jobArn"], " ")
             save_text(bucket, log_key, logs)
+
+
+def copy_simulation_outputs(
+    bucket: str,
+    series_name: str,
+    source_template: str,
+    n_replicates: int,
+    condition_keys: Optional[dict[str, str]] = None,
+) -> None:
+    """
+    Copy simulation outputs from where they are saved to pipeline file structure.
+
+    Parameters
+    ----------
+    bucket
+        Name of S3 bucket for input and output files.
+    series_name
+        Name of simulation series.
+    source_template
+        Template string for source output files.
+    n_replicates : int
+        _Number of simulation replicates.
+    condition_keys
+        Map of source to target condition keys.
+    """
+
+    if condition_keys is None:
+        condition_keys = {"": ""}
+
+    for index in range(n_replicates):
+        for source_condition, target_condition in condition_keys.items():
+            if source_condition == "" and target_condition == "":
+                source_key = source_template % (index)
+                target_key = f"{series_name}/outputs/{series_name}_{index}.h5"
+            else:
+                source_key = source_template % (source_condition, index)
+                target_key = (
+                    f"{series_name}/outputs/{series_name}_{target_condition}_{index}.h5"
+                )
+
+            print(f"Copying [ {source_key} ] to [ {target_key} ]")
+            copy_key(bucket, source_key, target_key)

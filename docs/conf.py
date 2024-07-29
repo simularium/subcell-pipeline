@@ -58,7 +58,7 @@ autodoc_default_options = {
 
 # List of modules to be mocked up. Useful when some external dependencies are
 # not met at build time and break the building process.
-autodoc_mock_imports = []
+autodoc_mock_imports = ["readdy"]
 
 # Controls how to represent typehints.
 autodoc_typehints = "signature"

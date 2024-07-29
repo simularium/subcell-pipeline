@@ -26,6 +26,8 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
+import pandas as pd
+
 from subcell_pipeline.analysis.tomography_data.tomography_data import (
     get_branched_tomography_data,
     get_unbranched_tomography_data,
@@ -51,6 +53,9 @@ bucket = "s3://subcell-working-bucket"
 # Data repository for downloading tomography data
 repository = "https://raw.githubusercontent.com/RangamaniLabUCSD/actincme/master/PolarityAnalysis/"
 
+# Conversion factor from pixels to um for this dataset
+tomography_scale_factor: float = 0.0006
+
 # Folders and names of branched actin datasets
 branched_datasets = [
     ("2018August_Tomo27", "TomoAugust_27_earlyCME"),
@@ -70,15 +75,20 @@ unbranched_datasets = [
     ("2018November_32", "TomoNovember_32_Vesicle"),
 ]
 
-# Spatial conversion scaling factor (pixels to um)
-scale_factor = 0.00006
-
 # %%
 branched_df = get_branched_tomography_data(
-    bucket, name, repository, branched_datasets, scale_factor
+    bucket=bucket,
+    name=name,
+    repository=repository,
+    datasets=branched_datasets,
+    scale_factor=tomography_scale_factor,
 )
 unbranched_df = get_unbranched_tomography_data(
-    bucket, name, repository, unbranched_datasets, scale_factor
+    bucket=bucket,
+    name=name,
+    repository=repository,
+    datasets=unbranched_datasets,
+    scale_factor=tomography_scale_factor,
 )
 
 # %% [markdown]
@@ -87,7 +97,9 @@ unbranched_df = get_unbranched_tomography_data(
 """
 
 # %%
-plot_tomography_data_by_dataset(branched_df)
+plot_tomography_data_by_dataset(
+    branched_df, bucket, f"{name}/{name}_plots_branched.png"
+)
 
 # %% [markdown]
 """
@@ -95,7 +107,9 @@ plot_tomography_data_by_dataset(branched_df)
 """
 
 # %%
-plot_tomography_data_by_dataset(unbranched_df)
+plot_tomography_data_by_dataset(
+    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png"
+)
 
 # %% [markdown]
 """
@@ -106,11 +120,13 @@ Defines the settings used for subsampling tomography data points.
 
 # %%
 # Number of monomer points per fiber
-n_monomer_points = 200
+n_monomer_points = 20
 
 # Minimum number of points for valid fiber
 minimum_points = 3
 
+# True to recalculate the sampled tomography data, False otherwise.
+recalculate = True
 
 # %% [markdown]
 """
@@ -123,8 +139,14 @@ sampling.
 
 # %%
 sampled_key = f"{name}/{name}_coordinates_sampled.csv"
+all_tomogram_df = pd.concat([branched_df, unbranched_df])
 sampled_data = sample_tomography_data(
-    unbranched_df, bucket, sampled_key, n_monomer_points, minimum_points
+    all_tomogram_df,
+    bucket,
+    sampled_key,
+    n_monomer_points,
+    minimum_points,
+    recalculate=recalculate,
 )
 
 # %% [markdown]
@@ -133,4 +155,8 @@ sampled_data = sample_tomography_data(
 """
 
 # %%
-plot_tomography_data_by_dataset(sampled_data)
+plot_tomography_data_by_dataset(
+    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
+)
+
+# %%

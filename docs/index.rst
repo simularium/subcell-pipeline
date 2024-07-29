@@ -16,6 +16,7 @@
 
    Simulations <simulation>
    Analysis <analysis>
+   Visualization <visualization>
 
 .. autosummary::
    :toctree: _summary
@@ -25,6 +26,7 @@
 
    subcell_pipeline.simulation
    subcell_pipeline.analysis
+   subcell_pipeline.visualization
 
 .. toctree::
    :hidden:

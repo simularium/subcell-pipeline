@@ -57,8 +57,8 @@ Iterate through all condition keys and random seeds to load simulation output
 files and parse them into a tidy data format. If the parsed file for a given
 condition key and random seed already exists, parsing is skipped.
 
-- Input: `(name)/outputs/(name)_(condition_key)_(index)/`
-- Output: `(name)/data/(name)_(condition_key)_(seed).csv`
+- Input: `(series_name)/outputs/(series_name)_(condition_key)_(index)/`
+- Output: `(series_name)/data/(series_name)_(condition_key)_(seed).csv`
 """
 
 # %%
@@ -86,8 +86,8 @@ Iterate through all condition keys and random seeds to load the parsed data and
 sample the timepoints and monomer points. If the sampled file for a given
 condition key and random seed already exists, sampling is skipped.
 
-- Input: `(name)/data/(name)_(condition_key)_(seed).csv`
-- Output: `(name)/samples/(name)_(condition_key)_(seed).csv`
+- Input: `(series_name)/data/(series_name)_(condition_key)_(seed).csv`
+- Output: `(series_name)/samples/(series_name)_(condition_key)_(seed).csv`
 """
 
 # %%

@@ -1,11 +1,38 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
+from io_collection.save.save_figure import save_figure
 
-SAMPLE_COLUMNS = ["xpos", "ypos", "zpos"]
+TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
+
+
+def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> bool:
+    """
+    Test whether the angles between consecutive segments of a polymer
+    trace are less than 90 degrees.
+
+    Parameters
+    ----------
+    polymer_trace
+        A 2D array where each row is a point in 3D space.
+
+    Returns
+    -------
+    :
+        True if all consecutive angles are less than 180 degrees.
+    """
+    vectors = polymer_trace[1:] - polymer_trace[:-1]
+
+    vectors /= np.linalg.norm(vectors, axis=1)[:, np.newaxis]
+    dot_products = np.dot(vectors[1:], vectors[:-1].T)
+
+    # Check if any angle is greater than 90 degrees
+    return np.all(dot_products > 0).item()
 
 
 def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
@@ -32,7 +59,7 @@ def read_tomography_data(file: str, label: str = "fil") -> pd.DataFrame:
     elif len(coordinates.columns) == 5:
         coordinates.columns = ["object", label, "xpos", "ypos", "zpos"]
     else:
-        print("Data file [ {file} ] has an unexpected number of columns")
+        print(f"Data file [ {file} ] has an unexpected number of columns")
 
     return coordinates
 
@@ -58,7 +85,7 @@ def get_branched_tomography_data(
     bucket: str,
     name: str,
     repository: str,
-    datasets: "list[tuple[str, str]]",
+    datasets: list[tuple[str, str]],
     scale_factor: float = 1.0,
 ) -> pd.DataFrame:
     """
@@ -92,7 +119,7 @@ def get_unbranched_tomography_data(
     bucket: str,
     name: str,
     repository: str,
-    datasets: "list[tuple[str, str]]",
+    datasets: list[tuple[str, str]],
     scale_factor: float = 1.0,
 ) -> pd.DataFrame:
     """
@@ -126,7 +153,7 @@ def get_tomography_data(
     bucket: str,
     name: str,
     repository: str,
-    datasets: "list[tuple[str, str]]",
+    datasets: list[tuple[str, str]],
     group: str,
     scale_factor: float = 1.0,
 ) -> pd.DataFrame:
@@ -187,7 +214,8 @@ def sample_tomography_data(
     save_key: str,
     n_monomer_points: int,
     minimum_points: int,
-    sampled_columns: list[str] = SAMPLE_COLUMNS,
+    sampled_columns: list[str] = TOMOGRAPHY_SAMPLE_COLUMNS,
+    recalculate: bool = False,
 ) -> pd.DataFrame:
     """
     Sample selected columns from tomography data at given resolution.
@@ -206,6 +234,8 @@ def sample_tomography_data(
         Minimum number of points for valid fiber.
     sampled_columns
         List of column names to sample.
+    recalculate
+        True to recalculate the sampled tomography data, False otherwise.
 
     Returns
     -------
@@ -213,12 +243,14 @@ def sample_tomography_data(
         Sampled tomography data.
     """
 
-    if check_key(save_location, save_key):
+    if check_key(save_location, save_key) and not recalculate:
         print(f"Loading existing sampled tomogram data from [ { save_key } ]")
         return load_dataframe(save_location, save_key)
     else:
         all_sampled_points = []
 
+        # TODO sort experimental samples in order along the fiber before resampling
+        # (see simularium visualization)
         for fiber_id, group in data.groupby("id"):
             if len(group) < minimum_points:
                 continue
@@ -232,8 +264,12 @@ def sample_tomography_data(
                 sampled_points[column] = np.interp(
                     np.linspace(0, 1, n_monomer_points),
                     np.linspace(0, 1, group.shape[0]),
-                    group[column].values,
+                    group[column].to_numpy(),
                 )
+
+            sampled_points["ordered"] = test_consecutive_segment_angles(
+                sampled_points[sampled_columns].to_numpy()
+            )
 
             all_sampled_points.append(sampled_points)
 
@@ -245,7 +281,11 @@ def sample_tomography_data(
         return all_sampled_df
 
 
-def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
+def plot_tomography_data_by_dataset(
+    data: pd.DataFrame,
+    bucket: str,
+    output_key: str,
+) -> None:
     """
     Plot tomography data for each dataset.
 
@@ -253,11 +293,14 @@ def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
     ----------
     data
         Tomography data.
+    bucket:
+        Where to upload the results.
+    output_key
+        File key for results.
     """
-
     for dataset, group in data.groupby("dataset"):
-        _, ax = plt.subplots(1, 3, figsize=(6, 2))
 
+        figure, ax = plt.subplots(1, 3, figsize=(6, 2))
         ax[1].set_title(dataset)
 
         views = ["XY", "XZ", "YZ"]
@@ -272,4 +315,5 @@ def plot_tomography_data_by_dataset(data: pd.DataFrame) -> None:
             ax[1].plot(fiber["xpos"], fiber["zpos"], marker="o", ms=1, lw=1)
             ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
 
-        plt.show()
+        base_name, ext = os.path.splitext(output_key)
+        save_figure(bucket, f"{base_name}_{dataset}.{ext}", figure)

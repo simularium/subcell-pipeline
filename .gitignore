@@ -123,3 +123,5 @@ ENV/
 *.cym
 *.simularium
 **/analysis_outputs/**
+*.h5
+*.pdm-python

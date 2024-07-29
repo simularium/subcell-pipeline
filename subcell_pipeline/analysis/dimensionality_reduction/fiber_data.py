@@ -93,7 +93,7 @@ def align_fibers(data: pd.DataFrame) -> None:
         if time == 0:
             fiber = coords
         else:
-            fiber = align_fiber(coords)
+            fiber, _ = align_fiber(coords)
 
         aligned_fibers.append(fiber)
 
@@ -104,7 +104,7 @@ def align_fibers(data: pd.DataFrame) -> None:
     data["zpos"] = all_aligned_fibers[:, 2]
 
 
-def align_fiber(coords: np.ndarray) -> np.ndarray:
+def align_fiber(coords: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Align an array of x, y, z coordinates along the positive y axis.
 
@@ -132,7 +132,7 @@ def align_fiber(coords: np.ndarray) -> np.ndarray:
     # Rotate y and z
     rotated = np.dot(coords[:, 1:], rot)
 
-    return np.concatenate((coords[:, 0:1], rotated), axis=1)
+    return np.concatenate((coords[:, 0:1], rotated), axis=1), rot
 
 
 def reshape_fibers(data: pd.DataFrame) -> tuple[np.ndarray, pd.DataFrame]:
