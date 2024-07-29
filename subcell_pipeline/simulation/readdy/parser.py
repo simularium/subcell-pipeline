@@ -209,7 +209,7 @@ def parse_readdy_simulation_single_fiber_trajectory(
     return dataframe
 
 
-def round_2_sig_figs(x: float) -> int:
+def _round_2_sig_figs(x: float) -> int:
     return int(round(x, -int(floor(log10(abs(0.1 * x))))))
 
 
@@ -254,7 +254,7 @@ def parse_readdy_simulation_data(
     total_steps: dict[str, int] = {}
     if compression:
         total_steps = {
-            cond: round_2_sig_figs(
+            cond: _round_2_sig_figs(
                 (COMPRESSION_DISTANCE * 1e-3 / velocity_for_cond(cond)) * 1e10
             )
             for cond in condition_keys

@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -296,9 +298,9 @@ def plot_tomography_data_by_dataset(
     output_key
         File key for results.
     """
-    figure, ax = plt.subplots(1, 3, figsize=(6, 2))
     for dataset, group in data.groupby("dataset"):
 
+        figure, ax = plt.subplots(1, 3, figsize=(6, 2))
         ax[1].set_title(dataset)
 
         views = ["XY", "XZ", "YZ"]
@@ -313,4 +315,5 @@ def plot_tomography_data_by_dataset(
             ax[1].plot(fiber["xpos"], fiber["zpos"], marker="o", ms=1, lw=1)
             ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
 
-    save_figure(bucket, output_key, figure)
+        base_name, ext = os.path.splitext(output_key)
+        save_figure(bucket, f"{base_name}_{dataset}.{ext}", figure)
