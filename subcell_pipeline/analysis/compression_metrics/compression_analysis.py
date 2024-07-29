@@ -131,10 +131,10 @@ def calculate_compression_metrics(
                 polymer_trace=polymer_trace, **options
             )
 
-    metrics = df_metrics.reset_index().rename(columns={"index": "time"})
-    metrics["normalized_time"] = metrics["time"] / metrics["time"].max()
+    df_metrics = df_metrics.reset_index().rename(columns={"index": "time"})
+    df_metrics["normalized_time"] = df_metrics["time"] / df_metrics["time"].max()
 
-    return metrics
+    return df_metrics
 
 
 def save_compression_metrics(
@@ -230,3 +230,62 @@ def plot_metrics_vs_time(
         fig.tight_layout()
         if figure_path is not None:
             fig.savefig(figure_path / f"{metric.value}_vs_time{suffix}.png")
+
+
+def plot_metric_distribution(
+    df: pd.DataFrame,
+    metrics: List[CompressionMetric],
+    figure_path: Union[Path, None] = None,
+    suffix: str = "",
+) -> None:
+    """
+    Plot metrics vs time.
+
+    Parameters
+    ----------
+    df
+        The input DataFrame.
+
+    metrics
+        The list of metrics to plot.
+
+    figure_path
+        The path to save the figure.
+
+    suffix
+        The suffix to append to the figure filename.
+        Defaults to "".
+
+    """
+    num_velocities = df["velocity"].nunique()
+    plt.rcParams.update({"font.size": 16})
+
+    for metric in metrics:
+        fig, axs = plt.subplots(
+            1,
+            num_velocities,
+            figsize=(num_velocities * 5, 5),
+            sharey=True,
+            sharex=True,
+            dpi=300,
+        )
+        axs = axs.ravel()
+        for ct, (velocity, df_velocity) in enumerate(df.groupby("velocity")):
+            metric_values = df_velocity[metric.value]
+            bins = np.linspace(np.nanmin(metric_values), np.nanmax(metric_values), 20)
+            for simulator, df_simulator in df_velocity.groupby("simulator"):
+                axs[ct].hist(
+                    df_simulator[metric.value],
+                    label=f"{simulator}",
+                    color=SIMULATOR_COLOR_MAP[simulator],  # type: ignore
+                    alpha=0.7,
+                    bins=bins,
+                )
+            axs[ct].set_title(f"Velocity: {velocity}")
+            if ct == 0:
+                axs[ct].legend()
+        fig.supxlabel(metric.label())
+        fig.supylabel("Count")
+        fig.tight_layout()
+        if figure_path is not None:
+            fig.savefig(figure_path / f"{metric.value}_histogram{suffix}.png")

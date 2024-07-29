@@ -64,6 +64,9 @@ docs = [
     "myst-parser>=3.0.1",
     "sphinx-copybutton>=0.5.2",
 ]
+debug = [
+    "ipdb>=0.13.13",
+]
 
 [tool.black]
 line-length = 88
