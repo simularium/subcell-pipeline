@@ -16,6 +16,7 @@ simulation.batch\_simulations
    .. autosummary::
    
       check_and_save_job_logs
+      copy_simulation_outputs
       generate_configs_from_file
       generate_configs_from_template
       register_and_run_simulations

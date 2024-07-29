@@ -1,0 +1,38 @@
+simulation.readdy
+=================
+
+.. automodule:: subcell_pipeline.simulation.readdy
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+
+.. currentmodule:: subcell_pipeline
+
+.. autosummary::
+   :toctree:
+   :template: custom_summary.rst
+   :recursive:
+
+   simulation.readdy.data_structures
+   simulation.readdy.loader
+   simulation.readdy.parser
+   simulation.readdy.post_processor
+

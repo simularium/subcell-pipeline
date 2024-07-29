@@ -22,6 +22,7 @@ analysis.tomography\_data.tomography\_data
       read_tomography_data
       rescale_tomography_data
       sample_tomography_data
+      test_consecutive_segment_angles
    
    
 

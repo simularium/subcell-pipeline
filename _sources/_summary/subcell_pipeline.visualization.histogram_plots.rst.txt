@@ -1,0 +1,31 @@
+visualization.histogram\_plots
+==============================
+
+.. automodule:: subcell_pipeline.visualization.histogram_plots
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      make_empty_histogram_plots
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

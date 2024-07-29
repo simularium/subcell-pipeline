@@ -1,0 +1,33 @@
+simulation.readdy.data\_structures
+==================================
+
+.. automodule:: subcell_pipeline.simulation.readdy.data_structures
+   :members:
+   :undoc-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      FrameData
+      ParticleData
+      TopologyData
+   
+   
+
+   
+   
+   
+
+
+
