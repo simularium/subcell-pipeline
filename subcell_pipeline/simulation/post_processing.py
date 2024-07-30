@@ -6,7 +6,8 @@ from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
 
-SAMPLE_COLUMNS = ["xpos", "ypos", "zpos"]
+SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
+"""Columns names used when sampling simulation data."""
 
 
 def sample_simulation_data(

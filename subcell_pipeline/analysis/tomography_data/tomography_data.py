@@ -11,6 +11,7 @@ from io_collection.save.save_dataframe import save_dataframe
 from io_collection.save.save_figure import save_figure
 
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
+"""Columns names used when sampling tomography data."""
 
 
 def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> bool:
