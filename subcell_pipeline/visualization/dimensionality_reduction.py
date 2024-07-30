@@ -1,3 +1,5 @@
+"""Visualization methods for dimensionality reduction analysis."""
+
 import os
 from typing import Tuple
 

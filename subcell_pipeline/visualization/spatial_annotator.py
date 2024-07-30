@@ -1,3 +1,5 @@
+"""Methods for adding spatial annotations to visualizations."""
+
 from typing import List
 
 import numpy as np

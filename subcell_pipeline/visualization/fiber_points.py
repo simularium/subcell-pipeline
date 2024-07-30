@@ -1,3 +1,5 @@
+"""Methods for visualizing fiber points."""
+
 import numpy as np
 from simulariumio import (
     AgentData,

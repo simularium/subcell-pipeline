@@ -1,3 +1,5 @@
+"""Methods for visualization display data."""
+
 from simulariumio import DISPLAY_TYPE, DisplayData
 
 

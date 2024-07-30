@@ -1,3 +1,5 @@
+"""Visualization methods for combined simulators."""
+
 import os
 from typing import Optional
 

@@ -1,3 +1,5 @@
+"""Visualization methods for tomography data analysis."""
+
 import os
 from typing import Optional
 

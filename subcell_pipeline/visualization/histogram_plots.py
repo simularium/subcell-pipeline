@@ -1,3 +1,5 @@
+"""Methods for histogram plot visualization."""
+
 from simulariumio import HistogramPlotData, ScatterPlotData
 
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
