@@ -18,31 +18,28 @@ def get_end_to_end_axis_distances_and_projections(
     polymer_trace: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Calculate the distances of the polymer trace points from the end-to-end axis.
+    Calculate distances of the polymer trace points from the end-to-end axis.
+
     Here, the end-to-end axis is defined as the line joining the first and last
     fiber point.
 
     Parameters
     ----------
     polymer_trace
-        Array containing the x,y,z positions of the polymer trace points
-        at a given time.
+        Array containing the x,y,z positions of the polymer trace.
 
     Returns
     -------
     perp_distances
         Perpendicular distances of the polymer trace from the end-to-end axis.
-
     scaled_projections
-        Length of fiber point projections along the end-to-end axis, scaled
-        by axis length.
-        Can be negative.
-
+        Length of fiber point projections along the end-to-end axis, scaled by
+        axis length. Can be negative.
     projection_positions
         Positions of points on the end-to-end axis that are closest from the
-        respective points in the polymer trace.
-        The distance from projection_positions to the trace points is the
-        shortest distance from the end-to-end axis.
+        respective points in the polymer trace. The distance from
+        projection_positions to the trace points is the shortest distance from
+        the end-to-end axis.
     """
     end_to_end_axis = get_end_to_end_unit_vector(polymer_trace=polymer_trace)
     end_to_end_axis_length = np.linalg.norm(polymer_trace[-1] - polymer_trace[0])
@@ -59,8 +56,7 @@ def get_end_to_end_axis_distances_and_projections(
 
 
 def get_average_distance_from_end_to_end_axis(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
     Calculate the average perpendicular distance of polymer trace points from
@@ -69,11 +65,9 @@ def get_average_distance_from_end_to_end_axis(
     Parameters
     ----------
     polymer_trace
-        Array containing the x,y,z positions of the polymer trace
-        at a given time.
-
+        Array containing the x,y,z positions of the polymer trace.
     **options
-        Additional options as key-value pairs.
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
@@ -90,8 +84,7 @@ def get_average_distance_from_end_to_end_axis(
 
 
 def get_asymmetry_of_peak(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
     Calculate the scaled distance of the projection of the peak from the
@@ -100,11 +93,9 @@ def get_asymmetry_of_peak(
     Parameters
     ----------
     polymer_trace
-        Array containing the x,y,z positions of the polymer trace
-        at a given time.
-
+        Array containing the x,y,z positions of the polymer trace.
     **options
-        Additional options as key-value pairs.
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
@@ -129,9 +120,7 @@ def get_asymmetry_of_peak(
     return peak_asym
 
 
-def get_pca_polymer_trace_projection(
-    polymer_trace: np.ndarray,
-) -> np.ndarray:
+def get_pca_polymer_trace_projection(polymer_trace: np.ndarray) -> np.ndarray:
     """
     Calculate the PCA projection of the polymer trace.
 
@@ -142,7 +131,7 @@ def get_pca_polymer_trace_projection(
 
     Returns
     -------
-    pca_projection
+    :
         PCA projection of the polymer trace.
     """
     pca = fit_pca_to_polymer_trace(polymer_trace=polymer_trace)
@@ -150,8 +139,7 @@ def get_pca_polymer_trace_projection(
 
 
 def get_contour_length_from_trace(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
     Calculate the sum of inter-monomer distances in the trace.
@@ -159,10 +147,9 @@ def get_contour_length_from_trace(
     Parameters
     ----------
     polymer_trace
-        n x 3 array containing the x,y,z positions of the polymer trace.
-
+        Array containing the x,y,z positions of the polymer trace.
     **options
-        Additional options as key-value pairs.
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
@@ -173,8 +160,7 @@ def get_contour_length_from_trace(
 
 
 def get_bending_energy_from_trace(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
     Calculate the bending energy per monomer of a polymer trace.
@@ -183,9 +169,8 @@ def get_bending_energy_from_trace(
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
     **options
-        Additional options as key-value pairs.
+        Additional options as key-value pairs:
 
         bending_constant: float
             Bending constant of the fiber in pN nm.
@@ -224,8 +209,7 @@ def get_bending_energy_from_trace(
 
 
 def get_2d_polymer_trace(
-    polymer_trace: np.ndarray,
-    compression_axis: int = 0,
+    polymer_trace: np.ndarray, compression_axis: int = 0
 ) -> np.ndarray:
     """
     Get the 2D projection of the polymer trace.
@@ -233,8 +217,7 @@ def get_2d_polymer_trace(
     Parameters
     ----------
     polymer_trace
-        The polymer trace as an Nx3 numpy array.
-
+        Array containing the x,y,z positions of the polymer trace.
     compression_axis
         The axis along which the polymer trace is compressed.
 
@@ -251,16 +234,14 @@ def get_2d_polymer_trace(
     ]
 
 
-def get_normalized_tangent_vectors(
-    polymer_trace: np.ndarray,
-) -> np.ndarray:
+def get_normalized_tangent_vectors(polymer_trace: np.ndarray) -> np.ndarray:
     """
     Calculate the normalized tangent vectors for a polymer trace.
 
     Parameters
     ----------
     polymer_trace
-        The polymer trace as an Nx3 numpy array.
+        Array containing the x,y,z positions of the polymer trace.
 
     Returns
     -------
@@ -279,10 +260,7 @@ def get_normalized_tangent_vectors(
     return tangents
 
 
-def get_twist_angle(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
-) -> float:
+def get_twist_angle(polymer_trace: np.ndarray, **options: Dict[str, Any]) -> float:
     """
     Calculate the twist angle of the polymer trace.
 
@@ -290,9 +268,8 @@ def get_twist_angle(
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
-    **options: Dict[str, Any]
-        Additional options as key-value pairs.
+    **options
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
@@ -316,10 +293,7 @@ def get_twist_angle(
     return chirality * angle * 180 / np.pi
 
 
-def get_chirality(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
-) -> float:
+def get_chirality(polymer_trace: np.ndarray, **options: Dict[str, Any]) -> float:
     """
     Calculate the chirality of a polymer trace.
 
@@ -327,9 +301,8 @@ def get_chirality(
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
-    **options: Dict[str, Any]
-        Additional options as key-value pairs.
+    **options
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
@@ -351,19 +324,16 @@ def get_chirality(
 
 
 def get_total_fiber_twist(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
-    Calculate the total twist of a polymer trace using the normal
-    vectors.
+    Calculate the total twist of a polymer trace using the normal vectors.
 
     Parameters
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
-    **options: Dict[str, Any]
+    **options
         Additional options as key-value pairs:
 
         signed: bool
@@ -402,19 +372,17 @@ def get_total_fiber_twist(
 
 
 def get_total_fiber_twist_project(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
-    Calculate the total twist using projections of the polymer trace
-    in the 2nd and 3rd dimension.
+    Calculate the total twist using projections of the polymer trace in the 2nd
+    and 3rd dimension.
 
     Parameters
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
-    **options: Dict[str, Any]
+    **options
         Additional options as key-value pairs:
 
         compression_axis: int
@@ -422,7 +390,7 @@ def get_total_fiber_twist_project(
         signed: bool
             Whether to return the signed or unsigned total twist.
         tolerance: float
-            ABSOLUTE_TOLERANCE
+            Tolerance for vector length.
 
     Returns
     -------
@@ -446,20 +414,18 @@ def get_total_fiber_twist_project(
 
 
 def get_total_fiber_twist_pca(
-    polymer_trace: np.ndarray,
-    tolerance: float = ABSOLUTE_TOLERANCE,
+    polymer_trace: np.ndarray, tolerance: float = ABSOLUTE_TOLERANCE
 ) -> float:
     """
-    Calculate the total twist using PCA projections of the polymer trace
-    in the 2nd and 3rd dimension.
+    Calculate the total twist using PCA projections of the polymer trace in the
+    2nd and 3rd dimension.
 
     Parameters
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
     tolerance
-        ABSOLUTE_TOLERANCE
+        Tolerance for vector length.
 
     Returns
     -------
@@ -473,9 +439,7 @@ def get_total_fiber_twist_pca(
 
 
 def get_angle_between_vectors(
-    vec1: np.ndarray,
-    vec2: np.ndarray,
-    signed: bool = False,
+    vec1: np.ndarray, vec2: np.ndarray, signed: bool = False
 ) -> float:
     """
     Calculate the signed angle between two vectors.
@@ -484,18 +448,15 @@ def get_angle_between_vectors(
     ----------
     vec1
         The first vector.
-
     vec2
         The second vector.
-
     signed
-        If True, returns the signed angle between vec1 and vec2
-        Default is False.
+        True to get signed angle between vectors, False otherwise.
 
     Returns
     -------
     :
-        Signed angle between vec1 and vec2.
+        Angle between vec1 and vec2.
     """
     vec1_length = np.linalg.norm(vec1)
     vec2_length = np.linalg.norm(vec2)
@@ -516,24 +477,20 @@ def get_angle_between_vectors(
 
 
 def get_total_fiber_twist_2d(
-    trace_2d: np.ndarray,
-    signed: bool = False,
-    tolerance: float = ABSOLUTE_TOLERANCE,
+    trace_2d: np.ndarray, signed: bool = False, tolerance: float = ABSOLUTE_TOLERANCE
 ) -> float:
     """
-    Calculate the total twist for 2d traces. The 2D twist is defined as the sum of
-    (signed) angles between consecutive vectors in the 2D projection along the
-    compression axis.
+    Calculate the total twist for 2D traces.
+
+    The 2D twist is defined as the sum of (signed) angles between consecutive
+    vectors in the 2D projection along the compression axis.
 
     Parameters
     ----------
     trace_2d
         Array containing the x,y positions of the polymer trace.
-
     signed
-        If True, returns the signed total twist.
-        Default is False.
-
+        True to calculate signed total twist, False otherwise.
     tolerance
         Tolerance for vector length.
 
@@ -564,9 +521,7 @@ def get_total_fiber_twist_2d(
     return np.abs(np.nansum(angles) / 2 / np.pi)
 
 
-def fit_pca_to_polymer_trace(
-    polymer_trace: np.ndarray,
-) -> PCA:
+def fit_pca_to_polymer_trace(polymer_trace: np.ndarray) -> PCA:
     """
     Fits PCA to the polymer trace and returns the fitted object.
 
@@ -578,7 +533,7 @@ def fit_pca_to_polymer_trace(
     Returns
     -------
     :
-        PCA object fitted to the polymer trace.
+        PCA object fit to the polymer trace.
     """
     pca = PCA(n_components=3)
     pca.fit(polymer_trace)
@@ -586,34 +541,31 @@ def fit_pca_to_polymer_trace(
 
 
 def get_third_component_variance(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
-    Calculate the third PCA component given the x,y,z positions of a fiber at
-    a given time. This component reflects non-coplanarity/out of planeness.
+    Calculate the 3rd PCA component given the x,y,z positions of a fiber.
+
+    This component reflects non-coplanarity/out-of-planeness of the fiber.
 
     Parameters
     ----------
     polymer_trace
         Array containing the x,y,z positions of the polymer trace.
-
-    **options: Dict[str, Any]
-        Additional options as key-value pairs.
+    **options
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
     :
-        Noncoplanarity of fiber.
-        Defined as the explained variance ratio of the third PCA component.
+        Variance explained by the third principal component.
     """
     pca = fit_pca_to_polymer_trace(polymer_trace=polymer_trace)
     return pca.explained_variance_ratio_[2]
 
 
 def get_sum_bending_energy(
-    fiber_energy: np.ndarray,
-    **options: Dict[str, Any],
+    fiber_energy: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
     Calculate the sum of bending energy from the given fiber energy array.
@@ -622,36 +574,32 @@ def get_sum_bending_energy(
     ----------
     fiber_energy
         Array containing fiber energy values.
-
-    options
-        Additional options for calculation.
+    **options
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
     :
         Sum of bending energy.
-
     """
     return fiber_energy[3].sum()
 
 
 def get_compression_ratio(
-    polymer_trace: np.ndarray,
-    **options: Dict[str, Any],
+    polymer_trace: np.ndarray, **options: Dict[str, Any]
 ) -> float:
     """
     Calculate the compression ratio of a polymer trace.
 
-    The compression ratio is defined as 1 minus the ratio of the length of
-    the end-to-end vector to the contour length of the polymer trace.
+    The compression ratio is defined as 1 minus the ratio of the length of the
+    end-to-end vector to the contour length of the polymer trace.
 
     Parameters
     ----------
-    polymer_trace: np.ndarray
-        The polymer trace as a numpy array.
-
-    **options: Dict[str, Any]
-        Additional options for the calculation.
+    polymer_trace
+        Array containing the x,y,z positions of the polymer trace.
+    **options
+        Additional options as key-value pairs. Unused.
 
     Returns
     -------
