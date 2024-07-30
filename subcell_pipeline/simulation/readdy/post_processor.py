@@ -473,7 +473,7 @@ class ReaddyPostProcessor:
             of control points for each fiber at each time.
         """
         if n_points < 2:
-            raise Exception("n_points must be > 1 to define a fiber.")
+            raise ValueError("n_points must be > 1 to define a fiber.")
         result: list[list[np.ndarray]] = []
         for time_ix in tqdm(range(len(axis_positions))):
             result.append([])
