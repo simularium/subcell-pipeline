@@ -42,7 +42,7 @@ class ParticleData:
     """ReaDDy type name of the particle."""
 
     position: np.ndarray
-    """XYZ position of the particle."""
+    """The x,y,z position of the particle."""
 
     neighbor_ids: list[int]
     """List of unique IDs of each neighbor particle connected by an edge."""
@@ -79,7 +79,7 @@ class FrameData:
     """Mapping of particle ID to a ParticleData for each particle."""
 
     edge_ids: list[list[int]]
-    """List of edges, each is a list of the IDs of the two connected particles."""
+    """List of edges, each is a list of IDs of the two connected particles."""
 
     def __init__(
         self,

@@ -47,13 +47,13 @@ IDEAL_ACTIN_VECTOR_TO_AXIS: np.ndarray = np.array(
 
 
 class ReaddyPostProcessor:
-    """Get different views of ReaDDy trajectory for different analysis purposes."""
+    """Get views of ReaDDy trajectory for different analysis purposes."""
 
     trajectory: list[FrameData]
     """ReaDDy data trajectory from ReaddyLoader(h5_file_path).trajectory()."""
 
     box_size: np.ndarray
-    """The size of the XYZ dimensions of the simulation volume (shape = 3)."""
+    """The size of the x,y,z dimensions of the simulation volume (shape = 3)."""
 
     periodic_boundary: bool
     """True if simulation had periodic boundary, False otherwise."""
@@ -216,8 +216,8 @@ class ReaddyPostProcessor:
         self, positions: np.ndarray, rotation: np.ndarray
     ) -> np.ndarray:
         """
-        Rotate an x,y,z position (or an array of them) around the x-axis
-        with the given rotation matrix.
+        Rotate an x,y,z position (or an array of them) around the x-axis with
+        the given rotation matrix.
         """
         if len(positions.shape) > 1:
             result = np.dot(positions[:, 1:], rotation)
@@ -231,9 +231,9 @@ class ReaddyPostProcessor:
         fiber_points: list[list[np.ndarray]],
     ) -> tuple[np.ndarray, list[list[np.ndarray]]]:
         """
-        Align the positions of particles in the trajectory
-        so that the furthest point from the x-axis
-        is aligned with the positive y-axis at the last time point.
+        Align the positions of particles in the trajectory so that the furthest
+        point from the x-axis is aligned with the positive y-axis at the last
+        time point.
 
         Parameters
         ----------
@@ -253,8 +253,8 @@ class ReaddyPostProcessor:
             Array (shape = timesteps x 1 x n x 3) containing the x,y,z positions
             of actin monomer particles at each timestep.
         fiber_points
-            List of lists of arrays (shape = n x 3) containing the x,y,z positions
-            of control points for each fiber at each time.
+            List of lists of arrays (shape = n x 3) containing the x,y,z
+            positions of control points for each fiber at each time.
         """
         result: list[list[np.ndarray]] = []
         _, rotation = align_fiber(fiber_points[-1][0])
@@ -332,7 +332,7 @@ class ReaddyPostProcessor:
         ideal_vector_to_axis: np.ndarray = IDEAL_ACTIN_VECTOR_TO_AXIS,
     ) -> tuple[list[list[np.ndarray]], list[list[list[int]]]]:
         """
-        Get XYZ axis positions for each particle in each linear fiber at each
+        Get x,y,z axis positions for each particle in each linear fiber at each
         timestep.
 
         Parameters
@@ -341,7 +341,8 @@ class ReaddyPostProcessor:
             List of list of lists of particle IDs for each particle in each
             fiber at each time.
         ideal_positions
-            XYZ positions for 3 particles in an ideal chain (shape = 3 x 3).
+            The x,y,z positions for 3 particles in an ideal chain (shape = 3 x
+            3).
         ideal_vector_to_axis
             Vector from the second ideal position to the axis of the fiber
             (shape = 3).
@@ -403,7 +404,7 @@ class ReaddyPostProcessor:
         normal_length: float = 5,
     ) -> list[list[np.ndarray]]:
         """
-        Get XYZ positions defining start and end points for normals for each
+        Get x,y,z positions defining start and end points for normals for each
         particle in each fiber at each timestep.
 
         Parameters
@@ -454,7 +455,7 @@ class ReaddyPostProcessor:
     ) -> list[list[np.ndarray]]:
         """
         Resample the fiber line defined by each array of axis positions to get
-        the requested number of points between XYZ control points for each
+        the requested number of points between x,y,z control points for each
         linear fiber at each timestep.
 
         Parameters
@@ -469,8 +470,8 @@ class ReaddyPostProcessor:
         Returns
         -------
         :
-            List of lists of arrays (shape = n x 3) containing the x,y,z positions
-            of control points for each fiber at each time.
+            List of lists of arrays (shape = n x 3) containing the x,y,z
+            positions of control points for each fiber at each time.
         """
         if n_points < 2:
             raise ValueError("n_points must be > 1 to define a fiber.")
@@ -583,8 +584,8 @@ class ReaddyPostProcessor:
         Returns
         -------
         :
-            List of list of edges as position of each of the two connected particles
-            for each edge at each time.
+            List of list of edges as position of each of the two connected
+            particles for each edge at each time.
         """
         edges: list[list[np.ndarray]] = []
         for frame in self.trajectory:

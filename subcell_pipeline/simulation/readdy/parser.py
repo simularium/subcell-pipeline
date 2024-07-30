@@ -210,11 +210,12 @@ def parse_readdy_simulation_single_fiber_trajectory(
 
 
 def _round_2_sig_figs(x: float) -> int:
+    """Round value to two sigfigs."""
     return int(round(x, -int(floor(log10(abs(0.1 * x))))))
 
 
-def velocity_for_cond(condition_key: str) -> float:
-    """'NNNN' -> NNN.N."""
+def _velocity_for_cond(condition_key: str) -> float:
+    """Convert `NNNN` condition key to `NNN.N` velocity."""
     return float(condition_key[:3] + "." + condition_key[-1])
 
 
@@ -246,8 +247,7 @@ def parse_readdy_simulation_data(
     n_monomer_points
         Number of equally spaced monomer points to sample.
     compression
-        If True, parse compressed trajectories,
-        If False, parse baseline uncompressed trajectories.
+        True if simulations are compressed, False otherwise.
     temp_path
         Path for saving temporary h5 files.
     """
@@ -255,7 +255,7 @@ def parse_readdy_simulation_data(
     if compression:
         total_steps = {
             cond: _round_2_sig_figs(
-                (COMPRESSION_DISTANCE * 1e-3 / velocity_for_cond(cond)) * 1e10
+                (COMPRESSION_DISTANCE * 1e-3 / _velocity_for_cond(cond)) * 1e10
             )
             for cond in condition_keys
         }

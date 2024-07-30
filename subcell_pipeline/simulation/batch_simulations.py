@@ -252,7 +252,7 @@ def copy_simulation_outputs(
         Name of simulation series.
     source_template
         Template string for source output files.
-    n_replicates : int
+    n_replicates
         _Number of simulation replicates.
     condition_keys
         Map of source to target condition keys.
