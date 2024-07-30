@@ -39,7 +39,10 @@ from subcell_pipeline.simulation.readdy.parser import (
 from subcell_pipeline.simulation.readdy.post_processor import ReaddyPostProcessor
 from subcell_pipeline.visualization.display_data import get_readdy_display_data
 from subcell_pipeline.visualization.scatter_plots import make_empty_scatter_plots
-from subcell_pipeline.visualization.spatial_annotator import SpatialAnnotator
+from subcell_pipeline.visualization.spatial_annotator import (
+    add_fiber_annotation_agents,
+    add_sphere_annotation_agents,
+)
 
 READDY_SAVED_FRAMES: int = 1000
 
@@ -86,7 +89,7 @@ def _add_readdy_spatial_annotations(
     edges = post_processor.edge_positions()
 
     # edges
-    converter._data = SpatialAnnotator.add_fiber_agents(
+    converter._data = add_fiber_annotation_agents(
         converter._data,
         fiber_points=edges,
         type_name="edge",
@@ -100,7 +103,7 @@ def _add_readdy_spatial_annotations(
         axis_positions=axis_positions,
         normal_length=10.0,
     )
-    converter._data = SpatialAnnotator.add_fiber_agents(
+    converter._data = add_fiber_annotation_agents(
         converter._data,
         fiber_points=normals,
         type_name="normal",
@@ -112,7 +115,7 @@ def _add_readdy_spatial_annotations(
     sphere_positions = []
     for time_ix in range(len(fiber_points)):
         sphere_positions.append(fiber_points[time_ix][0])
-    converter._data = SpatialAnnotator.add_sphere_agents(
+    converter._data = add_sphere_annotation_agents(
         converter._data,
         sphere_positions,
         type_name="fiber point",
