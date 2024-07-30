@@ -96,9 +96,6 @@ extend-select = [
     "RUF100", # Unused noqa directive
 ]
 extend-ignore = [
-    "D100", # Missing docstring in public module
-    "D101", # Missing docstring in public class
-    "D103", # Missing docstring in public function
     "D105", # Missing docstring in magic method
     "D107", # Missing docstring in __init__
     "D202", # Blank lines between the function body and the function docstring
