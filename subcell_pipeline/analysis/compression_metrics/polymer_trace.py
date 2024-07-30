@@ -1,6 +1,6 @@
 """Methods to calculate metrics from polymer trace data."""
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 import numpy as np
 from sklearn.decomposition import PCA
@@ -16,7 +16,7 @@ from subcell_pipeline.analysis.compression_metrics.vectors import (
 
 def get_end_to_end_axis_distances_and_projections(
     polymer_trace: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate distances of the polymer trace points from the end-to-end axis.
 
@@ -56,7 +56,7 @@ def get_end_to_end_axis_distances_and_projections(
 
 
 def get_average_distance_from_end_to_end_axis(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the average perpendicular distance of polymer trace points from
@@ -84,7 +84,7 @@ def get_average_distance_from_end_to_end_axis(
 
 
 def get_asymmetry_of_peak(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the scaled distance of the projection of the peak from the
@@ -139,7 +139,7 @@ def get_pca_polymer_trace_projection(polymer_trace: np.ndarray) -> np.ndarray:
 
 
 def get_contour_length_from_trace(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the sum of inter-monomer distances in the trace.
@@ -160,7 +160,7 @@ def get_contour_length_from_trace(
 
 
 def get_bending_energy_from_trace(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the bending energy per monomer of a polymer trace.
@@ -260,7 +260,7 @@ def get_normalized_tangent_vectors(polymer_trace: np.ndarray) -> np.ndarray:
     return tangents
 
 
-def get_twist_angle(polymer_trace: np.ndarray, **options: Dict[str, Any]) -> float:
+def get_twist_angle(polymer_trace: np.ndarray, **options: dict[str, Any]) -> float:
     """
     Calculate the twist angle of the polymer trace.
 
@@ -293,7 +293,7 @@ def get_twist_angle(polymer_trace: np.ndarray, **options: Dict[str, Any]) -> flo
     return chirality * angle * 180 / np.pi
 
 
-def get_chirality(polymer_trace: np.ndarray, **options: Dict[str, Any]) -> float:
+def get_chirality(polymer_trace: np.ndarray, **options: dict[str, Any]) -> float:
     """
     Calculate the chirality of a polymer trace.
 
@@ -324,7 +324,7 @@ def get_chirality(polymer_trace: np.ndarray, **options: Dict[str, Any]) -> float
 
 
 def get_total_fiber_twist(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the total twist of a polymer trace using the normal vectors.
@@ -372,7 +372,7 @@ def get_total_fiber_twist(
 
 
 def get_total_fiber_twist_project(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the total twist using projections of the polymer trace in the 2nd
@@ -541,7 +541,7 @@ def fit_pca_to_polymer_trace(polymer_trace: np.ndarray) -> PCA:
 
 
 def get_third_component_variance(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the 3rd PCA component given the x,y,z positions of a fiber.
@@ -565,7 +565,7 @@ def get_third_component_variance(
 
 
 def get_sum_bending_energy(
-    fiber_energy: np.ndarray, **options: Dict[str, Any]
+    fiber_energy: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the sum of bending energy from the given fiber energy array.
@@ -586,7 +586,7 @@ def get_sum_bending_energy(
 
 
 def get_compression_ratio(
-    polymer_trace: np.ndarray, **options: Dict[str, Any]
+    polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
     """
     Calculate the compression ratio of a polymer trace.

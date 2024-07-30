@@ -1,7 +1,6 @@
 """Visualization methods for dimensionality reduction analysis."""
 
 import os
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,7 +44,7 @@ def _pca_fiber_points_over_time(
     pc_ix: int,
     simulator_name: str = "Combined",
     color: str = "#eaeaea",
-) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
+) -> tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
     """
     Get fiber_points for samples of the PC distributions in order to visualize
     the samples over time.
@@ -78,7 +77,7 @@ def _pca_fiber_points_one_timestep(
     color_maps: dict[str, Colormap],
     pc_ix: int,
     simulator_name: str = "Combined",
-) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
+) -> tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
     """
     Get fiber_points for samples of the PC distributions in order to visualize
     the samples together in one timestep.

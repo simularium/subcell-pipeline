@@ -1,7 +1,7 @@
 """Enumerations for compression metric analysis."""
 
 from enum import Enum
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Union
 
 import numpy as np
 
@@ -120,7 +120,7 @@ class CompressionMetric(Enum):
         :
             The calculated compression metric for the polymer
         """
-        functions: Dict[CompressionMetric, Callable] = {
+        functions: dict[CompressionMetric, Callable] = {
             CompressionMetric.NON_COPLANARITY: get_third_component_variance,
             CompressionMetric.PEAK_ASYMMETRY: get_asymmetry_of_peak,
             CompressionMetric.SUM_BENDING_ENERGY: get_sum_bending_energy,

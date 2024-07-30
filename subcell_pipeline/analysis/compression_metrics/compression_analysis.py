@@ -1,7 +1,7 @@
 """Methods compression metric analysis and plotting."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -90,7 +90,7 @@ def get_compression_metric_data(
 
 
 def calculate_compression_metrics(
-    df: pd.DataFrame, metrics: List[Any], **options: Dict[str, Any]
+    df: pd.DataFrame, metrics: list[Any], **options: dict[str, Any]
 ) -> pd.DataFrame:
     """
     Calculate compression metrics for a single simulation condition and seed.
@@ -148,7 +148,7 @@ def save_compression_metrics(
 
 def plot_metrics_vs_time(
     df: pd.DataFrame,
-    metrics: List[CompressionMetric],
+    metrics: list[CompressionMetric],
     figure_path: Union[Path, None] = None,
     suffix: str = "",
     compression_distance: float = DEFAULT_COMPRESSION_DISTANCE,
@@ -216,7 +216,7 @@ def plot_metrics_vs_time(
 
 def plot_metric_distribution(
     df: pd.DataFrame,
-    metrics: List[CompressionMetric],
+    metrics: list[CompressionMetric],
     figure_path: Union[Path, None] = None,
     suffix: str = "",
 ) -> None:
