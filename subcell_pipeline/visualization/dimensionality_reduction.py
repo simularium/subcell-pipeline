@@ -21,12 +21,25 @@ BOX_SIZE: np.ndarray = np.array(3 * [600.0])
 """Bounding box size for dimensionality reduction trajectory."""
 
 
-def rgb_to_hex_color(color: tuple[float, float, float]) -> str:
+def _rgb_to_hex_color(color: tuple[float, float, float]) -> str:
+    """
+    Convert RGB color to hexadecimal format.
+
+    Parameters
+    ----------
+    color
+        Red, green, and blue colors (between 0.0 and 1.0).
+
+    Returns
+    -------
+    :
+        Color in hexadecimal format.
+    """
     rgb = (int(255 * color[0]), int(255 * color[1]), int(255 * color[2]))
     return f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}"
 
 
-def pca_fiber_points_over_time(
+def _pca_fiber_points_over_time(
     samples: list[np.ndarray],
     pca: PCA,
     pc_ix: int,
@@ -34,8 +47,8 @@ def pca_fiber_points_over_time(
     color: str = "#eaeaea",
 ) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
     """
-    Get fiber_points for samples of the PC distributions
-    in order to visualize the samples over time.
+    Get fiber_points for samples of the PC distributions in order to visualize
+    the samples over time.
     """
     if simulator_name == "Combined":
         simulator_name = ""
@@ -59,7 +72,7 @@ def pca_fiber_points_over_time(
     return [fiber_points_arr], [type_name], display_data
 
 
-def pca_fiber_points_one_timestep(
+def _pca_fiber_points_one_timestep(
     samples: list[np.ndarray],
     pca: PCA,
     color_maps: dict[str, Colormap],
@@ -67,8 +80,8 @@ def pca_fiber_points_one_timestep(
     simulator_name: str = "Combined",
 ) -> Tuple[list[np.ndarray], list[str], dict[str, DisplayData]]:
     """
-    Get fiber_points for samples of the PC distributions
-    in order to visualize the samples together in one timestep.
+    Get fiber_points for samples of the PC distributions in order to visualize
+    the samples together in one timestep.
     """
     color_map = color_maps[simulator_name]
     if simulator_name == "Combined":
@@ -94,12 +107,12 @@ def pca_fiber_points_one_timestep(
             display_data[type_name] = DisplayData(
                 name=type_name,
                 display_type=DISPLAY_TYPE.FIBER,
-                color=rgb_to_hex_color(color_map(abs(sample) / color_range)),
+                color=_rgb_to_hex_color(color_map(abs(sample) / color_range)),
             )
     return fiber_points, type_names, display_data
 
 
-def generate_simularium_and_save(
+def _generate_simularium_and_save(
     name: str,
     fiber_points: list[np.ndarray],
     type_names: list[str],
@@ -110,12 +123,10 @@ def generate_simularium_and_save(
     temp_path: str,
     pc: str,
 ) -> None:
-    """Generate a Simulariumio object for the fiber points and save it."""
+    """Generate a simulariumio object for the fiber points and save it."""
     meta_data = MetaData(
         box_size=BOX_SIZE,
         camera_defaults=CameraData(
-            # position=np.array([-20.0, 350.0, 200.0]),
-            # look_at_position=np.array([50.0, 0.0, 0.0]),
             position=np.array([70.0, 70.0, 300.0]),
             look_at_position=np.array([70.0, 70.0, 0.0]),
             fov_degrees=60.0,
@@ -132,7 +143,6 @@ def generate_simularium_and_save(
         time_units,
         spatial_units,
         fiber_radius=1.0,
-        # fiber_radius=6.0,
     )
 
     # Save locally and copy to bucket.
@@ -173,8 +183,8 @@ def visualize_dimensionality_reduction(
     simulator_detail
         True to show individual simulator ranges, False otherwise.
     sample_ranges
-        Min and max values to visualize for each PC
-        (and each simulator if simulator_detail).
+        Min and max values to visualize for each PC (and each simulator if
+        simulator_detail).
     separate_pcs
         True to Visualize PCs in separate files, False otherwise.
     sample_resolution
@@ -227,12 +237,12 @@ def visualize_dimensionality_reduction(
         ]
         for pc_ix in pc_ixs:
             if distribution_over_time:
-                _fiber_points, _type_names, _display_data = pca_fiber_points_over_time(
+                _fiber_points, _type_names, _display_data = _pca_fiber_points_over_time(
                     samples, pca, pc_ix, simulator, over_time_colors[simulator]
                 )
             else:
                 _fiber_points, _type_names, _display_data = (
-                    pca_fiber_points_one_timestep(
+                    _pca_fiber_points_one_timestep(
                         samples, pca, color_maps, pc_ix, simulator
                     )
                 )
@@ -246,7 +256,7 @@ def visualize_dimensionality_reduction(
                 display_data[0] = {**display_data[0], **_display_data}
     if separate_pcs:
         for pc_ix in pc_ixs:
-            generate_simularium_and_save(
+            _generate_simularium_and_save(
                 dataset_name,
                 fiber_points[pc_ix],
                 type_names[pc_ix],
@@ -258,7 +268,7 @@ def visualize_dimensionality_reduction(
                 str(pc_ix + 1),
             )
     else:
-        generate_simularium_and_save(
+        _generate_simularium_and_save(
             dataset_name,
             fiber_points[0],
             type_names[0],

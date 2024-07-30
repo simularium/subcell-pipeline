@@ -45,10 +45,10 @@ from subcell_pipeline.visualization.spatial_annotator import (
 )
 
 READDY_SAVED_FRAMES: int = 1000
+"""Number of saved frames for ReaDDy simulations."""
 
 BOX_SIZE: np.ndarray = np.array(3 * [600.0])
-
-UNIT_REGISTRY = UnitRegistry()
+"""Bounding box size for individual simulator trajectory."""
 
 
 def _add_individual_plots(
@@ -333,7 +333,7 @@ def visualize_individual_readdy_trajectories(
 
 def _find_time_units(raw_time: float, units: str = "s") -> tuple[str, float]:
     """Get compact time units and a multiplier to put the times in those units."""
-    time = UNIT_REGISTRY.Quantity(raw_time, units)
+    time = UnitRegistry().Quantity(raw_time, units)
     time_compact = time.to_compact()
     return f"{time_compact.units:~}", time_compact.magnitude / raw_time
 
