@@ -158,5 +158,3 @@ sampled_data = sample_tomography_data(
 plot_tomography_data_by_dataset(
     sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
 )
-
-# %%

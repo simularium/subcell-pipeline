@@ -45,9 +45,9 @@ def plot_pacmap_feature_scatter(data: pd.DataFrame, features: dict) -> None:
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data
         PaCMAP results data.
-    features : dict
+    features
         Map of feature name to coloring.
     """
 
