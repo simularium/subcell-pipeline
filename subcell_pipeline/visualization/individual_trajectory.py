@@ -399,6 +399,7 @@ def _get_cytosim_simularium_converter(
                             name="actin",
                             radius=0.002,
                             display_type=DISPLAY_TYPE.FIBER,
+                            color="#1cbfaa",
                         )
                     },
                 ),
