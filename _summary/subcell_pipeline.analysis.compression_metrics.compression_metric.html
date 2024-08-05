@@ -323,14 +323,13 @@
         <article role="main" id="furo-main-content">
           <section id="module-subcell_pipeline.analysis.compression_metrics.compression_metric">
 <span id="analysis-compression-metrics-compression-metric"></span><h1>analysis.compression_metrics.compression_metric<a class="headerlink" href="#module-subcell_pipeline.analysis.compression_metrics.compression_metric" title="Link to this heading">¶</a></h1>
-<p>Methods to obtain labels and calculate metrics from the
-CompressionMetric Enum class.</p>
+<p>Enumerations for compression metric analysis.</p>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric" title="subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompressionMetric</span></code></a></p></td>
-<td><p>An enumeration.</p></td>
+<td><p>Enumeration for compression metrics.</p></td>
 </tr>
 </tbody>
 </table>
@@ -338,7 +337,7 @@ CompressionMetric Enum class.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompressionMetric</span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/compression_metrics/compression_metric.html#CompressionMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric" title="Link to this definition">¶</a></dt>
-<dd><p>An enumeration.</p>
+<dd><p>Enumeration for compression metrics.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric.NON_COPLANARITY">
 <span class="sig-name descname"><span class="pre">NON_COPLANARITY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'non_coplanarity'</span></em><a class="headerlink" href="#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric.NON_COPLANARITY" title="Link to this definition">¶</a></dt>
@@ -394,11 +393,8 @@ CompressionMetric Enum class.</p>
 <span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/compression_metrics/compression_metric.html#CompressionMetric.label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric.label" title="Link to this definition">¶</a></dt>
 <dd><p>Return the label for the compression metric.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – the CompressionMetric object</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The label for the compression metric.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The label for the compression metric.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -408,11 +404,8 @@ CompressionMetric Enum class.</p>
 <span class="sig-name descname"><span class="pre">description</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/compression_metrics/compression_metric.html#CompressionMetric.description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric.description" title="Link to this definition">¶</a></dt>
 <dd><p>Return the description for the compression metric.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – the CompressionMetric object</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The description (and units) for the compression metric.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The description (and units) for the compression metric.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -422,11 +415,8 @@ CompressionMetric Enum class.</p>
 <span class="sig-name descname"><span class="pre">bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/compression_metrics/compression_metric.html#CompressionMetric.bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric.bounds" title="Link to this definition">¶</a></dt>
 <dd><p>Return the default bounds for the compression metric.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self</strong> – the CompressionMetric object</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The default bounds for the compression metric.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The default bounds for the compression metric.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -438,8 +428,7 @@ CompressionMetric Enum class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – the CompressionMetric object</p></li>
-<li><p><strong>polymer_trace</strong> – array containing the x,y,z positions of the polymer trace</p></li>
+<li><p><strong>polymer_trace</strong> – Array containing the x,y,z positions of the polymer trace</p></li>
 <li><p><strong>**options</strong> – Additional options as key-value pairs.</p></li>
 </ul>
 </dd>

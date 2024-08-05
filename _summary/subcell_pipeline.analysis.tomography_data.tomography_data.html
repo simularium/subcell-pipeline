@@ -323,6 +323,17 @@
         <article role="main" id="furo-main-content">
           <section id="module-subcell_pipeline.analysis.tomography_data.tomography_data">
 <span id="analysis-tomography-data-tomography-data"></span><h1>analysis.tomography_data.tomography_data<a class="headerlink" href="#module-subcell_pipeline.analysis.tomography_data.tomography_data" title="Link to this heading">¶</a></h1>
+<p>Methods for analyzing tomography data.</p>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.tomography_data.tomography_data.TOMOGRAPHY_SAMPLE_COLUMNS" title="subcell_pipeline.analysis.tomography_data.tomography_data.TOMOGRAPHY_SAMPLE_COLUMNS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TOMOGRAPHY_SAMPLE_COLUMNS</span></code></a></p></td>
+<td><p>Columns names used when sampling tomography data.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -349,22 +360,29 @@
 <td><p>Sample selected columns from tomography data at given resolution.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.tomography_data.tomography_data.test_consecutive_segment_angles" title="subcell_pipeline.analysis.tomography_data.tomography_data.test_consecutive_segment_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_consecutive_segment_angles</span></code></a>(polymer_trace)</p></td>
-<td><p>Test whether the angles between consecutive segments of a polymer trace are less than 90 degrees.</p></td>
+<td><p>Test if all angles between consecutive segments of a polymer trace are less than 90 degrees.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="subcell_pipeline.analysis.tomography_data.tomography_data.TOMOGRAPHY_SAMPLE_COLUMNS">
+<span class="sig-name descname"><span class="pre">TOMOGRAPHY_SAMPLE_COLUMNS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['xpos',</span> <span class="pre">'ypos',</span> <span class="pre">'zpos']</span></em><a class="headerlink" href="#subcell_pipeline.analysis.tomography_data.tomography_data.TOMOGRAPHY_SAMPLE_COLUMNS" title="Link to this definition">¶</a></dt>
+<dd><p>Columns names used when sampling tomography data.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="subcell_pipeline.analysis.tomography_data.tomography_data.test_consecutive_segment_angles">
 <span class="sig-name descname"><span class="pre">test_consecutive_segment_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/tomography_data/tomography_data.html#test_consecutive_segment_angles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.tomography_data.tomography_data.test_consecutive_segment_angles" title="Link to this definition">¶</a></dt>
-<dd><p>Test whether the angles between consecutive segments of a polymer
-trace are less than 90 degrees.</p>
+<dd><p>Test if all angles between consecutive segments of a polymer trace are less
+than 90 degrees.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>polymer_trace</strong> – A 2D array where each row is a point in 3D space.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if all consecutive angles are less than 180 degrees.</p>
+<dd class="field-even"><p>True if all consecutive angles are less than 90 degrees, False
+otherwise.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -409,16 +427,13 @@ trace are less than 90 degrees.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bucket</strong> – Name of S3 bucket for input and output files.</p></li>
 <li><p><strong>name</strong> – Name of dataset.</p></li>
-<li><p><strong>repository</strong> (<em>str</em>) – Data repository for downloading tomography data</p></li>
-<li><p><strong>datasets</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Folders and names of branched actin datasets</p></li>
-<li><p><strong>scale_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Data scaling factor (pixels to um).</p></li>
+<li><p><strong>repository</strong> – Data repository for downloading tomography data.</p></li>
+<li><p><strong>datasets</strong> – Folders and names of branched actin datasets.</p></li>
+<li><p><strong>scale_factor</strong> – Data scaling factor (pixels to um).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Merged data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p>Merged branched tomography data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -432,16 +447,13 @@ trace are less than 90 degrees.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bucket</strong> – Name of S3 bucket for input and output files.</p></li>
 <li><p><strong>name</strong> – Name of dataset.</p></li>
-<li><p><strong>repository</strong> (<em>str</em>) – Data repository for downloading tomography data</p></li>
-<li><p><strong>datasets</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Folders and names of branched actin datasets</p></li>
-<li><p><strong>scale_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Data scaling factor (pixels to um).</p></li>
+<li><p><strong>repository</strong> – Data repository for downloading tomography data.</p></li>
+<li><p><strong>datasets</strong> – Folders and names of branched actin datasets.</p></li>
+<li><p><strong>scale_factor</strong> – Data scaling factor (pixels to um).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Merged data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p>Merged unbranched tomography data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -455,17 +467,14 @@ trace are less than 90 degrees.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bucket</strong> – Name of S3 bucket for input and output files.</p></li>
 <li><p><strong>name</strong> – Name of dataset.</p></li>
-<li><p><strong>repository</strong> (<em>str</em>) – Data repository for downloading tomography data</p></li>
-<li><p><strong>datasets</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Folders and names of branched actin datasets</p></li>
-<li><p><strong>group</strong> (<em>str</em>) – Actin filament group (“branched” or “unbranched”)</p></li>
-<li><p><strong>scale_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Data scaling factor (pixels to um).</p></li>
+<li><p><strong>repository</strong> – Data repository for downloading tomography data.</p></li>
+<li><p><strong>datasets</strong> – Folders and names of branched actin datasets.</p></li>
+<li><p><strong>group</strong> – Actin filament group (“branched” or “unbranched”).</p></li>
+<li><p><strong>scale_factor</strong> – Data scaling factor (pixels to um).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Merged data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p>Merged tomography data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -477,7 +486,7 @@ trace are less than 90 degrees.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Tomography data to sample.</p></li>
+<li><p><strong>data</strong> – Tomography data to sample.</p></li>
 <li><p><strong>save_location</strong> – Location to save sampled data.</p></li>
 <li><p><strong>save_key</strong> – File key for sampled data.</p></li>
 <li><p><strong>n_monomer_points</strong> – Number of equally spaced monomer points to sample.</p></li>
@@ -565,6 +574,7 @@ trace are less than 90 degrees.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">analysis.tomography_data.tomography_data</a><ul>
+<li><a class="reference internal" href="#subcell_pipeline.analysis.tomography_data.tomography_data.TOMOGRAPHY_SAMPLE_COLUMNS"><code class="docutils literal notranslate"><span class="pre">TOMOGRAPHY_SAMPLE_COLUMNS</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.tomography_data.tomography_data.test_consecutive_segment_angles"><code class="docutils literal notranslate"><span class="pre">test_consecutive_segment_angles()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.tomography_data.tomography_data.read_tomography_data"><code class="docutils literal notranslate"><span class="pre">read_tomography_data()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.analysis.tomography_data.tomography_data.rescale_tomography_data"><code class="docutils literal notranslate"><span class="pre">rescale_tomography_data()</span></code></a></li>

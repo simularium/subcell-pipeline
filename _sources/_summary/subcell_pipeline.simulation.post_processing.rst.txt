@@ -7,6 +7,12 @@ simulation.post\_processing
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      SAMPLE_COLUMNS
+   
    
 
    

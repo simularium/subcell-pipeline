@@ -359,9 +359,6 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.parse_readdy_simulation_single_fiber_trajectory" title="subcell_pipeline.simulation.readdy.parser.parse_readdy_simulation_single_fiber_trajectory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_readdy_simulation_single_fiber_trajectory</span></code></a>(...)</p></td>
 <td><p>Parse ReaDDy trajectory data into tidy data format.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.velocity_for_cond" title="subcell_pipeline.simulation.readdy.parser.velocity_for_cond"><code class="xref py py-obj docutils literal notranslate"><span class="pre">velocity_for_cond</span></code></a>(condition_key)</p></td>
-<td><p>'NNNN' -&gt; NNN.N.</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -436,12 +433,6 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.parser.velocity_for_cond">
-<span class="sig-name descname"><span class="pre">velocity_for_cond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/parser.html#velocity_for_cond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.parser.velocity_for_cond" title="Link to this definition">¶</a></dt>
-<dd><p>‘NNNN’ -&gt; NNN.N.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.parser.parse_readdy_simulation_data">
 <span class="sig-name descname"><span class="pre">parse_readdy_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timepoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_monomer_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/parser.html#parse_readdy_simulation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.parser.parse_readdy_simulation_data" title="Link to this definition">¶</a></dt>
 <dd><p>Parse ReaDDy simulation data for select conditions and replicates.</p>
@@ -454,8 +445,7 @@
 <li><p><strong>n_replicates</strong> – Number of simulation replicates.</p></li>
 <li><p><strong>n_timepoints</strong> – Number of equally spaced timepoints to sample.</p></li>
 <li><p><strong>n_monomer_points</strong> – Number of equally spaced monomer points to sample.</p></li>
-<li><p><strong>compression</strong> – If True, parse compressed trajectories,
-If False, parse baseline uncompressed trajectories.</p></li>
+<li><p><strong>compression</strong> – True if simulations are compressed, False otherwise.</p></li>
 <li><p><strong>temp_path</strong> – Path for saving temporary h5 files.</p></li>
 </ul>
 </dd>
@@ -527,7 +517,6 @@ If False, parse baseline uncompressed trajectories.</p></li>
 <li><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.COMPRESSION_DISTANCE"><code class="docutils literal notranslate"><span class="pre">COMPRESSION_DISTANCE</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.download_readdy_hdf5"><code class="docutils literal notranslate"><span class="pre">download_readdy_hdf5()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.parse_readdy_simulation_single_fiber_trajectory"><code class="docutils literal notranslate"><span class="pre">parse_readdy_simulation_single_fiber_trajectory()</span></code></a></li>
-<li><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.velocity_for_cond"><code class="docutils literal notranslate"><span class="pre">velocity_for_cond()</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.simulation.readdy.parser.parse_readdy_simulation_data"><code class="docutils literal notranslate"><span class="pre">parse_readdy_simulation_data()</span></code></a></li>
 </ul>
 </li>

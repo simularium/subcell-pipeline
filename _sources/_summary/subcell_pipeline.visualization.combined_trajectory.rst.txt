@@ -7,6 +7,12 @@ visualization.combined\_trajectory
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      BOX_SIZE
+   
    
 
    
@@ -15,7 +21,6 @@ visualization.combined\_trajectory
 
    .. autosummary::
    
-      get_combined_trajectory_converter
       visualize_combined_trajectories
    
    

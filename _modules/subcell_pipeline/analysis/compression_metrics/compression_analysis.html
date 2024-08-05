@@ -315,13 +315,10 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for subcell_pipeline.analysis.compression_metrics.compression_analysis</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Methods for obtaining compression metric data and</span>
-<span class="sd">plotting compression metrics vs time.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Methods compression metric analysis and plotting.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -350,28 +347,23 @@
     <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load or create merged data with metrics for given conditions and random seeds.</span>
+<span class="sd">    Load or create merged data with metrics for given conditions and seeds.</span>
 
-<span class="sd">    If merged data already exists, load the data.</span>
-<span class="sd">    Otherwise, iterate through the conditions and seeds to merge the data.</span>
+<span class="sd">    If merged data already exists, load the data. Otherwise, iterate through the</span>
+<span class="sd">    conditions and seeds to merge the data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    bucket</span>
 <span class="sd">        Name of S3 bucket for input and output files.</span>
-
 <span class="sd">    series_name</span>
 <span class="sd">        Name of simulation series.</span>
-
 <span class="sd">    condition_keys</span>
 <span class="sd">        List of condition keys.</span>
-
 <span class="sd">    random_seeds</span>
 <span class="sd">        Random seeds for simulations.</span>
-
 <span class="sd">    metrics</span>
 <span class="sd">        List of metrics to calculate.</span>
-
 <span class="sd">    recalculate</span>
 <span class="sd">        True if data should be recalculated, False otherwise.</span>
 
@@ -420,7 +412,7 @@
 <div class="viewcode-block" id="calculate_compression_metrics">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.compression_analysis.html#subcell_pipeline.analysis.compression_metrics.compression_analysis.calculate_compression_metrics">[docs]</a>
 <span class="k">def</span> <span class="nf">calculate_compression_metrics</span><span class="p">(</span>
-    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate compression metrics for a single simulation condition and seed.</span>
@@ -428,18 +420,16 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    df</span>
-<span class="sd">        The input DataFrame for a single simulator.</span>
-
+<span class="sd">        Input data for a single simulator.</span>
 <span class="sd">    metrics</span>
 <span class="sd">        The list of metrics to calculate.</span>
-
 <span class="sd">    **options</span>
 <span class="sd">        Additional options for the calculation.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        The DataFrame with the calculated metrics.</span>
+<span class="sd">        Dataframe with calculated metrics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">time_values</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
     <span class="n">df_metrics</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -486,37 +476,29 @@
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.compression_analysis.html#subcell_pipeline.analysis.compression_metrics.compression_analysis.plot_metrics_vs_time">[docs]</a>
 <span class="k">def</span> <span class="nf">plot_metrics_vs_time</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CompressionMetric</span><span class="p">],</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CompressionMetric</span><span class="p">],</span>
     <span class="n">figure_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="n">compression_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_COMPRESSION_DISTANCE</span><span class="p">,</span>
     <span class="n">use_real_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot metrics vs time.</span>
+<span class="sd">    Plot individual metric values over time for each velocity.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    df</span>
-<span class="sd">        The input DataFrame.</span>
-
+<span class="sd">        Input dataframe.</span>
 <span class="sd">    metrics</span>
-<span class="sd">        The list of metrics to plot.</span>
-
+<span class="sd">        List of metrics to plot.</span>
 <span class="sd">    figure_path</span>
-<span class="sd">        The path to save the figure.</span>
-
+<span class="sd">        Path to save the figure.</span>
 <span class="sd">    suffix</span>
-<span class="sd">        The suffix to append to the figure filename.</span>
-<span class="sd">        Defaults to &quot;&quot;.</span>
-
+<span class="sd">        Suffix to append to the figure filename.</span>
 <span class="sd">    compression_distance</span>
-<span class="sd">        The compression distance in nm.</span>
-<span class="sd">        Defaults to 150.0.</span>
-
+<span class="sd">        Compression distance in nm.</span>
 <span class="sd">    use_real_time</span>
-<span class="sd">        Whether to use real time for the x-axis.</span>
-<span class="sd">        Defaults to False.</span>
+<span class="sd">        True to use real time for the x-axis, False otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">num_velocities</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
     <span class="n">total_time</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -531,7 +513,7 @@
         <span class="k">for</span> <span class="n">ct</span><span class="p">,</span> <span class="p">(</span><span class="n">velocity</span><span class="p">,</span> <span class="n">df_velocity</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;velocity&quot;</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">use_real_time</span><span class="p">:</span>
                 <span class="c1"># type checker is unable to infer the datatype of velocity</span>
-                <span class="n">total_time</span> <span class="o">=</span> <span class="n">compression_distance</span> <span class="o">/</span> <span class="n">velocity</span>  <span class="c1"># type: ignore</span>
+                <span class="n">total_time</span> <span class="o">=</span> <span class="n">compression_distance</span> <span class="o">/</span> <span class="n">velocity</span>
                 <span class="n">time_label</span> <span class="o">=</span> <span class="s2">&quot;Time (s)&quot;</span>
             <span class="k">for</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">df_simulator</span> <span class="ow">in</span> <span class="n">df_velocity</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;simulator&quot;</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">repeat</span><span class="p">,</span> <span class="n">df_repeat</span> <span class="ow">in</span> <span class="n">df_simulator</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;repeat&quot;</span><span class="p">):</span>
@@ -547,7 +529,7 @@
                         <span class="n">xvals</span><span class="p">,</span>
                         <span class="n">yvals</span><span class="p">,</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
-                        <span class="n">color</span><span class="o">=</span><span class="n">SIMULATOR_COLOR_MAP</span><span class="p">[</span><span class="n">simulator</span><span class="p">],</span>  <span class="c1"># type: ignore</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">SIMULATOR_COLOR_MAP</span><span class="p">[</span><span class="n">simulator</span><span class="p">],</span>
                         <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="n">axs</span><span class="p">[</span><span class="n">ct</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Velocity: </span><span class="si">{</span><span class="n">velocity</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -565,28 +547,23 @@
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.compression_analysis.html#subcell_pipeline.analysis.compression_metrics.compression_analysis.plot_metric_distribution">[docs]</a>
 <span class="k">def</span> <span class="nf">plot_metric_distribution</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CompressionMetric</span><span class="p">],</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CompressionMetric</span><span class="p">],</span>
     <span class="n">figure_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot metrics vs time.</span>
+<span class="sd">    Plot distribution of metric values for each velocity.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    df</span>
-<span class="sd">        The input DataFrame.</span>
-
+<span class="sd">        Input dataframe.</span>
 <span class="sd">    metrics</span>
-<span class="sd">        The list of metrics to plot.</span>
-
+<span class="sd">        List of metrics to plot.</span>
 <span class="sd">    figure_path</span>
-<span class="sd">        The path to save the figure.</span>
-
+<span class="sd">        Path to save the figure.</span>
 <span class="sd">    suffix</span>
-<span class="sd">        The suffix to append to the figure filename.</span>
-<span class="sd">        Defaults to &quot;&quot;.</span>
-
+<span class="sd">        Suffix to append to the figure filename.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">num_velocities</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;font.size&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">})</span>
@@ -608,7 +585,7 @@
                 <span class="n">axs</span><span class="p">[</span><span class="n">ct</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span>
                     <span class="n">df_simulator</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
                     <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">simulator</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="n">color</span><span class="o">=</span><span class="n">SIMULATOR_COLOR_MAP</span><span class="p">[</span><span class="n">simulator</span><span class="p">],</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">SIMULATOR_COLOR_MAP</span><span class="p">[</span><span class="n">simulator</span><span class="p">],</span>
                     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
                     <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>
                 <span class="p">)</span>

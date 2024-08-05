@@ -7,6 +7,12 @@ visualization.tomography
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      TOMOGRAPHY_VIZ_SCALE
+   
    
 
    

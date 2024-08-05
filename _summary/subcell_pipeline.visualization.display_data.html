@@ -323,12 +323,13 @@
         <article role="main" id="furo-main-content">
           <section id="module-subcell_pipeline.visualization.display_data">
 <span id="visualization-display-data"></span><h1>visualization.display_data<a class="headerlink" href="#module-subcell_pipeline.visualization.display_data" title="Link to this heading">¶</a></h1>
+<p>Methods for visualization display data.</p>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.display_data.get_readdy_display_data" title="subcell_pipeline.visualization.display_data.get_readdy_display_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_readdy_display_data</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Get DisplayData for ReaDDy actin simulations.</p></td>
 </tr>
 </tbody>
 </table>
@@ -336,7 +337,73 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="subcell_pipeline.visualization.display_data.get_readdy_display_data">
 <span class="sig-name descname"><span class="pre">get_readdy_display_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DisplayData</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/display_data.html#get_readdy_display_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.display_data.get_readdy_display_data" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get DisplayData for ReaDDy actin simulations.</p>
+<p>Each actin monomer uses the <cite>SPHERE</cite> display type with the following colors:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Label</p></th>
+<th class="head"><p>Color</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>actin</p></td>
+<td><p>#bf9b30</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#mid</p></td>
+<td><p>#bf9b30</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#fixed</p></td>
+<td><p>#bf9b30</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#mid_fixed</p></td>
+<td><p>#bf9b30</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#ATP</p></td>
+<td><p>#ffbf00</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#mid_ATP</p></td>
+<td><p>#ffbf00</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#fixed_ATP</p></td>
+<td><p>#ffbf00</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#mid_fixed_ATP</p></td>
+<td><p>#ffbf00</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#barbed</p></td>
+<td><p>#ffdc73</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#barbed_ATP</p></td>
+<td><p>#ffdc73</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#fixed_barbed</p></td>
+<td><p>#ffdc73</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#fixed_barbed_ATP</p></td>
+<td><p>#ffdc73</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#pointed</p></td>
+<td><p>#a67c00</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#pointed_ATP</p></td>
+<td><p>#a67c00</p></td>
+</tr>
+<tr class="row-even"><td><p>actin#pointed_fixed</p></td>
+<td><p>#a67c00</p></td>
+</tr>
+<tr class="row-odd"><td><p>actin#pointed_fixed_ATP</p></td>
+<td><p>#a67c00</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Map of names to DisplayData objects.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

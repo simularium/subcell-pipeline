@@ -323,24 +323,31 @@
         <article role="main" id="furo-main-content">
           <section id="module-subcell_pipeline.visualization.combined_trajectory">
 <span id="visualization-combined-trajectory"></span><h1>visualization.combined_trajectory<a class="headerlink" href="#module-subcell_pipeline.visualization.combined_trajectory" title="Link to this heading">¶</a></h1>
+<p>Visualization methods for combined simulators.</p>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.BOX_SIZE" title="subcell_pipeline.visualization.combined_trajectory.BOX_SIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BOX_SIZE</span></code></a></p></td>
+<td><p>Bounding box size for combined simulator trajectories.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.get_combined_trajectory_converter" title="subcell_pipeline.visualization.combined_trajectory.get_combined_trajectory_converter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_combined_trajectory_converter</span></code></a>(...)</p></td>
-<td><p>Generate a TrajectoryConverter to visualize simulations from ReaDDy and Cytosim together.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.visualize_combined_trajectories" title="subcell_pipeline.visualization.combined_trajectory.visualize_combined_trajectories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize_combined_trajectories</span></code></a>(buckets, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.visualize_combined_trajectories" title="subcell_pipeline.visualization.combined_trajectory.visualize_combined_trajectories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize_combined_trajectories</span></code></a>(buckets, ...)</p></td>
 <td><p>Visualize combined simulations from ReaDDy and Cytosim for select conditions and number of replicates.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py function">
-<dt class="sig sig-object py" id="subcell_pipeline.visualization.combined_trajectory.get_combined_trajectory_converter">
-<span class="sig-name descname"><span class="pre">get_combined_trajectory_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fiber_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DisplayData</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TrajectoryConverter</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/combined_trajectory.html#get_combined_trajectory_converter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.combined_trajectory.get_combined_trajectory_converter" title="Link to this definition">¶</a></dt>
-<dd><p>Generate a TrajectoryConverter to visualize simulations from ReaDDy and
-Cytosim together.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="subcell_pipeline.visualization.combined_trajectory.BOX_SIZE">
+<span class="sig-name descname"><span class="pre">BOX_SIZE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([600.,</span> <span class="pre">600.,</span> <span class="pre">600.])</span></em><a class="headerlink" href="#subcell_pipeline.visualization.combined_trajectory.BOX_SIZE" title="Link to this definition">¶</a></dt>
+<dd><p>Bounding box size for combined simulator trajectories.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -424,7 +431,7 @@ visualization.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">visualization.combined_trajectory</a><ul>
-<li><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.get_combined_trajectory_converter"><code class="docutils literal notranslate"><span class="pre">get_combined_trajectory_converter()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.BOX_SIZE"><code class="docutils literal notranslate"><span class="pre">BOX_SIZE</span></code></a></li>
 <li><a class="reference internal" href="#subcell_pipeline.visualization.combined_trajectory.visualize_combined_trajectories"><code class="docutils literal notranslate"><span class="pre">visualize_combined_trajectories()</span></code></a></li>
 </ul>
 </li>

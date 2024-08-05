@@ -348,7 +348,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor" title="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReaddyPostProcessor</span></code></a></p></td>
-<td><p>Get different views of ReaDDy trajectory for different analysis purposes.</p></td>
+<td><p>Get views of ReaDDy trajectory for different analysis purposes.</p></td>
 </tr>
 </tbody>
 </table>
@@ -380,7 +380,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReaddyPostProcessor</span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor" title="Link to this definition">¶</a></dt>
-<dd><p>Get different views of ReaDDy trajectory for different analysis purposes.</p>
+<dd><p>Get views of ReaDDy trajectory for different analysis purposes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="subcell_pipeline.simulation.readdy.data_structures.html#subcell_pipeline.simulation.readdy.data_structures.FrameData" title="subcell_pipeline.simulation.readdy.data_structures.FrameData"><span class="pre">FrameData</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodic_boundary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.__init__" title="Link to this definition">¶</a></dt>
@@ -395,7 +395,7 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.box_size">
 <span class="sig-name descname"><span class="pre">box_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.box_size" title="Link to this definition">¶</a></dt>
-<dd><p>The size of the XYZ dimensions of the simulation volume (shape = 3).</p>
+<dd><p>The size of the x,y,z dimensions of the simulation volume (shape = 3).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -422,16 +422,16 @@ n_timesteps).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.rotate_positions">
 <span class="sig-name descname"><span class="pre">rotate_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor.rotate_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.rotate_positions" title="Link to this definition">¶</a></dt>
-<dd><p>Rotate an x,y,z position (or an array of them) around the x-axis
-with the given rotation matrix.</p>
+<dd><p>Rotate an x,y,z position (or an array of them) around the x-axis with
+the given rotation matrix.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.align_trajectory">
 <span class="sig-name descname"><span class="pre">align_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fiber_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor.align_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.align_trajectory" title="Link to this definition">¶</a></dt>
-<dd><p>Align the positions of particles in the trajectory
-so that the furthest point from the x-axis
-is aligned with the positive y-axis at the last time point.</p>
+<dd><p>Align the positions of particles in the trajectory so that the furthest
+point from the x-axis is aligned with the positive y-axis at the last
+time point.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -447,8 +447,8 @@ the particles other than the start particles.</p></li>
 <dd class="field-even"><p><ul class="simple">
 <li><p><em>positions</em> – Array (shape = timesteps x 1 x n x 3) containing the x,y,z positions
 of actin monomer particles at each timestep.</p></li>
-<li><p><em>fiber_points</em> – List of lists of arrays (shape = n x 3) containing the x,y,z positions
-of control points for each fiber at each time.</p></li>
+<li><p><em>fiber_points</em> – List of lists of arrays (shape = n x 3) containing the x,y,z
+positions of control points for each fiber at each time.</p></li>
 </ul>
 </p>
 </dd>
@@ -480,14 +480,15 @@ each fiber at each time.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.linear_fiber_axis_positions">
 <span class="sig-name descname"><span class="pre">linear_fiber_axis_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fiber_chain_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ideal_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([[24.738,</span> <span class="pre">20.881,</span> <span class="pre">26.671],</span> <span class="pre">[27.609,</span> <span class="pre">24.061,</span> <span class="pre">27.598],</span> <span class="pre">[30.382,</span> <span class="pre">21.19,</span> <span class="pre">25.725]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ideal_vector_to_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([-0.01056751,</span> <span class="pre">-1.47785105,</span> <span class="pre">-0.65833209])</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor.linear_fiber_axis_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.linear_fiber_axis_positions" title="Link to this definition">¶</a></dt>
-<dd><p>Get XYZ axis positions for each particle in each linear fiber at each
+<dd><p>Get x,y,z axis positions for each particle in each linear fiber at each
 timestep.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fiber_chain_ids</strong> – List of list of lists of particle IDs for each particle in each
 fiber at each time.</p></li>
-<li><p><strong>ideal_positions</strong> – XYZ positions for 3 particles in an ideal chain (shape = 3 x 3).</p></li>
+<li><p><strong>ideal_positions</strong> – The x,y,z positions for 3 particles in an ideal chain (shape = 3 x
+3).</p></li>
 <li><p><strong>ideal_vector_to_axis</strong> – Vector from the second ideal position to the axis of the fiber
 (shape = 3).</p></li>
 </ul>
@@ -508,7 +509,7 @@ for each particle in each fiber at each time.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.linear_fiber_normals">
 <span class="sig-name descname"><span class="pre">linear_fiber_normals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fiber_chain_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor.linear_fiber_normals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.linear_fiber_normals" title="Link to this definition">¶</a></dt>
-<dd><p>Get XYZ positions defining start and end points for normals for each
+<dd><p>Get x,y,z positions defining start and end points for normals for each
 particle in each fiber at each timestep.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -533,7 +534,7 @@ of each particle in each fiber at each time.</p>
 <dt class="sig sig-object py" id="subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.linear_fiber_control_points">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear_fiber_control_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/simulation/readdy/post_processor.html#ReaddyPostProcessor.linear_fiber_control_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.simulation.readdy.post_processor.ReaddyPostProcessor.linear_fiber_control_points" title="Link to this definition">¶</a></dt>
 <dd><p>Resample the fiber line defined by each array of axis positions to get
-the requested number of points between XYZ control points for each
+the requested number of points between x,y,z control points for each
 linear fiber at each timestep.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -545,8 +546,8 @@ each particle in each fiber at each time.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of lists of arrays (shape = n x 3) containing the x,y,z positions
-of control points for each fiber at each time.</p>
+<dd class="field-even"><p>List of lists of arrays (shape = n x 3) containing the x,y,z
+positions of control points for each fiber at each time.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -584,8 +585,8 @@ starting end for the first particle in each bond at each time.</p></li>
 <dd><p>Get the edges between particles as start and end positions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of list of edges as position of each of the two connected particles
-for each edge at each time.</p>
+<dd class="field-odd"><p>List of list of edges as position of each of the two connected
+particles for each edge at each time.</p>
 </dd>
 </dl>
 </dd></dl>

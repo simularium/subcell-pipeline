@@ -7,6 +7,12 @@ analysis.tomography\_data.tomography\_data
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      TOMOGRAPHY_SAMPLE_COLUMNS
+   
    
 
    

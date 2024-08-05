@@ -146,7 +146,3 @@ plot_tomography_data_by_dataset(
     sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
 )
 ```
-
-```python
-
-```

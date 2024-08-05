@@ -11,15 +11,16 @@ visualization.spatial\_annotator
 
    
    
-   
-
-   
-   
-   .. rubric:: Classes
+   .. rubric:: Functions
 
    .. autosummary::
    
-      SpatialAnnotator
+      add_fiber_annotation_agents
+      add_sphere_annotation_agents
+   
+   
+
+   
    
    
 

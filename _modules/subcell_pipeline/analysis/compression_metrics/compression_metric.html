@@ -315,13 +315,10 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for subcell_pipeline.analysis.compression_metrics.compression_metric</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Methods to obtain labels and calculate metrics from the</span>
-<span class="sd">CompressionMetric Enum class.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Enumerations for compression metric analysis.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -341,7 +338,7 @@
 <div class="viewcode-block" id="CompressionMetric">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.compression_metric.html#subcell_pipeline.analysis.compression_metrics.compression_metric.CompressionMetric">[docs]</a>
 <span class="k">class</span> <span class="nc">CompressionMetric</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="c1"># Enum class for compression metrics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration for compression metrics.&quot;&quot;&quot;</span>
 
     <span class="n">NON_COPLANARITY</span> <span class="o">=</span> <span class="s2">&quot;non_coplanarity&quot;</span>
     <span class="n">PEAK_ASYMMETRY</span> <span class="o">=</span> <span class="s2">&quot;peak_asymmetry&quot;</span>
@@ -359,11 +356,6 @@
     <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Enum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the label for the compression metric.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        self</span>
-<span class="sd">            the CompressionMetric object</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -392,11 +384,6 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the description for the compression metric.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        self</span>
-<span class="sd">            the CompressionMetric object</span>
-
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        :</span>
@@ -423,11 +410,6 @@
     <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Enum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the default bounds for the compression metric.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        self</span>
-<span class="sd">            the CompressionMetric object</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -458,12 +440,8 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        self</span>
-<span class="sd">            the CompressionMetric object</span>
-
 <span class="sd">        polymer_trace</span>
-<span class="sd">            array containing the x,y,z positions of the polymer trace</span>
-
+<span class="sd">            Array containing the x,y,z positions of the polymer trace</span>
 <span class="sd">        **options</span>
 <span class="sd">            Additional options as key-value pairs.</span>
 
@@ -472,7 +450,7 @@
 <span class="sd">        :</span>
 <span class="sd">            The calculated compression metric for the polymer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">CompressionMetric</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">CompressionMetric</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">CompressionMetric</span><span class="o">.</span><span class="n">NON_COPLANARITY</span><span class="p">:</span> <span class="n">get_third_component_variance</span><span class="p">,</span>
             <span class="n">CompressionMetric</span><span class="o">.</span><span class="n">PEAK_ASYMMETRY</span><span class="p">:</span> <span class="n">get_asymmetry_of_peak</span><span class="p">,</span>
             <span class="n">CompressionMetric</span><span class="o">.</span><span class="n">SUM_BENDING_ENERGY</span><span class="p">:</span> <span class="n">get_sum_bending_energy</span><span class="p">,</span>

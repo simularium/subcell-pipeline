@@ -323,64 +323,60 @@
         <article role="main" id="furo-main-content">
           <section id="module-subcell_pipeline.visualization.spatial_annotator">
 <span id="visualization-spatial-annotator"></span><h1>visualization.spatial_annotator<a class="headerlink" href="#module-subcell_pipeline.visualization.spatial_annotator" title="Link to this heading">¶</a></h1>
-<p class="rubric">Classes</p>
+<p>Methods for adding spatial annotations to visualizations.</p>
+<p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator" title="subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpatialAnnotator</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.add_fiber_annotation_agents" title="subcell_pipeline.visualization.spatial_annotator.add_fiber_annotation_agents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_fiber_annotation_agents</span></code></a>(traj_data, ...)</p></td>
+<td><p>Add agent data for fiber annotations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.add_sphere_annotation_agents" title="subcell_pipeline.visualization.spatial_annotator.add_sphere_annotation_agents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_sphere_annotation_agents</span></code></a>(traj_data, ...)</p></td>
+<td><p>Add agent data for sphere annotations.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py class">
-<dt class="sig sig-object py" id="subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpatialAnnotator</span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/spatial_annotator.html#SpatialAnnotator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator" title="Link to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator.add_fiber_agents">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_fiber_agents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TrajectoryData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiber_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fiber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiber_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#eaeaea'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TrajectoryData</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/spatial_annotator.html#SpatialAnnotator.add_fiber_agents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator.add_fiber_agents" title="Link to this definition">¶</a></dt>
-<dd><p>Add agent data for fibers.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_pipeline.visualization.spatial_annotator.add_fiber_annotation_agents">
+<span class="sig-name descname"><span class="pre">add_fiber_annotation_agents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TrajectoryData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiber_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fiber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiber_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#eaeaea'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TrajectoryData</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/spatial_annotator.html#add_fiber_annotation_agents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.spatial_annotator.add_fiber_annotation_agents" title="Link to this definition">¶</a></dt>
+<dd><p>Add agent data for fiber annotations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>traj_data</strong> (<em>TrajectoryData</em>) – Trajectory data to add the fibers to.</p></li>
-<li><p><strong>fiber_points</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>np.ndarray</em><em> (</em><em>shape = n x 3</em><em>)</em><em>]</em><em>]</em>) – List of lists of arrays containing
-the x,y,z positions of control points
-for each fiber at each time.</p></li>
-<li><p><strong>type_name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – Agent type name to use for the new fibers.
-Default: “fiber”</p></li>
-<li><p><strong>fiber_width</strong> (<em>float</em><em> (</em><em>optional</em><em>)</em>) – Width to draw the fibers.
-Default: 0.5</p></li>
-<li><p><strong>color</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – Color for the new fibers.
-Default: “#eaeaea”</p></li>
+<li><p><strong>traj_data</strong> – Trajectory data to add the fibers to.</p></li>
+<li><p><strong>fiber_points</strong> – List of lists of arrays (shape = n x 3) containing the x,y,z positions
+of control points for each fiber at each time.</p></li>
+<li><p><strong>type_name</strong> – Agent type name to use for the new fibers.</p></li>
+<li><p><strong>fiber_width</strong> – Width to draw the fibers.</p></li>
+<li><p><strong>color</strong> – Color for the new fibers.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated trajectory data.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator.add_sphere_agents">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_sphere_agents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TrajectoryData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sphere'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rainbow_colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#eaeaea'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TrajectoryData</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/spatial_annotator.html#SpatialAnnotator.add_sphere_agents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator.add_sphere_agents" title="Link to this definition">¶</a></dt>
-<dd><p>Add agent data for fibers.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="subcell_pipeline.visualization.spatial_annotator.add_sphere_annotation_agents">
+<span class="sig-name descname"><span class="pre">add_sphere_annotation_agents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TrajectoryData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sphere'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rainbow_colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#eaeaea'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TrajectoryData</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/visualization/spatial_annotator.html#add_sphere_annotation_agents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.visualization.spatial_annotator.add_sphere_annotation_agents" title="Link to this definition">¶</a></dt>
+<dd><p>Add agent data for sphere annotations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>traj_data</strong> (<em>TrajectoryData</em>) – Trajectory data to add the spheres to.</p></li>
-<li><p><strong>sphere_positions</strong> (<em>List</em><em>[</em><em>np.ndarray</em><em> (</em><em>shape = n x 3</em><em>)</em><em>]</em>) – List of x,y,z positions of spheres to visualize
-at each time.</p></li>
-<li><p><strong>type_name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – Agent type name to use for the new spheres.
-Default: “sphere”</p></li>
-<li><p><strong>radius</strong> (<em>float</em><em> (</em><em>optional</em><em>)</em>) – Radius to draw the spheres.
-Default: 1.</p></li>
-<li><p><strong>rainbow_colors</strong> (<em>bool</em><em> (</em><em>optional</em><em>)</em>) – If True, color the new spheres in rainbow order.
-If False, use color instead.</p></li>
-<li><p><strong>color</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – Color for the new spheres.
-Default: “#eaeaea”</p></li>
+<li><p><strong>traj_data</strong> – Trajectory data to add the spheres to.</p></li>
+<li><p><strong>sphere_positions</strong> – List of x,y,z positions of spheres to visualize at each time.</p></li>
+<li><p><strong>type_name</strong> – Agent type name to use for the new spheres.</p></li>
+<li><p><strong>radius</strong> – Radius to draw the spheres</p></li>
+<li><p><strong>rainbow_colors</strong> – True to color new spheres in rainbow order, False otherwise.</p></li>
+<li><p><strong>color</strong> – Color for the new fibers (if rainbow_colors is False).</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated trajectory data.</p>
+</dd>
 </dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -441,11 +437,8 @@ Default: “#eaeaea”</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">visualization.spatial_annotator</a><ul>
-<li><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator"><code class="docutils literal notranslate"><span class="pre">SpatialAnnotator</span></code></a><ul>
-<li><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator.add_fiber_agents"><code class="docutils literal notranslate"><span class="pre">SpatialAnnotator.add_fiber_agents()</span></code></a></li>
-<li><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.SpatialAnnotator.add_sphere_agents"><code class="docutils literal notranslate"><span class="pre">SpatialAnnotator.add_sphere_agents()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.add_fiber_annotation_agents"><code class="docutils literal notranslate"><span class="pre">add_fiber_annotation_agents()</span></code></a></li>
+<li><a class="reference internal" href="#subcell_pipeline.visualization.spatial_annotator.add_sphere_annotation_agents"><code class="docutils literal notranslate"><span class="pre">add_sphere_annotation_agents()</span></code></a></li>
 </ul>
 </li>
 </ul>

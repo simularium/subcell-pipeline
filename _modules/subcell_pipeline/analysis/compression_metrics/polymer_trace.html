@@ -317,7 +317,7 @@
           <h1>Source code for subcell_pipeline.analysis.compression_metrics.polymer_trace</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Methods to calculate metrics from polymer trace data.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
@@ -335,33 +335,30 @@
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_end_to_end_axis_distances_and_projections">[docs]</a>
 <span class="k">def</span> <span class="nf">get_end_to_end_axis_distances_and_projections</span><span class="p">(</span>
     <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the distances of the polymer trace points from the end-to-end axis.</span>
+<span class="sd">    Calculate distances of the polymer trace points from the end-to-end axis.</span>
+
 <span class="sd">    Here, the end-to-end axis is defined as the line joining the first and last</span>
 <span class="sd">    fiber point.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
-<span class="sd">        Array containing the x,y,z positions of the polymer trace points</span>
-<span class="sd">        at a given time.</span>
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    perp_distances</span>
 <span class="sd">        Perpendicular distances of the polymer trace from the end-to-end axis.</span>
-
 <span class="sd">    scaled_projections</span>
-<span class="sd">        Length of fiber point projections along the end-to-end axis, scaled</span>
-<span class="sd">        by axis length.</span>
-<span class="sd">        Can be negative.</span>
-
+<span class="sd">        Length of fiber point projections along the end-to-end axis, scaled by</span>
+<span class="sd">        axis length. Can be negative.</span>
 <span class="sd">    projection_positions</span>
 <span class="sd">        Positions of points on the end-to-end axis that are closest from the</span>
-<span class="sd">        respective points in the polymer trace.</span>
-<span class="sd">        The distance from projection_positions to the trace points is the</span>
-<span class="sd">        shortest distance from the end-to-end axis.</span>
+<span class="sd">        respective points in the polymer trace. The distance from</span>
+<span class="sd">        projection_positions to the trace points is the shortest distance from</span>
+<span class="sd">        the end-to-end axis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">end_to_end_axis</span> <span class="o">=</span> <span class="n">get_end_to_end_unit_vector</span><span class="p">(</span><span class="n">polymer_trace</span><span class="o">=</span><span class="n">polymer_trace</span><span class="p">)</span>
     <span class="n">end_to_end_axis_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -381,8 +378,7 @@
 <div class="viewcode-block" id="get_average_distance_from_end_to_end_axis">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_average_distance_from_end_to_end_axis">[docs]</a>
 <span class="k">def</span> <span class="nf">get_average_distance_from_end_to_end_axis</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the average perpendicular distance of polymer trace points from</span>
@@ -391,11 +387,9 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
-<span class="sd">        Array containing the x,y,z positions of the polymer trace</span>
-<span class="sd">        at a given time.</span>
-
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
 <span class="sd">    **options</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -415,8 +409,7 @@
 <div class="viewcode-block" id="get_asymmetry_of_peak">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_asymmetry_of_peak">[docs]</a>
 <span class="k">def</span> <span class="nf">get_asymmetry_of_peak</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the scaled distance of the projection of the peak from the</span>
@@ -425,11 +418,9 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
-<span class="sd">        Array containing the x,y,z positions of the polymer trace</span>
-<span class="sd">        at a given time.</span>
-
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
 <span class="sd">    **options</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -457,9 +448,7 @@
 
 <div class="viewcode-block" id="get_pca_polymer_trace_projection">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_pca_polymer_trace_projection">[docs]</a>
-<span class="k">def</span> <span class="nf">get_pca_polymer_trace_projection</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">get_pca_polymer_trace_projection</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the PCA projection of the polymer trace.</span>
 
@@ -470,7 +459,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pca_projection</span>
+<span class="sd">    :</span>
 <span class="sd">        PCA projection of the polymer trace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pca</span> <span class="o">=</span> <span class="n">fit_pca_to_polymer_trace</span><span class="p">(</span><span class="n">polymer_trace</span><span class="o">=</span><span class="n">polymer_trace</span><span class="p">)</span>
@@ -481,8 +470,7 @@
 <div class="viewcode-block" id="get_contour_length_from_trace">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_contour_length_from_trace">[docs]</a>
 <span class="k">def</span> <span class="nf">get_contour_length_from_trace</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the sum of inter-monomer distances in the trace.</span>
@@ -490,10 +478,9 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
-<span class="sd">        n x 3 array containing the x,y,z positions of the polymer trace.</span>
-
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
 <span class="sd">    **options</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -507,8 +494,7 @@
 <div class="viewcode-block" id="get_bending_energy_from_trace">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_bending_energy_from_trace">[docs]</a>
 <span class="k">def</span> <span class="nf">get_bending_energy_from_trace</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the bending energy per monomer of a polymer trace.</span>
@@ -517,9 +503,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
 <span class="sd">    **options</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">        Additional options as key-value pairs:</span>
 
 <span class="sd">        bending_constant: float</span>
 <span class="sd">            Bending constant of the fiber in pN nm.</span>
@@ -561,8 +546,7 @@
 <div class="viewcode-block" id="get_2d_polymer_trace">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_2d_polymer_trace">[docs]</a>
 <span class="k">def</span> <span class="nf">get_2d_polymer_trace</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">compression_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">compression_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the 2D projection of the polymer trace.</span>
@@ -570,8 +554,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
-<span class="sd">        The polymer trace as an Nx3 numpy array.</span>
-
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
 <span class="sd">    compression_axis</span>
 <span class="sd">        The axis along which the polymer trace is compressed.</span>
 
@@ -591,16 +574,14 @@
 
 <div class="viewcode-block" id="get_normalized_tangent_vectors">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_normalized_tangent_vectors">[docs]</a>
-<span class="k">def</span> <span class="nf">get_normalized_tangent_vectors</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">get_normalized_tangent_vectors</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the normalized tangent vectors for a polymer trace.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
-<span class="sd">        The polymer trace as an Nx3 numpy array.</span>
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -622,10 +603,7 @@
 
 <div class="viewcode-block" id="get_twist_angle">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_twist_angle">[docs]</a>
-<span class="k">def</span> <span class="nf">get_twist_angle</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">get_twist_angle</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the twist angle of the polymer trace.</span>
 
@@ -633,9 +611,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
-<span class="sd">    **options: Dict[str, Any]</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">    **options</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -662,10 +639,7 @@
 
 <div class="viewcode-block" id="get_chirality">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_chirality">[docs]</a>
-<span class="k">def</span> <span class="nf">get_chirality</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">get_chirality</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the chirality of a polymer trace.</span>
 
@@ -673,9 +647,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
-<span class="sd">    **options: Dict[str, Any]</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">    **options</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -700,19 +673,16 @@
 <div class="viewcode-block" id="get_total_fiber_twist">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_total_fiber_twist">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the total twist of a polymer trace using the normal</span>
-<span class="sd">    vectors.</span>
+<span class="sd">    Calculate the total twist of a polymer trace using the normal vectors.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
-<span class="sd">    **options: Dict[str, Any]</span>
+<span class="sd">    **options</span>
 <span class="sd">        Additional options as key-value pairs:</span>
 
 <span class="sd">        signed: bool</span>
@@ -754,19 +724,17 @@
 <div class="viewcode-block" id="get_total_fiber_twist_project">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_total_fiber_twist_project">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist_project</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the total twist using projections of the polymer trace</span>
-<span class="sd">    in the 2nd and 3rd dimension.</span>
+<span class="sd">    Calculate the total twist using projections of the polymer trace in the 2nd</span>
+<span class="sd">    and 3rd dimension.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
-<span class="sd">    **options: Dict[str, Any]</span>
+<span class="sd">    **options</span>
 <span class="sd">        Additional options as key-value pairs:</span>
 
 <span class="sd">        compression_axis: int</span>
@@ -774,7 +742,7 @@
 <span class="sd">        signed: bool</span>
 <span class="sd">            Whether to return the signed or unsigned total twist.</span>
 <span class="sd">        tolerance: float</span>
-<span class="sd">            ABSOLUTE_TOLERANCE</span>
+<span class="sd">            Tolerance for vector length.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -801,20 +769,18 @@
 <div class="viewcode-block" id="get_total_fiber_twist_pca">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_total_fiber_twist_pca">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist_pca</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">,</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the total twist using PCA projections of the polymer trace</span>
-<span class="sd">    in the 2nd and 3rd dimension.</span>
+<span class="sd">    Calculate the total twist using PCA projections of the polymer trace in the</span>
+<span class="sd">    2nd and 3rd dimension.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
 <span class="sd">    tolerance</span>
-<span class="sd">        ABSOLUTE_TOLERANCE</span>
+<span class="sd">        Tolerance for vector length.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -831,9 +797,7 @@
 <div class="viewcode-block" id="get_angle_between_vectors">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_angle_between_vectors">[docs]</a>
 <span class="k">def</span> <span class="nf">get_angle_between_vectors</span><span class="p">(</span>
-    <span class="n">vec1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">vec2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">vec1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vec2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the signed angle between two vectors.</span>
@@ -842,18 +806,15 @@
 <span class="sd">    ----------</span>
 <span class="sd">    vec1</span>
 <span class="sd">        The first vector.</span>
-
 <span class="sd">    vec2</span>
 <span class="sd">        The second vector.</span>
-
 <span class="sd">    signed</span>
-<span class="sd">        If True, returns the signed angle between vec1 and vec2</span>
-<span class="sd">        Default is False.</span>
+<span class="sd">        True to get signed angle between vectors, False otherwise.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        Signed angle between vec1 and vec2.</span>
+<span class="sd">        Angle between vec1 and vec2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vec1_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec1</span><span class="p">)</span>
     <span class="n">vec2_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec2</span><span class="p">)</span>
@@ -877,24 +838,20 @@
 <div class="viewcode-block" id="get_total_fiber_twist_2d">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_total_fiber_twist_2d">[docs]</a>
 <span class="k">def</span> <span class="nf">get_total_fiber_twist_2d</span><span class="p">(</span>
-    <span class="n">trace_2d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span><span class="p">,</span>
+    <span class="n">trace_2d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ABSOLUTE_TOLERANCE</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the total twist for 2d traces. The 2D twist is defined as the sum of</span>
-<span class="sd">    (signed) angles between consecutive vectors in the 2D projection along the</span>
-<span class="sd">    compression axis.</span>
+<span class="sd">    Calculate the total twist for 2D traces.</span>
+
+<span class="sd">    The 2D twist is defined as the sum of (signed) angles between consecutive</span>
+<span class="sd">    vectors in the 2D projection along the compression axis.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    trace_2d</span>
 <span class="sd">        Array containing the x,y positions of the polymer trace.</span>
-
 <span class="sd">    signed</span>
-<span class="sd">        If True, returns the signed total twist.</span>
-<span class="sd">        Default is False.</span>
-
+<span class="sd">        True to calculate signed total twist, False otherwise.</span>
 <span class="sd">    tolerance</span>
 <span class="sd">        Tolerance for vector length.</span>
 
@@ -928,9 +885,7 @@
 
 <div class="viewcode-block" id="fit_pca_to_polymer_trace">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.fit_pca_to_polymer_trace">[docs]</a>
-<span class="k">def</span> <span class="nf">fit_pca_to_polymer_trace</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PCA</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">fit_pca_to_polymer_trace</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PCA</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fits PCA to the polymer trace and returns the fitted object.</span>
 
@@ -942,7 +897,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        PCA object fitted to the polymer trace.</span>
+<span class="sd">        PCA object fit to the polymer trace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">pca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">)</span>
@@ -953,26 +908,24 @@
 <div class="viewcode-block" id="get_third_component_variance">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_third_component_variance">[docs]</a>
 <span class="k">def</span> <span class="nf">get_third_component_variance</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the third PCA component given the x,y,z positions of a fiber at</span>
-<span class="sd">    a given time. This component reflects non-coplanarity/out of planeness.</span>
+<span class="sd">    Calculate the 3rd PCA component given the x,y,z positions of a fiber.</span>
+
+<span class="sd">    This component reflects non-coplanarity/out-of-planeness of the fiber.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    polymer_trace</span>
 <span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
-
-<span class="sd">    **options: Dict[str, Any]</span>
-<span class="sd">        Additional options as key-value pairs.</span>
+<span class="sd">    **options</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        Noncoplanarity of fiber.</span>
-<span class="sd">        Defined as the explained variance ratio of the third PCA component.</span>
+<span class="sd">        Variance explained by the third principal component.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pca</span> <span class="o">=</span> <span class="n">fit_pca_to_polymer_trace</span><span class="p">(</span><span class="n">polymer_trace</span><span class="o">=</span><span class="n">polymer_trace</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pca</span><span class="o">.</span><span class="n">explained_variance_ratio_</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
@@ -982,8 +935,7 @@
 <div class="viewcode-block" id="get_sum_bending_energy">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_sum_bending_energy">[docs]</a>
 <span class="k">def</span> <span class="nf">get_sum_bending_energy</span><span class="p">(</span>
-    <span class="n">fiber_energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">fiber_energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the sum of bending energy from the given fiber energy array.</span>
@@ -992,15 +944,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    fiber_energy</span>
 <span class="sd">        Array containing fiber energy values.</span>
-
-<span class="sd">    options</span>
-<span class="sd">        Additional options for calculation.</span>
+<span class="sd">    **options</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
 <span class="sd">        Sum of bending energy.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fiber_energy</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
@@ -1009,22 +959,20 @@
 <div class="viewcode-block" id="get_compression_ratio">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.compression_metrics.polymer_trace.html#subcell_pipeline.analysis.compression_metrics.polymer_trace.get_compression_ratio">[docs]</a>
 <span class="k">def</span> <span class="nf">get_compression_ratio</span><span class="p">(</span>
-    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the compression ratio of a polymer trace.</span>
 
-<span class="sd">    The compression ratio is defined as 1 minus the ratio of the length of</span>
-<span class="sd">    the end-to-end vector to the contour length of the polymer trace.</span>
+<span class="sd">    The compression ratio is defined as 1 minus the ratio of the length of the</span>
+<span class="sd">    end-to-end vector to the contour length of the polymer trace.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    polymer_trace: np.ndarray</span>
-<span class="sd">        The polymer trace as a numpy array.</span>
-
-<span class="sd">    **options: Dict[str, Any]</span>
-<span class="sd">        Additional options for the calculation.</span>
+<span class="sd">    polymer_trace</span>
+<span class="sd">        Array containing the x,y,z positions of the polymer trace.</span>
+<span class="sd">    **options</span>
+<span class="sd">        Additional options as key-value pairs. Unused.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

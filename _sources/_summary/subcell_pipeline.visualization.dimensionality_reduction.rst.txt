@@ -21,10 +21,6 @@ visualization.dimensionality\_reduction
 
    .. autosummary::
    
-      generate_simularium_and_save
-      pca_fiber_points_one_timestep
-      pca_fiber_points_over_time
-      rgb_to_hex_color
       visualize_dimensionality_reduction
    
    

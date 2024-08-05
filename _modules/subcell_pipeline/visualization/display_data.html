@@ -315,12 +315,46 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for subcell_pipeline.visualization.display_data</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">simulariumio</span> <span class="kn">import</span> <span class="n">DISPLAY_TYPE</span><span class="p">,</span> <span class="n">DisplayData</span>
+<span></span><span class="sd">&quot;&quot;&quot;Methods for visualization display data.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">simulariumio</span> <span class="kn">import</span> <span class="n">DISPLAY_TYPE</span><span class="p">,</span> <span class="n">DisplayData</span>
 
 
 <div class="viewcode-block" id="get_readdy_display_data">
 <a class="viewcode-back" href="../../../_summary/subcell_pipeline.visualization.display_data.html#subcell_pipeline.visualization.display_data.get_readdy_display_data">[docs]</a>
 <span class="k">def</span> <span class="nf">get_readdy_display_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DisplayData</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get DisplayData for ReaDDy actin simulations.</span>
+
+<span class="sd">    Each actin monomer uses the `SPHERE` display type with the following colors:</span>
+
+<span class="sd">    ======================= =======</span>
+<span class="sd">    Label                   Color</span>
+<span class="sd">    ======================= =======</span>
+<span class="sd">    actin                   #bf9b30</span>
+<span class="sd">    actin#mid               #bf9b30</span>
+<span class="sd">    actin#fixed             #bf9b30</span>
+<span class="sd">    actin#mid_fixed         #bf9b30</span>
+<span class="sd">    actin#ATP               #ffbf00</span>
+<span class="sd">    actin#mid_ATP           #ffbf00</span>
+<span class="sd">    actin#fixed_ATP         #ffbf00</span>
+<span class="sd">    actin#mid_fixed_ATP     #ffbf00</span>
+<span class="sd">    actin#barbed            #ffdc73</span>
+<span class="sd">    actin#barbed_ATP        #ffdc73</span>
+<span class="sd">    actin#fixed_barbed      #ffdc73</span>
+<span class="sd">    actin#fixed_barbed_ATP  #ffdc73</span>
+<span class="sd">    actin#pointed           #a67c00</span>
+<span class="sd">    actin#pointed_ATP       #a67c00</span>
+<span class="sd">    actin#pointed_fixed     #a67c00</span>
+<span class="sd">    actin#pointed_fixed_ATP #a67c00</span>
+<span class="sd">    ======================= =======</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Map of names to DisplayData objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">extra_radius</span> <span class="o">=</span> <span class="mf">1.5</span>
     <span class="n">actin_radius</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">extra_radius</span>
     <span class="n">n_polymer_numbers</span> <span class="o">=</span> <span class="mi">5</span>

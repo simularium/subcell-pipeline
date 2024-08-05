@@ -315,7 +315,9 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for subcell_pipeline.analysis.tomography_data.tomography_data</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="sd">&quot;&quot;&quot;Methods for analyzing tomography data.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -326,14 +328,15 @@
 <span class="kn">from</span> <span class="nn">io_collection.save.save_figure</span> <span class="kn">import</span> <span class="n">save_figure</span>
 
 <span class="n">TOMOGRAPHY_SAMPLE_COLUMNS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="s2">&quot;zpos&quot;</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Columns names used when sampling tomography data.&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="test_consecutive_segment_angles">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.tomography_data.tomography_data.html#subcell_pipeline.analysis.tomography_data.tomography_data.test_consecutive_segment_angles">[docs]</a>
 <span class="k">def</span> <span class="nf">test_consecutive_segment_angles</span><span class="p">(</span><span class="n">polymer_trace</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Test whether the angles between consecutive segments of a polymer</span>
-<span class="sd">    trace are less than 90 degrees.</span>
+<span class="sd">    Test if all angles between consecutive segments of a polymer trace are less</span>
+<span class="sd">    than 90 degrees.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -343,14 +346,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        True if all consecutive angles are less than 180 degrees.</span>
+<span class="sd">        True if all consecutive angles are less than 90 degrees, False</span>
+<span class="sd">        otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vectors</span> <span class="o">=</span> <span class="n">polymer_trace</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">polymer_trace</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">vectors</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
     <span class="n">dot_products</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">vectors</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-    <span class="c1"># Check if any angle is greater than 90 degrees</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dot_products</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
 
 
@@ -425,17 +428,17 @@
 <span class="sd">        Name of S3 bucket for input and output files.</span>
 <span class="sd">    name</span>
 <span class="sd">        Name of dataset.</span>
-<span class="sd">    repository : str</span>
-<span class="sd">        Data repository for downloading tomography data</span>
-<span class="sd">    datasets : list[tuple[str, str]]</span>
-<span class="sd">        Folders and names of branched actin datasets</span>
-<span class="sd">    scale_factor : float, optional</span>
+<span class="sd">    repository</span>
+<span class="sd">        Data repository for downloading tomography data.</span>
+<span class="sd">    datasets</span>
+<span class="sd">        Folders and names of branched actin datasets.</span>
+<span class="sd">    scale_factor</span>
 <span class="sd">        Data scaling factor (pixels to um).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pd.DataFrame</span>
-<span class="sd">        Merged data.</span>
+<span class="sd">    :</span>
+<span class="sd">        Merged branched tomography data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">get_tomography_data</span><span class="p">(</span>
@@ -462,17 +465,17 @@
 <span class="sd">        Name of S3 bucket for input and output files.</span>
 <span class="sd">    name</span>
 <span class="sd">        Name of dataset.</span>
-<span class="sd">    repository : str</span>
-<span class="sd">        Data repository for downloading tomography data</span>
-<span class="sd">    datasets : list[tuple[str, str]]</span>
-<span class="sd">        Folders and names of branched actin datasets</span>
-<span class="sd">    scale_factor : float, optional</span>
+<span class="sd">    repository</span>
+<span class="sd">        Data repository for downloading tomography data.</span>
+<span class="sd">    datasets</span>
+<span class="sd">        Folders and names of branched actin datasets.</span>
+<span class="sd">    scale_factor</span>
 <span class="sd">        Data scaling factor (pixels to um).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pd.DataFrame</span>
-<span class="sd">        Merged data.</span>
+<span class="sd">    :</span>
+<span class="sd">        Merged unbranched tomography data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">get_tomography_data</span><span class="p">(</span>
@@ -500,19 +503,19 @@
 <span class="sd">        Name of S3 bucket for input and output files.</span>
 <span class="sd">    name</span>
 <span class="sd">        Name of dataset.</span>
-<span class="sd">    repository : str</span>
-<span class="sd">        Data repository for downloading tomography data</span>
-<span class="sd">    datasets : list[tuple[str, str]]</span>
-<span class="sd">        Folders and names of branched actin datasets</span>
-<span class="sd">    group : str</span>
-<span class="sd">        Actin filament group (&quot;branched&quot; or &quot;unbranched&quot;)</span>
-<span class="sd">    scale_factor : float, optional</span>
+<span class="sd">    repository</span>
+<span class="sd">        Data repository for downloading tomography data.</span>
+<span class="sd">    datasets</span>
+<span class="sd">        Folders and names of branched actin datasets.</span>
+<span class="sd">    group</span>
+<span class="sd">        Actin filament group (&quot;branched&quot; or &quot;unbranched&quot;).</span>
+<span class="sd">    scale_factor</span>
 <span class="sd">        Data scaling factor (pixels to um).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pd.DataFrame</span>
-<span class="sd">        Merged data.</span>
+<span class="sd">    :</span>
+<span class="sd">        Merged tomography data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_coordinates_</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.csv&quot;</span>
@@ -559,7 +562,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">    data</span>
 <span class="sd">        Tomography data to sample.</span>
 <span class="sd">    save_location</span>
 <span class="sd">        Location to save sampled data.</span>
@@ -633,7 +636,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    data</span>
 <span class="sd">        Tomography data.</span>
-<span class="sd">    bucket:</span>
+<span class="sd">    bucket</span>
 <span class="sd">        Where to upload the results.</span>
 <span class="sd">    output_key</span>
 <span class="sd">        File key for results.</span>

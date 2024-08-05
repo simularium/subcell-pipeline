@@ -356,13 +356,16 @@
 <span class="kn">from</span> <span class="nn">subcell_pipeline.simulation.readdy.post_processor</span> <span class="kn">import</span> <span class="n">ReaddyPostProcessor</span>
 <span class="kn">from</span> <span class="nn">subcell_pipeline.visualization.display_data</span> <span class="kn">import</span> <span class="n">get_readdy_display_data</span>
 <span class="kn">from</span> <span class="nn">subcell_pipeline.visualization.scatter_plots</span> <span class="kn">import</span> <span class="n">make_empty_scatter_plots</span>
-<span class="kn">from</span> <span class="nn">subcell_pipeline.visualization.spatial_annotator</span> <span class="kn">import</span> <span class="n">SpatialAnnotator</span>
+<span class="kn">from</span> <span class="nn">subcell_pipeline.visualization.spatial_annotator</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">add_fiber_annotation_agents</span><span class="p">,</span>
+    <span class="n">add_sphere_annotation_agents</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">READDY_SAVED_FRAMES</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="sd">&quot;&quot;&quot;Number of saved frames for ReaDDy simulations.&quot;&quot;&quot;</span>
 
 <span class="n">BOX_SIZE</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">[</span><span class="mf">600.0</span><span class="p">])</span>
-
-<span class="n">UNIT_REGISTRY</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="sd">&quot;&quot;&quot;Bounding box size for individual simulator trajectory.&quot;&quot;&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">_add_individual_plots</span><span class="p">(</span>
@@ -403,7 +406,7 @@
     <span class="n">edges</span> <span class="o">=</span> <span class="n">post_processor</span><span class="o">.</span><span class="n">edge_positions</span><span class="p">()</span>
 
     <span class="c1"># edges</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">SpatialAnnotator</span><span class="o">.</span><span class="n">add_fiber_agents</span><span class="p">(</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">add_fiber_annotation_agents</span><span class="p">(</span>
         <span class="n">converter</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
         <span class="n">fiber_points</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span>
@@ -417,7 +420,7 @@
         <span class="n">axis_positions</span><span class="o">=</span><span class="n">axis_positions</span><span class="p">,</span>
         <span class="n">normal_length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">SpatialAnnotator</span><span class="o">.</span><span class="n">add_fiber_agents</span><span class="p">(</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">add_fiber_annotation_agents</span><span class="p">(</span>
         <span class="n">converter</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
         <span class="n">fiber_points</span><span class="o">=</span><span class="n">normals</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span>
@@ -429,7 +432,7 @@
     <span class="n">sphere_positions</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">time_ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fiber_points</span><span class="p">)):</span>
         <span class="n">sphere_positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fiber_points</span><span class="p">[</span><span class="n">time_ix</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">SpatialAnnotator</span><span class="o">.</span><span class="n">add_sphere_agents</span><span class="p">(</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">add_sphere_annotation_agents</span><span class="p">(</span>
         <span class="n">converter</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
         <span class="n">sphere_positions</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;fiber point&quot;</span><span class="p">,</span>
@@ -653,7 +656,7 @@
 
 <span class="k">def</span> <span class="nf">_find_time_units</span><span class="p">(</span><span class="n">raw_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get compact time units and a multiplier to put the times in those units.&quot;&quot;&quot;</span>
-    <span class="n">time</span> <span class="o">=</span> <span class="n">UNIT_REGISTRY</span><span class="o">.</span><span class="n">Quantity</span><span class="p">(</span><span class="n">raw_time</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span><span class="o">.</span><span class="n">Quantity</span><span class="p">(</span><span class="n">raw_time</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
     <span class="n">time_compact</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">to_compact</span><span class="p">()</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_compact</span><span class="o">.</span><span class="n">units</span><span class="si">:</span><span class="s2">~</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">time_compact</span><span class="o">.</span><span class="n">magnitude</span> <span class="o">/</span> <span class="n">raw_time</span>
 

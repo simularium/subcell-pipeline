@@ -315,8 +315,9 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for subcell_pipeline.visualization.dimensionality_reduction</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span></span><span class="sd">&quot;&quot;&quot;Visualization methods for dimensionality reduction analysis.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -336,26 +337,34 @@
 <span class="sd">&quot;&quot;&quot;Bounding box size for dimensionality reduction trajectory.&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="rgb_to_hex_color">
-<a class="viewcode-back" href="../../../_summary/subcell_pipeline.visualization.dimensionality_reduction.html#subcell_pipeline.visualization.dimensionality_reduction.rgb_to_hex_color">[docs]</a>
-<span class="k">def</span> <span class="nf">rgb_to_hex_color</span><span class="p">(</span><span class="n">color</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_rgb_to_hex_color</span><span class="p">(</span><span class="n">color</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert RGB color to hexadecimal format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    color</span>
+<span class="sd">        Red, green, and blue colors (between 0.0 and 1.0).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Color in hexadecimal format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rgb</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="n">color</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="n">color</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">02X</span><span class="si">}{</span><span class="n">rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">02X</span><span class="si">}{</span><span class="n">rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">02X</span><span class="si">}</span><span class="s2">&quot;</span></div>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">02X</span><span class="si">}{</span><span class="n">rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">02X</span><span class="si">}{</span><span class="n">rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">02X</span><span class="si">}</span><span class="s2">&quot;</span>
 
 
-
-<div class="viewcode-block" id="pca_fiber_points_over_time">
-<a class="viewcode-back" href="../../../_summary/subcell_pipeline.visualization.dimensionality_reduction.html#subcell_pipeline.visualization.dimensionality_reduction.pca_fiber_points_over_time">[docs]</a>
-<span class="k">def</span> <span class="nf">pca_fiber_points_over_time</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_pca_fiber_points_over_time</span><span class="p">(</span>
     <span class="n">samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">pca</span><span class="p">:</span> <span class="n">PCA</span><span class="p">,</span>
     <span class="n">pc_ix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">simulator_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Combined&quot;</span><span class="p">,</span>
     <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#eaeaea&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DisplayData</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DisplayData</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get fiber_points for samples of the PC distributions</span>
-<span class="sd">    in order to visualize the samples over time.</span>
+<span class="sd">    Get fiber_points for samples of the PC distributions in order to visualize</span>
+<span class="sd">    the samples over time.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">simulator_name</span> <span class="o">==</span> <span class="s2">&quot;Combined&quot;</span><span class="p">:</span>
         <span class="n">simulator_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -376,22 +385,19 @@
         <span class="n">display_type</span><span class="o">=</span><span class="n">DISPLAY_TYPE</span><span class="o">.</span><span class="n">FIBER</span><span class="p">,</span>
         <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">fiber_points_arr</span><span class="p">],</span> <span class="p">[</span><span class="n">type_name</span><span class="p">],</span> <span class="n">display_data</span></div>
+    <span class="k">return</span> <span class="p">[</span><span class="n">fiber_points_arr</span><span class="p">],</span> <span class="p">[</span><span class="n">type_name</span><span class="p">],</span> <span class="n">display_data</span>
 
 
-
-<div class="viewcode-block" id="pca_fiber_points_one_timestep">
-<a class="viewcode-back" href="../../../_summary/subcell_pipeline.visualization.dimensionality_reduction.html#subcell_pipeline.visualization.dimensionality_reduction.pca_fiber_points_one_timestep">[docs]</a>
-<span class="k">def</span> <span class="nf">pca_fiber_points_one_timestep</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_pca_fiber_points_one_timestep</span><span class="p">(</span>
     <span class="n">samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">pca</span><span class="p">:</span> <span class="n">PCA</span><span class="p">,</span>
     <span class="n">color_maps</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Colormap</span><span class="p">],</span>
     <span class="n">pc_ix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">simulator_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Combined&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DisplayData</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DisplayData</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get fiber_points for samples of the PC distributions</span>
-<span class="sd">    in order to visualize the samples together in one timestep.</span>
+<span class="sd">    Get fiber_points for samples of the PC distributions in order to visualize</span>
+<span class="sd">    the samples together in one timestep.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">color_map</span> <span class="o">=</span> <span class="n">color_maps</span><span class="p">[</span><span class="n">simulator_name</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">simulator_name</span> <span class="o">==</span> <span class="s2">&quot;Combined&quot;</span><span class="p">:</span>
@@ -417,15 +423,12 @@
             <span class="n">display_data</span><span class="p">[</span><span class="n">type_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">DisplayData</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">type_name</span><span class="p">,</span>
                 <span class="n">display_type</span><span class="o">=</span><span class="n">DISPLAY_TYPE</span><span class="o">.</span><span class="n">FIBER</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="n">rgb_to_hex_color</span><span class="p">(</span><span class="n">color_map</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span> <span class="o">/</span> <span class="n">color_range</span><span class="p">)),</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">_rgb_to_hex_color</span><span class="p">(</span><span class="n">color_map</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span> <span class="o">/</span> <span class="n">color_range</span><span class="p">)),</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="n">fiber_points</span><span class="p">,</span> <span class="n">type_names</span><span class="p">,</span> <span class="n">display_data</span></div>
+    <span class="k">return</span> <span class="n">fiber_points</span><span class="p">,</span> <span class="n">type_names</span><span class="p">,</span> <span class="n">display_data</span>
 
 
-
-<div class="viewcode-block" id="generate_simularium_and_save">
-<a class="viewcode-back" href="../../../_summary/subcell_pipeline.visualization.dimensionality_reduction.html#subcell_pipeline.visualization.dimensionality_reduction.generate_simularium_and_save">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_simularium_and_save</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_generate_simularium_and_save</span><span class="p">(</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">fiber_points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">type_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -436,12 +439,10 @@
     <span class="n">temp_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">pc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a Simulariumio object for the fiber points and save it.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a simulariumio object for the fiber points and save it.&quot;&quot;&quot;</span>
     <span class="n">meta_data</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
         <span class="n">box_size</span><span class="o">=</span><span class="n">BOX_SIZE</span><span class="p">,</span>
         <span class="n">camera_defaults</span><span class="o">=</span><span class="n">CameraData</span><span class="p">(</span>
-            <span class="c1"># position=np.array([-20.0, 350.0, 200.0]),</span>
-            <span class="c1"># look_at_position=np.array([50.0, 0.0, 0.0]),</span>
             <span class="n">position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">70.0</span><span class="p">,</span> <span class="mf">70.0</span><span class="p">,</span> <span class="mf">300.0</span><span class="p">]),</span>
             <span class="n">look_at_position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">70.0</span><span class="p">,</span> <span class="mf">70.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
             <span class="n">fov_degrees</span><span class="o">=</span><span class="mf">60.0</span><span class="p">,</span>
@@ -458,7 +459,6 @@
         <span class="n">time_units</span><span class="p">,</span>
         <span class="n">spatial_units</span><span class="p">,</span>
         <span class="n">fiber_radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="c1"># fiber_radius=6.0,</span>
     <span class="p">)</span>
 
     <span class="c1"># Save locally and copy to bucket.</span>
@@ -469,8 +469,7 @@
     <span class="n">local_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">output_key</span><span class="p">)</span>
     <span class="n">converter</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="o">=</span><span class="n">local_file_path</span><span class="p">)</span>
     <span class="n">output_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_key</span><span class="si">}</span><span class="s2">.simularium&quot;</span>
-    <span class="n">save_buffer</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">output_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">load_buffer</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">output_key</span><span class="p">))</span></div>
-
+    <span class="n">save_buffer</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">output_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">load_buffer</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">output_key</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="visualize_dimensionality_reduction">
@@ -502,8 +501,8 @@
 <span class="sd">    simulator_detail</span>
 <span class="sd">        True to show individual simulator ranges, False otherwise.</span>
 <span class="sd">    sample_ranges</span>
-<span class="sd">        Min and max values to visualize for each PC</span>
-<span class="sd">        (and each simulator if simulator_detail).</span>
+<span class="sd">        Min and max values to visualize for each PC (and each simulator if</span>
+<span class="sd">        simulator_detail).</span>
 <span class="sd">    separate_pcs</span>
 <span class="sd">        True to Visualize PCs in separate files, False otherwise.</span>
 <span class="sd">    sample_resolution</span>
@@ -556,12 +555,12 @@
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">pc_ix</span> <span class="ow">in</span> <span class="n">pc_ixs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">distribution_over_time</span><span class="p">:</span>
-                <span class="n">_fiber_points</span><span class="p">,</span> <span class="n">_type_names</span><span class="p">,</span> <span class="n">_display_data</span> <span class="o">=</span> <span class="n">pca_fiber_points_over_time</span><span class="p">(</span>
+                <span class="n">_fiber_points</span><span class="p">,</span> <span class="n">_type_names</span><span class="p">,</span> <span class="n">_display_data</span> <span class="o">=</span> <span class="n">_pca_fiber_points_over_time</span><span class="p">(</span>
                     <span class="n">samples</span><span class="p">,</span> <span class="n">pca</span><span class="p">,</span> <span class="n">pc_ix</span><span class="p">,</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">over_time_colors</span><span class="p">[</span><span class="n">simulator</span><span class="p">]</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">_fiber_points</span><span class="p">,</span> <span class="n">_type_names</span><span class="p">,</span> <span class="n">_display_data</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">pca_fiber_points_one_timestep</span><span class="p">(</span>
+                    <span class="n">_pca_fiber_points_one_timestep</span><span class="p">(</span>
                         <span class="n">samples</span><span class="p">,</span> <span class="n">pca</span><span class="p">,</span> <span class="n">color_maps</span><span class="p">,</span> <span class="n">pc_ix</span><span class="p">,</span> <span class="n">simulator</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
@@ -575,7 +574,7 @@
                 <span class="n">display_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">display_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">_display_data</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">separate_pcs</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">pc_ix</span> <span class="ow">in</span> <span class="n">pc_ixs</span><span class="p">:</span>
-            <span class="n">generate_simularium_and_save</span><span class="p">(</span>
+            <span class="n">_generate_simularium_and_save</span><span class="p">(</span>
                 <span class="n">dataset_name</span><span class="p">,</span>
                 <span class="n">fiber_points</span><span class="p">[</span><span class="n">pc_ix</span><span class="p">],</span>
                 <span class="n">type_names</span><span class="p">[</span><span class="n">pc_ix</span><span class="p">],</span>
@@ -587,7 +586,7 @@
                 <span class="nb">str</span><span class="p">(</span><span class="n">pc_ix</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
             <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">generate_simularium_and_save</span><span class="p">(</span>
+        <span class="n">_generate_simularium_and_save</span><span class="p">(</span>
             <span class="n">dataset_name</span><span class="p">,</span>
             <span class="n">fiber_points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">type_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
