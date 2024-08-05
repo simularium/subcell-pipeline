@@ -1,3 +1,5 @@
+"""Methods for visualizing fiber points."""
+
 import numpy as np
 from simulariumio import (
     AgentData,
@@ -36,8 +38,7 @@ def generate_trajectory_converter_for_fiber_points(
     spatial_units
         Spatial unit data.
     fiber_radius
-        Radius to render fiber
-        Default: 0.5
+        Radius to render fiber.
 
     Returns
     -------

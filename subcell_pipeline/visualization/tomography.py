@@ -1,3 +1,5 @@
+"""Visualization methods for tomography data analysis."""
+
 import os
 from typing import Optional
 
@@ -11,14 +13,16 @@ from simulariumio import CameraData, MetaData, TrajectoryConverter, UnitData
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
     CompressionMetric,
 )
+from subcell_pipeline.analysis.tomography_data.tomography_data import (
+    TOMOGRAPHY_SAMPLE_COLUMNS,
+)
 from subcell_pipeline.visualization.fiber_points import (
     generate_trajectory_converter_for_fiber_points,
 )
 from subcell_pipeline.visualization.histogram_plots import make_empty_histogram_plots
 
-TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
-
 TOMOGRAPHY_VIZ_SCALE: float = 100.0
+"""Spatial scaling factor for tomography visualization."""
 
 
 def _add_tomography_plots(

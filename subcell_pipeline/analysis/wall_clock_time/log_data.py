@@ -1,3 +1,5 @@
+"""Methods for analyzing simulation logs."""
+
 import re
 
 import pandas as pd

@@ -1,10 +1,7 @@
-"""
-Methods to obtain labels and calculate metrics from the
-CompressionMetric Enum class.
-"""
+"""Enumerations for compression metric analysis."""
 
 from enum import Enum
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Union
 
 import numpy as np
 
@@ -22,7 +19,7 @@ from subcell_pipeline.analysis.compression_metrics.polymer_trace import (
 
 
 class CompressionMetric(Enum):
-    # Enum class for compression metrics
+    """Enumeration for compression metrics."""
 
     NON_COPLANARITY = "non_coplanarity"
     PEAK_ASYMMETRY = "peak_asymmetry"
@@ -38,11 +35,6 @@ class CompressionMetric(Enum):
     def label(self: Enum) -> str:
         """
         Return the label for the compression metric.
-
-        Parameters
-        ----------
-        self
-            the CompressionMetric object
 
         Returns
         -------
@@ -68,11 +60,6 @@ class CompressionMetric(Enum):
         """
         Return the description for the compression metric.
 
-        Parameters
-        ----------
-        self
-            the CompressionMetric object
-
         Returns
         -------
         :
@@ -96,11 +83,6 @@ class CompressionMetric(Enum):
     def bounds(self: Enum) -> tuple[float, float]:
         """
         Return the default bounds for the compression metric.
-
-        Parameters
-        ----------
-        self
-            the CompressionMetric object
 
         Returns
         -------
@@ -128,12 +110,8 @@ class CompressionMetric(Enum):
 
         Parameters
         ----------
-        self
-            the CompressionMetric object
-
         polymer_trace
-            array containing the x,y,z positions of the polymer trace
-
+            Array containing the x,y,z positions of the polymer trace
         **options
             Additional options as key-value pairs.
 
@@ -142,7 +120,7 @@ class CompressionMetric(Enum):
         :
             The calculated compression metric for the polymer
         """
-        functions: Dict[CompressionMetric, Callable] = {
+        functions: dict[CompressionMetric, Callable] = {
             CompressionMetric.NON_COPLANARITY: get_third_component_variance,
             CompressionMetric.PEAK_ASYMMETRY: get_asymmetry_of_peak,
             CompressionMetric.SUM_BENDING_ENERGY: get_sum_bending_energy,

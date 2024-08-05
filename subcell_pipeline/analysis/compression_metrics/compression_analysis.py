@@ -1,10 +1,7 @@
-"""
-Methods for obtaining compression metric data and
-plotting compression metrics vs time.
-"""
+"""Methods compression metric analysis and plotting."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -31,28 +28,23 @@ def get_compression_metric_data(
     recalculate: bool = False,
 ) -> pd.DataFrame:
     """
-    Load or create merged data with metrics for given conditions and random seeds.
+    Load or create merged data with metrics for given conditions and seeds.
 
-    If merged data already exists, load the data.
-    Otherwise, iterate through the conditions and seeds to merge the data.
+    If merged data already exists, load the data. Otherwise, iterate through the
+    conditions and seeds to merge the data.
 
     Parameters
     ----------
     bucket
         Name of S3 bucket for input and output files.
-
     series_name
         Name of simulation series.
-
     condition_keys
         List of condition keys.
-
     random_seeds
         Random seeds for simulations.
-
     metrics
         List of metrics to calculate.
-
     recalculate
         True if data should be recalculated, False otherwise.
 
@@ -98,7 +90,7 @@ def get_compression_metric_data(
 
 
 def calculate_compression_metrics(
-    df: pd.DataFrame, metrics: List[Any], **options: Dict[str, Any]
+    df: pd.DataFrame, metrics: list[Any], **options: dict[str, Any]
 ) -> pd.DataFrame:
     """
     Calculate compression metrics for a single simulation condition and seed.
@@ -106,18 +98,16 @@ def calculate_compression_metrics(
     Parameters
     ----------
     df
-        The input DataFrame for a single simulator.
-
+        Input data for a single simulator.
     metrics
         The list of metrics to calculate.
-
     **options
         Additional options for the calculation.
 
     Returns
     -------
     :
-        The DataFrame with the calculated metrics.
+        Dataframe with calculated metrics.
     """
     time_values = df["time"].unique()
     df_metrics = pd.DataFrame(
@@ -158,37 +148,29 @@ def save_compression_metrics(
 
 def plot_metrics_vs_time(
     df: pd.DataFrame,
-    metrics: List[CompressionMetric],
+    metrics: list[CompressionMetric],
     figure_path: Union[Path, None] = None,
     suffix: str = "",
     compression_distance: float = DEFAULT_COMPRESSION_DISTANCE,
     use_real_time: bool = False,
 ) -> None:
     """
-    Plot metrics vs time.
+    Plot individual metric values over time for each velocity.
 
     Parameters
     ----------
     df
-        The input DataFrame.
-
+        Input dataframe.
     metrics
-        The list of metrics to plot.
-
+        List of metrics to plot.
     figure_path
-        The path to save the figure.
-
+        Path to save the figure.
     suffix
-        The suffix to append to the figure filename.
-        Defaults to "".
-
+        Suffix to append to the figure filename.
     compression_distance
-        The compression distance in nm.
-        Defaults to 150.0.
-
+        Compression distance in nm.
     use_real_time
-        Whether to use real time for the x-axis.
-        Defaults to False.
+        True to use real time for the x-axis, False otherwise.
     """
     num_velocities = df["velocity"].nunique()
     total_time = 1.0
@@ -203,7 +185,7 @@ def plot_metrics_vs_time(
         for ct, (velocity, df_velocity) in enumerate(df.groupby("velocity")):
             if use_real_time:
                 # type checker is unable to infer the datatype of velocity
-                total_time = compression_distance / velocity  # type: ignore
+                total_time = compression_distance / velocity
                 time_label = "Time (s)"
             for simulator, df_simulator in df_velocity.groupby("simulator"):
                 for repeat, df_repeat in df_simulator.groupby("repeat"):
@@ -219,7 +201,7 @@ def plot_metrics_vs_time(
                         xvals,
                         yvals,
                         label=label,
-                        color=SIMULATOR_COLOR_MAP[simulator],  # type: ignore
+                        color=SIMULATOR_COLOR_MAP[simulator],
                         alpha=0.6,
                     )
             axs[ct].set_title(f"Velocity: {velocity}")
@@ -234,28 +216,23 @@ def plot_metrics_vs_time(
 
 def plot_metric_distribution(
     df: pd.DataFrame,
-    metrics: List[CompressionMetric],
+    metrics: list[CompressionMetric],
     figure_path: Union[Path, None] = None,
     suffix: str = "",
 ) -> None:
     """
-    Plot metrics vs time.
+    Plot distribution of metric values for each velocity.
 
     Parameters
     ----------
     df
-        The input DataFrame.
-
+        Input dataframe.
     metrics
-        The list of metrics to plot.
-
+        List of metrics to plot.
     figure_path
-        The path to save the figure.
-
+        Path to save the figure.
     suffix
-        The suffix to append to the figure filename.
-        Defaults to "".
-
+        Suffix to append to the figure filename.
     """
     num_velocities = df["velocity"].nunique()
     plt.rcParams.update({"font.size": 16})
@@ -277,7 +254,7 @@ def plot_metric_distribution(
                 axs[ct].hist(
                     df_simulator[metric.value],
                     label=f"{simulator}",
-                    color=SIMULATOR_COLOR_MAP[simulator],  # type: ignore
+                    color=SIMULATOR_COLOR_MAP[simulator],
                     alpha=0.7,
                     bins=bins,
                 )

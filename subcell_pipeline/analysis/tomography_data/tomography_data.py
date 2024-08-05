@@ -1,3 +1,5 @@
+"""Methods for analyzing tomography data."""
+
 import os
 
 import matplotlib.pyplot as plt
@@ -9,12 +11,13 @@ from io_collection.save.save_dataframe import save_dataframe
 from io_collection.save.save_figure import save_figure
 
 TOMOGRAPHY_SAMPLE_COLUMNS: list[str] = ["xpos", "ypos", "zpos"]
+"""Columns names used when sampling tomography data."""
 
 
 def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> bool:
     """
-    Test whether the angles between consecutive segments of a polymer
-    trace are less than 90 degrees.
+    Test if all angles between consecutive segments of a polymer trace are less
+    than 90 degrees.
 
     Parameters
     ----------
@@ -24,14 +27,14 @@ def test_consecutive_segment_angles(polymer_trace: np.ndarray) -> bool:
     Returns
     -------
     :
-        True if all consecutive angles are less than 180 degrees.
+        True if all consecutive angles are less than 90 degrees, False
+        otherwise.
     """
     vectors = polymer_trace[1:] - polymer_trace[:-1]
 
     vectors /= np.linalg.norm(vectors, axis=1)[:, np.newaxis]
     dot_products = np.dot(vectors[1:], vectors[:-1].T)
 
-    # Check if any angle is greater than 90 degrees
     return np.all(dot_products > 0).item()
 
 
@@ -97,17 +100,17 @@ def get_branched_tomography_data(
         Name of S3 bucket for input and output files.
     name
         Name of dataset.
-    repository : str
-        Data repository for downloading tomography data
-    datasets : list[tuple[str, str]]
-        Folders and names of branched actin datasets
-    scale_factor : float, optional
+    repository
+        Data repository for downloading tomography data.
+    datasets
+        Folders and names of branched actin datasets.
+    scale_factor
         Data scaling factor (pixels to um).
 
     Returns
     -------
-    pd.DataFrame
-        Merged data.
+    :
+        Merged branched tomography data.
     """
 
     return get_tomography_data(
@@ -131,17 +134,17 @@ def get_unbranched_tomography_data(
         Name of S3 bucket for input and output files.
     name
         Name of dataset.
-    repository : str
-        Data repository for downloading tomography data
-    datasets : list[tuple[str, str]]
-        Folders and names of branched actin datasets
-    scale_factor : float, optional
+    repository
+        Data repository for downloading tomography data.
+    datasets
+        Folders and names of branched actin datasets.
+    scale_factor
         Data scaling factor (pixels to um).
 
     Returns
     -------
-    pd.DataFrame
-        Merged data.
+    :
+        Merged unbranched tomography data.
     """
 
     return get_tomography_data(
@@ -166,19 +169,19 @@ def get_tomography_data(
         Name of S3 bucket for input and output files.
     name
         Name of dataset.
-    repository : str
-        Data repository for downloading tomography data
-    datasets : list[tuple[str, str]]
-        Folders and names of branched actin datasets
-    group : str
-        Actin filament group ("branched" or "unbranched")
-    scale_factor : float, optional
+    repository
+        Data repository for downloading tomography data.
+    datasets
+        Folders and names of branched actin datasets.
+    group
+        Actin filament group ("branched" or "unbranched").
+    scale_factor
         Data scaling factor (pixels to um).
 
     Returns
     -------
-    pd.DataFrame
-        Merged data.
+    :
+        Merged tomography data.
     """
 
     data_key = f"{name}/{name}_coordinates_{group}.csv"
@@ -222,7 +225,7 @@ def sample_tomography_data(
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data
         Tomography data to sample.
     save_location
         Location to save sampled data.
@@ -293,7 +296,7 @@ def plot_tomography_data_by_dataset(
     ----------
     data
         Tomography data.
-    bucket:
+    bucket
         Where to upload the results.
     output_key
         File key for results.

@@ -1,7 +1,41 @@
+"""Methods for visualization display data."""
+
 from simulariumio import DISPLAY_TYPE, DisplayData
 
 
 def get_readdy_display_data() -> dict[str, DisplayData]:
+    """
+    Get DisplayData for ReaDDy actin simulations.
+
+    Each actin monomer uses the `SPHERE` display type with the following colors:
+
+    ======================= =======
+    Label                   Color
+    ======================= =======
+    actin                   #bf9b30
+    actin#mid               #bf9b30
+    actin#fixed             #bf9b30
+    actin#mid_fixed         #bf9b30
+    actin#ATP               #ffbf00
+    actin#mid_ATP           #ffbf00
+    actin#fixed_ATP         #ffbf00
+    actin#mid_fixed_ATP     #ffbf00
+    actin#barbed            #ffdc73
+    actin#barbed_ATP        #ffdc73
+    actin#fixed_barbed      #ffdc73
+    actin#fixed_barbed_ATP  #ffdc73
+    actin#pointed           #a67c00
+    actin#pointed_ATP       #a67c00
+    actin#pointed_fixed     #a67c00
+    actin#pointed_fixed_ATP #a67c00
+    ======================= =======
+
+    Returns
+    -------
+    :
+        Map of names to DisplayData objects.
+    """
+
     extra_radius = 1.5
     actin_radius = 2.0 + extra_radius
     n_polymer_numbers = 5

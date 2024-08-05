@@ -1,3 +1,5 @@
+"""Methods for scatter plot visualization."""
+
 from typing import Optional
 
 import numpy as np

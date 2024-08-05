@@ -55,7 +55,7 @@ def save_pca_results(
         Location for output file (local path or S3 bucket).
     save_key
         Name key for output file.
-    resample : bool
+    resample
         True if data should be resampled before saving, False otherwise.
     """
 
@@ -108,7 +108,7 @@ def save_pca_transforms(
 
     Parameters
     ----------
-    pca : PCA
+    pca
         PCA object.
     points
         List of inverse transform points.
@@ -155,11 +155,11 @@ def plot_pca_feature_scatter(data: pd.DataFrame, features: dict, pca: PCA) -> No
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data
         PCA results data.
-    features : dict
+    features
         Map of feature name to coloring.
-    pca : PCA
+    pca
         PCA object.
     """
 
@@ -204,9 +204,9 @@ def plot_pca_inverse_transform(pca: PCA, pca_results: pd.DataFrame) -> None:
 
     Parameters
     ----------
-    pca : PCA
+    pca
         PCA object.
-    pca_results : pd.DataFrame
+    pca_results
         PCA results data.
     """
 

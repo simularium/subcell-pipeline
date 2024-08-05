@@ -1,3 +1,5 @@
+"""Visualization methods for combined simulators."""
+
 import os
 from typing import Optional
 
@@ -28,6 +30,7 @@ from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import align_
 from subcell_pipeline.visualization.scatter_plots import make_empty_scatter_plots
 
 BOX_SIZE: np.ndarray = np.array(3 * [600.0])
+"""Bounding box size for combined simulator trajectories."""
 
 
 def _load_fiber_points_from_dataframe(
@@ -60,7 +63,7 @@ def _load_fiber_points_from_dataframe(
     return np.array(fiber_points)
 
 
-def get_combined_trajectory_converter(
+def _get_combined_trajectory_converter(
     fiber_points: list[np.ndarray],
     type_names: list[str],
     display_data: dict[str, DisplayData],
@@ -227,7 +230,7 @@ def visualize_combined_trajectories(
                     color=color,
                 )
 
-    converter = get_combined_trajectory_converter(
+    converter = _get_combined_trajectory_converter(
         fiber_points, type_names, display_data
     )
 
