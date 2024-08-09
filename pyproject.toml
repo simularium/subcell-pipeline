@@ -2,7 +2,17 @@
 name = "subcell_pipeline"
 description = "Simulation, analysis, and visualization for subcellular models"
 authors = [
+    { name = "Mark Hansen", email = "mark@homeworld.bio" },
     { name = "Blair Lyons", email = "blairl@alleninstitute.org" },
+    { name = "Saurabh S. Mogre", email = "saurabh.mogre@alleninstitute.org" },
+    { name = "Aadarsh Raghunathan", email = "aadarsh.raghunathan@research.iiit.ac.in" },
+    { name = "Karthik Vegesna", email = "karthik.vegesna@alleninstitute.org" },
+    { name = "Jessica S. Yu", email = "jessica.yu@alleninstitute.org" },
+]
+maintainers = [
+    { name = "Blair Lyons", email = "blairl@alleninstitute.org" },
+    { name = "Saurabh S. Mogre", email = "saurabh.mogre@alleninstitute.org" },
+    { name = "Jessica S. Yu", email = "jessica.yu@alleninstitute.org" },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
