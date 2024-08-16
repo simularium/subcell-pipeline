@@ -1,6 +1,6 @@
 """Methods for analyzing tomography data."""
 
-import os
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -286,8 +286,8 @@ def sample_tomography_data(
 
 def plot_tomography_data_by_dataset(
     data: pd.DataFrame,
-    bucket: str,
-    output_key: str,
+    save_location: Optional[str] = None,
+    save_key_template: str = "tomography_data_%s.png",
 ) -> None:
     """
     Plot tomography data for each dataset.
@@ -296,13 +296,13 @@ def plot_tomography_data_by_dataset(
     ----------
     data
         Tomography data.
-    bucket
-        Where to upload the results.
-    output_key
-        File key for results.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key_template
+        Name key template for output file.
     """
-    for dataset, group in data.groupby("dataset"):
 
+    for dataset, group in data.groupby("dataset"):
         figure, ax = plt.subplots(1, 3, figsize=(6, 2))
         ax[1].set_title(dataset)
 
@@ -318,5 +318,6 @@ def plot_tomography_data_by_dataset(
             ax[1].plot(fiber["xpos"], fiber["zpos"], marker="o", ms=1, lw=1)
             ax[2].plot(fiber["ypos"], fiber["zpos"], marker="o", ms=1, lw=1)
 
-        base_name, ext = os.path.splitext(output_key)
-        save_figure(bucket, f"{base_name}_{dataset}.{ext}", figure)
+        if save_location is not None:
+            save_key = save_key_template % dataset
+            save_figure(save_location, save_key, figure)

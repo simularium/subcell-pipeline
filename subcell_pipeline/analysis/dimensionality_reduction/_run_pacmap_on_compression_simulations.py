@@ -57,6 +57,9 @@ random_seeds: list[int] = [1, 2, 3, 4, 5]
 # List of condition file keys for each velocity
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
+# Location to save analysis results (S3 bucket or local path)
+save_location: str = "s3://subcell-working-bucket"
+
 # %% [markdown]
 """
 ## Load merged data
@@ -89,7 +92,9 @@ data["velocity"] = data["key"].astype("int") / 10
 """
 
 # %%
-plot_fibers_by_key_and_seed(data)
+plot_fibers_by_key_and_seed(
+    data, save_location, "dimensionality_reduction/actin_compression_aligned_fibers.png"
+)
 
 # %% [markdown]
 """
@@ -120,4 +125,9 @@ features = {
     "REPEAT": "viridis",
 }
 
-plot_pacmap_feature_scatter(pacmap_results, features)
+plot_pacmap_feature_scatter(
+    pacmap_results,
+    features,
+    save_location,
+    "dimensionality_reduction/actin_compression_pacmap_feature_scatter.png",
+)

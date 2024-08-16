@@ -114,7 +114,10 @@ time_map = {
 }
 
 save_aligned_fibers(
-    data, time_map, save_location, "actin_compression_aligned_fibers.json"
+    data,
+    time_map,
+    save_location,
+    "dimensionality_reduction/actin_compression_aligned_fibers.json",
 )
 
 # %% [markdown]
@@ -123,7 +126,9 @@ save_aligned_fibers(
 """
 
 # %%
-plot_fibers_by_key_and_seed(data)
+plot_fibers_by_key_and_seed(
+    data, save_location, "dimensionality_reduction/actin_compression_aligned_fibers.png"
+)
 
 # %% [markdown]
 """
@@ -139,7 +144,7 @@ pca_results, pca = run_pca(data)
 """
 
 # %%
-save_pickle(save_location, "actin_compression_pca.pkl", pca)
+save_pickle(save_location, "dimensionality_reduction/actin_compression_pca.pkl", pca)
 
 # %% [markdown]
 """
@@ -151,7 +156,10 @@ entries. Pre-shuffled data is useful for scatter plots showing each individual
 
 # %%
 save_pca_results(
-    pca_results, save_location, "actin_compression_pca_results.csv", resample=True
+    pca_results,
+    save_location,
+    "dimensionality_reduction/actin_compression_pca_results.csv",
+    resample=True,
 )
 
 # %% [markdown]
@@ -161,7 +169,9 @@ save_pca_results(
 
 # %%
 save_pca_trajectories(
-    pca_results, save_location, "actin_compression_pca_trajectories.json"
+    pca_results,
+    save_location,
+    "dimensionality_reduction/actin_compression_pca_trajectories.json",
 )
 
 # %% [markdown]
@@ -175,7 +185,12 @@ points: list[list[float]] = [
     [-600, -400, -200, 0, 200],
 ]
 
-save_pca_transforms(pca, points, save_location, "actin_compression_pca_transforms.json")
+save_pca_transforms(
+    pca,
+    points,
+    save_location,
+    "dimensionality_reduction/actin_compression_pca_transforms.json",
+)
 
 # %% [markdown]
 """
@@ -198,7 +213,13 @@ features = {
     "REPEAT": "viridis",
 }
 
-plot_pca_feature_scatter(pca_results, features, pca)
+plot_pca_feature_scatter(
+    pca_results,
+    features,
+    pca,
+    save_location,
+    "dimensionality_reduction/actin_compression_pca_feature_scatter.png",
+)
 
 # %% [markdown]
 """
@@ -206,4 +227,9 @@ plot_pca_feature_scatter(pca_results, features, pca)
 """
 
 # %%
-plot_pca_inverse_transform(pca, pca_results)
+plot_pca_inverse_transform(
+    pca,
+    pca_results,
+    save_location,
+    "dimensionality_reduction/actin_compression_pca_inverse_transform.png",
+)

@@ -1,13 +1,13 @@
 """Methods compression metric analysis and plotting."""
 
-from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
+from io_collection.save.save_figure import save_figure
 from matplotlib import pyplot as plt
 
 from subcell_pipeline.analysis.compression_metrics.compression_metric import (
@@ -149,10 +149,10 @@ def save_compression_metrics(
 def plot_metrics_vs_time(
     df: pd.DataFrame,
     metrics: list[CompressionMetric],
-    figure_path: Union[Path, None] = None,
-    suffix: str = "",
     compression_distance: float = DEFAULT_COMPRESSION_DISTANCE,
     use_real_time: bool = False,
+    save_location: Optional[str] = None,
+    save_key_template: str = "compression_metrics_over_time_%s.png",
 ) -> None:
     """
     Plot individual metric values over time for each velocity.
@@ -163,22 +163,23 @@ def plot_metrics_vs_time(
         Input dataframe.
     metrics
         List of metrics to plot.
-    figure_path
-        Path to save the figure.
-    suffix
-        Suffix to append to the figure filename.
     compression_distance
         Compression distance in nm.
     use_real_time
         True to use real time for the x-axis, False otherwise.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key_template
+        Name key template for output file.
     """
+
     num_velocities = df["velocity"].nunique()
     total_time = 1.0
     time_label = "Normalized Time"
     plt.rcParams.update({"font.size": 16})
 
     for metric in metrics:
-        fig, axs = plt.subplots(
+        figure, axs = plt.subplots(
             1, num_velocities, figsize=(num_velocities * 5, 5), sharey=True, dpi=300
         )
         axs = axs.ravel()
@@ -207,18 +208,20 @@ def plot_metrics_vs_time(
             axs[ct].set_title(f"Velocity: {velocity}")
             if ct == 0:
                 axs[ct].legend()
-        fig.supxlabel(time_label)
-        fig.supylabel(metric.label())
-        fig.tight_layout()
-        if figure_path is not None:
-            fig.savefig(figure_path / f"{metric.value}_vs_time{suffix}.png")
+        figure.supxlabel(time_label)
+        figure.supylabel(metric.label())
+        figure.tight_layout()
+
+        if save_location is not None:
+            save_key = save_key_template % metric.value
+            save_figure(save_location, save_key, figure)
 
 
 def plot_metric_distribution(
     df: pd.DataFrame,
     metrics: list[CompressionMetric],
-    figure_path: Union[Path, None] = None,
-    suffix: str = "",
+    save_location: Optional[str] = None,
+    save_key_template: str = "compression_metrics_histograms_%s.png",
 ) -> None:
     """
     Plot distribution of metric values for each velocity.
@@ -229,16 +232,17 @@ def plot_metric_distribution(
         Input dataframe.
     metrics
         List of metrics to plot.
-    figure_path
-        Path to save the figure.
-    suffix
-        Suffix to append to the figure filename.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key_template
+        Name key template for output file.
     """
+
     num_velocities = df["velocity"].nunique()
     plt.rcParams.update({"font.size": 16})
 
     for metric in metrics:
-        fig, axs = plt.subplots(
+        figure, axs = plt.subplots(
             1,
             num_velocities,
             figsize=(num_velocities * 5, 5),
@@ -261,8 +265,10 @@ def plot_metric_distribution(
             axs[ct].set_title(f"Velocity: {velocity}")
             if ct == 0:
                 axs[ct].legend()
-        fig.supxlabel(metric.label())
-        fig.supylabel("Count")
-        fig.tight_layout()
-        if figure_path is not None:
-            fig.savefig(figure_path / f"{metric.value}_histogram{suffix}.png")
+        figure.supxlabel(metric.label())
+        figure.supylabel("Count")
+        figure.tight_layout()
+
+        if save_location is not None:
+            save_key = save_key_template % metric.value
+            save_figure(save_location, save_key, figure)

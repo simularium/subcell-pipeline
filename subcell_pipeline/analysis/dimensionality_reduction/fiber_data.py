@@ -1,11 +1,14 @@
 """Methods for fiber data merging and alignment."""
 
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from io_collection.keys.check_key import check_key
 from io_collection.load.load_dataframe import load_dataframe
 from io_collection.save.save_dataframe import save_dataframe
+from io_collection.save.save_figure import save_figure
 from io_collection.save.save_json import save_json
 
 
@@ -211,7 +214,11 @@ def save_aligned_fibers(
     save_json(save_location, save_key, output)
 
 
-def plot_fibers_by_key_and_seed(data: pd.DataFrame) -> None:
+def plot_fibers_by_key_and_seed(
+    data: pd.DataFrame,
+    save_location: Optional[str] = None,
+    save_key: str = "aligned_fibers_by_key_and_seed.png",
+) -> None:
     """
     Plot simulated fiber data for each condition key and random seed.
 
@@ -219,12 +226,16 @@ def plot_fibers_by_key_and_seed(data: pd.DataFrame) -> None:
     ----------
     data
         Simulated fiber data.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
     """
 
     rows = data["key"].unique()
     cols = data["seed"].unique()
 
-    _, ax = plt.subplots(
+    figure, ax = plt.subplots(
         len(rows), len(cols), figsize=(10, 6), sharey=True, sharex=True
     )
 
@@ -246,3 +257,6 @@ def plot_fibers_by_key_and_seed(data: pd.DataFrame) -> None:
 
     plt.tight_layout()
     plt.show()
+
+    if save_location is not None:
+        save_figure(save_location, save_key, figure)
