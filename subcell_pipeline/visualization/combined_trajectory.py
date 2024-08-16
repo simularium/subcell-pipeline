@@ -130,7 +130,7 @@ def _add_combined_plots(
 
 def visualize_combined_trajectories(
     buckets: dict[str, str],
-    series_names: dict[str, str],
+    series_name: str,
     condition_keys: list[str],
     replicates: list[int],
     n_timepoints: int,
@@ -148,8 +148,8 @@ def visualize_combined_trajectories(
     buckets
         Names of S3 buckets for input and output files for each simulator and
         visualization.
-    series_names
-        Names of simulation series for each simulator.
+    series_name
+        Name of simulation series.
     condition_keys
         List of condition keys.
     replicates
@@ -174,7 +174,6 @@ def visualize_combined_trajectories(
 
     for simulator, color in simulator_colors.items():
         bucket = buckets[simulator]
-        series_name = series_names[simulator]
 
         # Load calculated compression metric data.
         if metrics is not None:
