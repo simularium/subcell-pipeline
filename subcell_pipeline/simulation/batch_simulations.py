@@ -96,7 +96,7 @@ def generate_configs_from_template(
         for index, seed in enumerate(random_seeds):
             config_key = f"{series_name}/{timestamp}/configs/{group_key}_{index}.cym"
             config_contents = contents.replace("{{RANDOM_SEED}}", str(seed))
-            print(f"Saving config for [ {match} ] for seed {seed} to [ {config_key}]")
+            print(f"Saving config for [ {match} ] for seed {seed} to [ {config_key} ]")
             save_text(bucket, config_key, config_contents)
 
     return group_keys
