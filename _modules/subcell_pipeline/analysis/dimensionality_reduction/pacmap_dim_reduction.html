@@ -317,8 +317,11 @@
           <h1>Source code for subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Methods for dimensionality reduction using PaCMAP.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">io_collection.save.save_figure</span> <span class="kn">import</span> <span class="n">save_figure</span>
 <span class="kn">from</span> <span class="nn">pacmap</span> <span class="kn">import</span> <span class="n">PaCMAP</span>
 
 <span class="kn">from</span> <span class="nn">subcell_pipeline.analysis.dimensionality_reduction.fiber_data</span> <span class="kn">import</span> <span class="n">reshape_fibers</span>
@@ -361,7 +364,12 @@
 
 <div class="viewcode-block" id="plot_pacmap_feature_scatter">
 <a class="viewcode-back" href="../../../../_summary/subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction.html#subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction.plot_pacmap_feature_scatter">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_pacmap_feature_scatter</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">plot_pacmap_feature_scatter</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">save_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pacmap_feature_scatter.png&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot scatter of PaCMAP embedding colored by the given features.</span>
 
@@ -371,9 +379,15 @@
 <span class="sd">        PaCMAP results data.</span>
 <span class="sd">    features</span>
 <span class="sd">        Map of feature name to coloring.</span>
+<span class="sd">    save_location</span>
+<span class="sd">        Location for output file (local path or S3 bucket).</span>
+<span class="sd">    save_key</span>
+<span class="sd">        Name key for output file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">figure</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">colors</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -405,7 +419,10 @@
         <span class="n">ax</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;PACMAP2&quot;</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">save_location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_figure</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span> <span class="n">save_key</span><span class="p">,</span> <span class="n">figure</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

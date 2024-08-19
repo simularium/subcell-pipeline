@@ -378,8 +378,8 @@ simulation series.</p>
 </section>
 <section id="visualize-compression-simulations">
 <h2>Visualize compression simulations<a class="headerlink" href="#visualize-compression-simulations" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">COMPRESSION_VELOCITY</span></code> simulation series compresses a single 500 nm actin
-fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with five
+<p>The <code class="docutils literal notranslate"><span class="pre">ACTIN_COMPRESSION_VELOCITY</span></code> simulation series compresses a single 500 nm
+actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with five
 replicates each.</p>
 <p>Iterate through all condition keys and replicates to load simulation output
 files and visualize them. If the visualization file for a given condition key
@@ -389,7 +389,7 @@ and replicate already exists and recalculate is False, visualization is skipped.
 <li><p>Output: <code class="docutils literal notranslate"><span class="pre">(series_name)/viz/(series_name)_(condition_key)_(seed).simularium</span></code></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Name of the simulation series</span>
-<span class="n">compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;COMPRESSION_VELOCITY&quot;</span>
+<span class="n">compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ACTIN_COMPRESSION_VELOCITY&quot;</span>
 
 <span class="c1"># List of condition file keys for each velocity</span>
 <span class="n">compression_condition_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;0047&quot;</span><span class="p">,</span> <span class="s2">&quot;0150&quot;</span><span class="p">,</span> <span class="s2">&quot;0470&quot;</span><span class="p">,</span> <span class="s2">&quot;1500&quot;</span><span class="p">]</span>
@@ -410,8 +410,8 @@ and replicate already exists and recalculate is False, visualization is skipped.
 </section>
 <section id="visualize-no-compression-simulations">
 <h2>Visualize no compression simulations<a class="headerlink" href="#visualize-no-compression-simulations" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">NO_COMPRESSION</span></code> simulation series simulates a single actin fiber with a
-free barbed end across five replicates.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ACTIN_NO_COMPRESSION</span></code> simulation series simulates a single actin fiber with
+a free barbed end across five replicates.</p>
 <p>Iterate through all replicates to load simulation output files and visualize
 them. If the visualization file for a given replicate already exists and
 recalculate is False, visualization is skipped.</p>
@@ -420,7 +420,7 @@ recalculate is False, visualization is skipped.</p>
 <li><p>Output: <code class="docutils literal notranslate"><span class="pre">(series_name)/viz/(series_name)_(seed).simularium</span></code></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Name of the simulation series</span>
-<span class="n">no_compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NO_COMPRESSION&quot;</span>
+<span class="n">no_compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ACTIN_NO_COMPRESSION&quot;</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">visualize_individual_cytosim_trajectories</span><span class="p">(</span>

@@ -337,7 +337,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.fiber_data.get_merged_data" title="subcell_pipeline.analysis.dimensionality_reduction.fiber_data.get_merged_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_merged_data</span></code></a>(bucket, series_name, ...[, ...])</p></td>
 <td><p>Load or create merged data for given conditions and random seeds.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed" title="subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_fibers_by_key_and_seed</span></code></a>(data)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed" title="subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_fibers_by_key_and_seed</span></code></a>(data[, ...])</p></td>
 <td><p>Plot simulated fiber data for each condition key and random seed.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#subcell_pipeline.analysis.dimensionality_reduction.fiber_data.reshape_fibers" title="subcell_pipeline.analysis.dimensionality_reduction.fiber_data.reshape_fibers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshape_fibers</span></code></a>(data)</p></td>
@@ -430,11 +430,15 @@ changed. For example, if the furthest point is (0.5, 0, 1), it is rotated to
 
 <dl class="py function">
 <dt class="sig sig-object py" id="subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed">
-<span class="sig-name descname"><span class="pre">plot_fibers_by_key_and_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/dimensionality_reduction/fiber_data.html#plot_fibers_by_key_and_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_fibers_by_key_and_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'aligned_fibers_by_key_and_seed.png'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/subcell_pipeline/analysis/dimensionality_reduction/fiber_data.html#plot_fibers_by_key_and_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#subcell_pipeline.analysis.dimensionality_reduction.fiber_data.plot_fibers_by_key_and_seed" title="Link to this definition">¶</a></dt>
 <dd><p>Plot simulated fiber data for each condition key and random seed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> – Simulated fiber data.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Simulated fiber data.</p></li>
+<li><p><strong>save_location</strong> – Location for output file (local path or S3 bucket).</p></li>
+<li><p><strong>save_key</strong> – Name key for output file.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

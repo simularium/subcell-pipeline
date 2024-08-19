@@ -449,7 +449,7 @@
 <a class="viewcode-back" href="../../../_summary/subcell_pipeline.visualization.combined_trajectory.html#subcell_pipeline.visualization.combined_trajectory.visualize_combined_trajectories">[docs]</a>
 <span class="k">def</span> <span class="nf">visualize_combined_trajectories</span><span class="p">(</span>
     <span class="n">buckets</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-    <span class="n">series_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">condition_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">replicates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">n_timepoints</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -467,8 +467,8 @@
 <span class="sd">    buckets</span>
 <span class="sd">        Names of S3 buckets for input and output files for each simulator and</span>
 <span class="sd">        visualization.</span>
-<span class="sd">    series_names</span>
-<span class="sd">        Names of simulation series for each simulator.</span>
+<span class="sd">    series_name</span>
+<span class="sd">        Name of simulation series.</span>
 <span class="sd">    condition_keys</span>
 <span class="sd">        List of condition keys.</span>
 <span class="sd">    replicates</span>
@@ -493,7 +493,6 @@
 
     <span class="k">for</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">simulator_colors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">bucket</span> <span class="o">=</span> <span class="n">buckets</span><span class="p">[</span><span class="n">simulator</span><span class="p">]</span>
-        <span class="n">series_name</span> <span class="o">=</span> <span class="n">series_names</span><span class="p">[</span><span class="n">simulator</span><span class="p">]</span>
 
         <span class="c1"># Load calculated compression metric data.</span>
         <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

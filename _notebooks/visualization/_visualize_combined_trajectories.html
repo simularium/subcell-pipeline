@@ -352,11 +352,8 @@ single actin fiber using <a class="reference external" href="https://simularium.
     <span class="s2">&quot;cytosim&quot;</span><span class="p">:</span> <span class="s2">&quot;s3://cytosim-working-bucket&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="c1"># Names of the simulation series for each simulator</span>
-<span class="n">series_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;readdy&quot;</span><span class="p">:</span> <span class="s2">&quot;ACTIN_COMPRESSION_VELOCITY&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cytosim&quot;</span><span class="p">:</span> <span class="s2">&quot;COMPRESSION_VELOCITY&quot;</span><span class="p">,</span>
-<span class="p">}</span>
+<span class="c1"># Name of the simulation series</span>
+<span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ACTIN_COMPRESSION_VELOCITY&quot;</span>
 
 <span class="c1"># List of condition file keys for each velocity</span>
 <span class="n">condition_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;0047&quot;</span><span class="p">,</span> <span class="s2">&quot;0150&quot;</span><span class="p">,</span> <span class="s2">&quot;0470&quot;</span><span class="p">,</span> <span class="s2">&quot;1500&quot;</span><span class="p">]</span>
@@ -398,7 +395,7 @@ Simularium.</p>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">visualize_combined_trajectories</span><span class="p">(</span>
     <span class="n">buckets</span><span class="p">,</span>
-    <span class="n">series_names</span><span class="p">,</span>
+    <span class="n">series_name</span><span class="p">,</span>
     <span class="n">condition_keys</span><span class="p">,</span>
     <span class="n">replicates</span><span class="p">,</span>
     <span class="n">n_timepoints</span><span class="p">,</span>

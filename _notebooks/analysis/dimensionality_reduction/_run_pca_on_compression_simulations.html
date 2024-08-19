@@ -363,11 +363,11 @@ the positive y axis, keeping x axis coordinates unchanged, before running PCA.</
 </div>
 <section id="define-simulation-conditions">
 <h2>Define simulation conditions<a class="headerlink" href="#define-simulation-conditions" title="Link to this heading">¶</a></h2>
-<p>Defines the <code class="docutils literal notranslate"><span class="pre">COMPRESSION_VELOCITY</span></code> simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each (random seeds 1, 2, 3, 4, and 5).</p>
+<p>Defines the <code class="docutils literal notranslate"><span class="pre">ACTIN_COMPRESSION_VELOCITY</span></code> simulation series, which compresses a
+single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150
+μm/s) with five replicates each (random seeds 1, 2, 3, 4, and 5).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Name of the simulation series</span>
-<span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;COMPRESSION_VELOCITY&quot;</span>
+<span class="n">series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ACTIN_COMPRESSION_VELOCITY&quot;</span>
 
 <span class="c1"># S3 bucket Cytosim for input and output files</span>
 <span class="n">cytosim_bucket</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;s3://cytosim-working-bucket&quot;</span>
@@ -391,9 +391,7 @@ five replicates each (random seeds 1, 2, 3, 4, and 5).</p>
 <p>Load merged simulation data from Cytosim and ReaDDy. Data is aligned in the
 yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 <code class="docutils literal notranslate"><span class="pre">align=False</span></code> to load un-aligned data instead.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">readdy_data</span> <span class="o">=</span> <span class="n">get_merged_data</span><span class="p">(</span>
-    <span class="n">readdy_bucket</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ACTIN_</span><span class="si">{</span><span class="n">series_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">condition_keys</span><span class="p">,</span> <span class="n">random_seeds</span>
-<span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">readdy_data</span> <span class="o">=</span> <span class="n">get_merged_data</span><span class="p">(</span><span class="n">readdy_bucket</span><span class="p">,</span> <span class="n">series_name</span><span class="p">,</span> <span class="n">condition_keys</span><span class="p">,</span> <span class="n">random_seeds</span><span class="p">)</span>
 <span class="n">readdy_data</span><span class="p">[</span><span class="s2">&quot;simulator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;readdy&quot;</span>
 </pre></div>
 </div>
@@ -423,14 +421,19 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 <span class="p">}</span>
 
 <span class="n">save_aligned_fibers</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">time_map</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;actin_compression_aligned_fibers.json&quot;</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">time_map</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;dimensionality_reduction/actin_compression_aligned_fibers.json&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="plot-aligned-fibers">
 <h2>Plot aligned fibers<a class="headerlink" href="#plot-aligned-fibers" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_fibers_by_key_and_seed</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_fibers_by_key_and_seed</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;dimensionality_reduction/actin_compression_aligned_fibers.png&quot;</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -442,7 +445,7 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 </section>
 <section id="save-pca-object">
 <h2>Save PCA object<a class="headerlink" href="#save-pca-object" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_pickle</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;actin_compression_pca.pkl&quot;</span><span class="p">,</span> <span class="n">pca</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_pickle</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;dimensionality_reduction/actin_compression_pca.pkl&quot;</span><span class="p">,</span> <span class="n">pca</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -451,7 +454,10 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 <p>The PCA results are saved with resampled rows, which shuffles the order of the
 entries. Pre-shuffled data is useful for scatter plots showing each individual</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_pca_results</span><span class="p">(</span>
-    <span class="n">pca_results</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;actin_compression_pca_results.csv&quot;</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">pca_results</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;dimensionality_reduction/actin_compression_pca_results.csv&quot;</span><span class="p">,</span>
+    <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -459,7 +465,9 @@ entries. Pre-shuffled data is useful for scatter plots showing each individual</
 <section id="save-pca-trajectories">
 <h2>Save PCA trajectories<a class="headerlink" href="#save-pca-trajectories" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_pca_trajectories</span><span class="p">(</span>
-    <span class="n">pca_results</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;actin_compression_pca_trajectories.json&quot;</span>
+    <span class="n">pca_results</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;dimensionality_reduction/actin_compression_pca_trajectories.json&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -471,7 +479,12 @@ entries. Pre-shuffled data is useful for scatter plots showing each individual</
     <span class="p">[</span><span class="o">-</span><span class="mi">600</span><span class="p">,</span> <span class="o">-</span><span class="mi">400</span><span class="p">,</span> <span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span>
 <span class="p">]</span>
 
-<span class="n">save_pca_transforms</span><span class="p">(</span><span class="n">pca</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span> <span class="s2">&quot;actin_compression_pca_transforms.json&quot;</span><span class="p">)</span>
+<span class="n">save_pca_transforms</span><span class="p">(</span>
+    <span class="n">pca</span><span class="p">,</span>
+    <span class="n">points</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;dimensionality_reduction/actin_compression_pca_transforms.json&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -492,13 +505,24 @@ entries. Pre-shuffled data is useful for scatter plots showing each individual</
     <span class="s2">&quot;REPEAT&quot;</span><span class="p">:</span> <span class="s2">&quot;viridis&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="n">plot_pca_feature_scatter</span><span class="p">(</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pca</span><span class="p">)</span>
+<span class="n">plot_pca_feature_scatter</span><span class="p">(</span>
+    <span class="n">pca_results</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">,</span>
+    <span class="n">pca</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;dimensionality_reduction/actin_compression_pca_feature_scatter.png&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="plot-pca-inverse-transform">
 <h2>Plot PCA inverse transform<a class="headerlink" href="#plot-pca-inverse-transform" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_pca_inverse_transform</span><span class="p">(</span><span class="n">pca</span><span class="p">,</span> <span class="n">pca_results</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_pca_inverse_transform</span><span class="p">(</span>
+    <span class="n">pca</span><span class="p">,</span>
+    <span class="n">pca_results</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;dimensionality_reduction/actin_compression_pca_inverse_transform.png&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </section>

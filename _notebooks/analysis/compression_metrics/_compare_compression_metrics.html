@@ -333,14 +333,13 @@ simulators. Currently supports comparison of Cytosim and ReaDDy simulations.</p>
 <li><p><a class="reference internal" href="#combine-metrics-from-both-simulators">Combine metrics from both simulators</a></p></li>
 <li><p><a class="reference internal" href="#save-combined-compression-metrics">Save combined compression metrics</a></p></li>
 <li><p><a class="reference internal" href="#plot-metrics-vs-time">Plot metrics vs time</a></p></li>
+<li><p><a class="reference internal" href="#plot-metrics-histograms">Plot metrics histograms</a></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">!=</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;This module is a notebook and is not meant to be imported&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">subcell_pipeline.analysis.compression_metrics.compression_analysis</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_compression_metric_data</span><span class="p">,</span>
@@ -355,13 +354,14 @@ simulators. Currently supports comparison of Cytosim and ReaDDy simulations.</p>
 </div>
 <section id="define-simulation-conditions">
 <h2>Define simulation conditions<a class="headerlink" href="#define-simulation-conditions" title="Link to this heading">¶</a></h2>
-<p>Defines the <code class="docutils literal notranslate"><span class="pre">COMPRESSION_VELOCITY</span></code> simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each and the baseline <code class="docutils literal notranslate"><span class="pre">NO_COMPRESSION</span></code> simulation series, which
-simulates a single actin fiber with a free barbed end across five replicates.</p>
+<p>Defines the <code class="docutils literal notranslate"><span class="pre">ACTIN_COMPRESSION_VELOCITY</span></code> simulation series, which compresses a
+single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150
+μm/s) with five replicates each and the baseline <code class="docutils literal notranslate"><span class="pre">ACTIN_NO_COMPRESSION</span></code>
+simulation series, which simulates a single actin fiber with a free barbed end
+across five replicates.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Name of the simulation series</span>
-<span class="n">compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;COMPRESSION_VELOCITY&quot;</span>
-<span class="n">no_compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NO_COMPRESSION&quot;</span>
+<span class="n">compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ACTIN_COMPRESSION_VELOCITY&quot;</span>
+<span class="n">no_compression_series_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ACTIN_NO_COMPRESSION&quot;</span>
 
 <span class="c1"># S3 bucket Cytosim for input and output files</span>
 <span class="n">cytosim_bucket</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;s3://cytosim-working-bucket&quot;</span>
@@ -375,13 +375,12 @@ simulates a single actin fiber with a free barbed end across five replicates.</p
 <span class="c1"># List of condition file keys for each velocity</span>
 <span class="n">condition_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;0047&quot;</span><span class="p">,</span> <span class="s2">&quot;0150&quot;</span><span class="p">,</span> <span class="s2">&quot;0470&quot;</span><span class="p">,</span> <span class="s2">&quot;1500&quot;</span><span class="p">]</span>
 
-<span class="c1"># Location to save plot of metrics vs time (local path)</span>
-<span class="n">save_location</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="s2">&quot;analysis_outputs&quot;</span>
-<span class="n">save_location</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Location to save analysis results (S3 bucket or local path)</span>
+<span class="n">save_location</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;s3://subcell-working-bucket&quot;</span>
 
 <span class="c1"># Specify whether the metrics should be recalculated. Set this to true if you</span>
 <span class="c1"># make changes to any metric calculation functions.</span>
-<span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 </div>
 </section>
@@ -430,7 +429,7 @@ simulates a single actin fiber with a free barbed end across five replicates.</p
 <h2>Calculate metrics for ReaDDy data<a class="headerlink" href="#calculate-metrics-for-readdy-data" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">readdy_metrics_compression</span> <span class="o">=</span> <span class="n">get_compression_metric_data</span><span class="p">(</span>
     <span class="n">bucket</span><span class="o">=</span><span class="n">readdy_bucket</span><span class="p">,</span>
-    <span class="n">series_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ACTIN_</span><span class="si">{</span><span class="n">compression_series_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">series_name</span><span class="o">=</span><span class="n">compression_series_name</span><span class="p">,</span>
     <span class="n">condition_keys</span><span class="o">=</span><span class="n">condition_keys</span><span class="p">,</span>
     <span class="n">random_seeds</span><span class="o">=</span><span class="n">random_seeds</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
@@ -441,7 +440,7 @@ simulates a single actin fiber with a free barbed end across five replicates.</p
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">readdy_metrics_no_compression</span> <span class="o">=</span> <span class="n">get_compression_metric_data</span><span class="p">(</span>
     <span class="n">bucket</span><span class="o">=</span><span class="n">readdy_bucket</span><span class="p">,</span>
-    <span class="n">series_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ACTIN_</span><span class="si">{</span><span class="n">no_compression_series_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">series_name</span><span class="o">=</span><span class="n">no_compression_series_name</span><span class="p">,</span>
     <span class="n">condition_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span>
     <span class="n">random_seeds</span><span class="o">=</span><span class="n">random_seeds</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
@@ -462,7 +461,9 @@ simulates a single actin fiber with a free barbed end across five replicates.</p
 <section id="save-combined-compression-metrics">
 <h2>Save combined compression metrics<a class="headerlink" href="#save-combined-compression-metrics" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">save_compression_metrics</span><span class="p">(</span>
-    <span class="n">combined_metrics</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_location</span><span class="p">),</span> <span class="s2">&quot;actin_compression_combined_metrics.csv&quot;</span>
+    <span class="n">combined_metrics</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="p">,</span>
+    <span class="s2">&quot;compression_metrics/actin_compression_combined_metrics.csv&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -472,16 +473,19 @@ simulates a single actin fiber with a free barbed end across five replicates.</p
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_metrics_vs_time</span><span class="p">(</span>
     <span class="n">df</span><span class="o">=</span><span class="n">combined_metrics</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
-    <span class="n">figure_path</span><span class="o">=</span><span class="n">save_location</span><span class="p">,</span>
-    <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_subsampled&quot;</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="o">=</span><span class="n">save_location</span><span class="p">,</span>
+    <span class="n">save_key_template</span><span class="o">=</span><span class="s2">&quot;compression_metrics/actin_compression_metrics_over_time_subsampled_</span><span class="si">%s</span><span class="s2">.png&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="plot-metrics-histograms">
+<h2>Plot metrics histograms<a class="headerlink" href="#plot-metrics-histograms" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_metric_distribution</span><span class="p">(</span>
     <span class="n">df</span><span class="o">=</span><span class="n">combined_metrics</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
-    <span class="n">figure_path</span><span class="o">=</span><span class="n">save_location</span><span class="p">,</span>
-    <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_subsampled&quot;</span><span class="p">,</span>
+    <span class="n">save_location</span><span class="o">=</span><span class="n">save_location</span><span class="p">,</span>
+    <span class="n">save_key_template</span><span class="o">=</span><span class="s2">&quot;compression_metrics/actin_compression_metrics_histograms_subsampled_</span><span class="si">%s</span><span class="s2">.png&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -533,6 +537,7 @@ simulates a single actin fiber with a free barbed end across five replicates.</p
 <li><a class="reference internal" href="#combine-metrics-from-both-simulators">Combine metrics from both simulators</a></li>
 <li><a class="reference internal" href="#save-combined-compression-metrics">Save combined compression metrics</a></li>
 <li><a class="reference internal" href="#plot-metrics-vs-time">Plot metrics vs time</a></li>
+<li><a class="reference internal" href="#plot-metrics-histograms">Plot metrics histograms</a></li>
 </ul>
 </li>
 </ul>
