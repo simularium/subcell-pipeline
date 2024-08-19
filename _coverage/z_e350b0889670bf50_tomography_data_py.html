@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">85 statements &nbsp;</span>
+            <span class="text">86 statements &nbsp;</span>
             <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">0<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">85<span class="text"> missing</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">86<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_c687de3d33debc05_log_data_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.3">coverage.py v7.5.3</a>,
-            created at 2024-08-09 15:19 +0000
+            created at 2024-08-19 18:39 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -82,7 +82,7 @@
 <main id="source">
     <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">"""Methods for analyzing tomography data."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="key">import</span> <span class="nam">os</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">typing</span> <span class="key">import</span> <span class="nam">Optional</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">import</span> <span class="nam">matplotlib</span><span class="op">.</span><span class="nam">pyplot</span> <span class="key">as</span> <span class="nam">plt</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">import</span> <span class="nam">numpy</span> <span class="key">as</span> <span class="nam">np</span>&nbsp;</span><span class="r"></span></p>
@@ -368,8 +368,8 @@
     <p class="pln"><span class="n"><a id="t286" href="#t286">286</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t287" href="#t287">287</a></span><span class="t"><span class="key">def</span> <span class="nam">plot_tomography_data_by_dataset</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t288" href="#t288">288</a></span><span class="t">    <span class="nam">data</span><span class="op">:</span> <span class="nam">pd</span><span class="op">.</span><span class="nam">DataFrame</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t289" href="#t289">289</a></span><span class="t">    <span class="nam">bucket</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t290" href="#t290">290</a></span><span class="t">    <span class="nam">output_key</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t289" href="#t289">289</a></span><span class="t">    <span class="nam">save_location</span><span class="op">:</span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t290" href="#t290">290</a></span><span class="t">    <span class="nam">save_key_template</span><span class="op">:</span> <span class="nam">str</span> <span class="op">=</span> <span class="str">"tomography_data_%s.png"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t291" href="#t291">291</a></span><span class="t"><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t292" href="#t292">292</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t293" href="#t293">293</a></span><span class="t"><span class="str">    Plot tomography data for each dataset.</span>&nbsp;</span><span class="r"></span></p>
@@ -378,13 +378,13 @@
     <p class="pln"><span class="n"><a id="t296" href="#t296">296</a></span><span class="t"><span class="str">    ----------</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t297" href="#t297">297</a></span><span class="t"><span class="str">    data</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t298" href="#t298">298</a></span><span class="t"><span class="str">        Tomography data.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t299" href="#t299">299</a></span><span class="t"><span class="str">    bucket</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t300" href="#t300">300</a></span><span class="t"><span class="str">        Where to upload the results.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t301" href="#t301">301</a></span><span class="t"><span class="str">    output_key</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t302" href="#t302">302</a></span><span class="t"><span class="str">        File key for results.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t299" href="#t299">299</a></span><span class="t"><span class="str">    save_location</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t300" href="#t300">300</a></span><span class="t"><span class="str">        Location for output file (local path or S3 bucket).</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t301" href="#t301">301</a></span><span class="t"><span class="str">    save_key_template</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t302" href="#t302">302</a></span><span class="t"><span class="str">        Name key template for output file.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t303" href="#t303">303</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t304" href="#t304">304</a></span><span class="t">    <span class="key">for</span> <span class="nam">dataset</span><span class="op">,</span> <span class="nam">group</span> <span class="key">in</span> <span class="nam">data</span><span class="op">.</span><span class="nam">groupby</span><span class="op">(</span><span class="str">"dataset"</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t305" href="#t305">305</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t304" href="#t304">304</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t305" href="#t305">305</a></span><span class="t">    <span class="key">for</span> <span class="nam">dataset</span><span class="op">,</span> <span class="nam">group</span> <span class="key">in</span> <span class="nam">data</span><span class="op">.</span><span class="nam">groupby</span><span class="op">(</span><span class="str">"dataset"</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t306" href="#t306">306</a></span><span class="t">        <span class="nam">figure</span><span class="op">,</span> <span class="nam">ax</span> <span class="op">=</span> <span class="nam">plt</span><span class="op">.</span><span class="nam">subplots</span><span class="op">(</span><span class="num">1</span><span class="op">,</span> <span class="num">3</span><span class="op">,</span> <span class="nam">figsize</span><span class="op">=</span><span class="op">(</span><span class="num">6</span><span class="op">,</span> <span class="num">2</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t307" href="#t307">307</a></span><span class="t">        <span class="nam">ax</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="op">.</span><span class="nam">set_title</span><span class="op">(</span><span class="nam">dataset</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t308" href="#t308">308</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -400,8 +400,9 @@
     <p class="mis show_mis"><span class="n"><a id="t318" href="#t318">318</a></span><span class="t">            <span class="nam">ax</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="op">.</span><span class="nam">plot</span><span class="op">(</span><span class="nam">fiber</span><span class="op">[</span><span class="str">"xpos"</span><span class="op">]</span><span class="op">,</span> <span class="nam">fiber</span><span class="op">[</span><span class="str">"zpos"</span><span class="op">]</span><span class="op">,</span> <span class="nam">marker</span><span class="op">=</span><span class="str">"o"</span><span class="op">,</span> <span class="nam">ms</span><span class="op">=</span><span class="num">1</span><span class="op">,</span> <span class="nam">lw</span><span class="op">=</span><span class="num">1</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t319" href="#t319">319</a></span><span class="t">            <span class="nam">ax</span><span class="op">[</span><span class="num">2</span><span class="op">]</span><span class="op">.</span><span class="nam">plot</span><span class="op">(</span><span class="nam">fiber</span><span class="op">[</span><span class="str">"ypos"</span><span class="op">]</span><span class="op">,</span> <span class="nam">fiber</span><span class="op">[</span><span class="str">"zpos"</span><span class="op">]</span><span class="op">,</span> <span class="nam">marker</span><span class="op">=</span><span class="str">"o"</span><span class="op">,</span> <span class="nam">ms</span><span class="op">=</span><span class="num">1</span><span class="op">,</span> <span class="nam">lw</span><span class="op">=</span><span class="num">1</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t320" href="#t320">320</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t321" href="#t321">321</a></span><span class="t">        <span class="nam">base_name</span><span class="op">,</span> <span class="nam">ext</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">splitext</span><span class="op">(</span><span class="nam">output_key</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t322" href="#t322">322</a></span><span class="t">        <span class="nam">save_figure</span><span class="op">(</span><span class="nam">bucket</span><span class="op">,</span> <span class="str">f"{base_name}_{dataset}.{ext}"</span><span class="op">,</span> <span class="nam">figure</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t321" href="#t321">321</a></span><span class="t">        <span class="key">if</span> <span class="nam">save_location</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t322" href="#t322">322</a></span><span class="t">            <span class="nam">save_key</span> <span class="op">=</span> <span class="nam">save_key_template</span> <span class="op">%</span> <span class="nam">dataset</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t323" href="#t323">323</a></span><span class="t">            <span class="nam">save_figure</span><span class="op">(</span><span class="nam">save_location</span><span class="op">,</span> <span class="nam">save_key</span><span class="op">,</span> <span class="nam">figure</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -411,7 +412,7 @@
             <a class="nav" href="z_c687de3d33debc05_log_data_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.3">coverage.py v7.5.3</a>,
-            created at 2024-08-09 15:19 +0000
+            created at 2024-08-19 18:39 +0000
         </p>
     </div>
 </footer>
