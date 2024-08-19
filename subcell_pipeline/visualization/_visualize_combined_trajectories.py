@@ -37,11 +37,8 @@ buckets: dict[str, str] = {
     "cytosim": "s3://cytosim-working-bucket",
 }
 
-# Names of the simulation series for each simulator
-series_names: dict[str, str] = {
-    "readdy": "ACTIN_COMPRESSION_VELOCITY",
-    "cytosim": "COMPRESSION_VELOCITY",
-}
+# Name of the simulation series
+series_name: str = "ACTIN_COMPRESSION_VELOCITY"
 
 # List of condition file keys for each velocity
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
@@ -86,7 +83,7 @@ Simularium.
 # %%
 visualize_combined_trajectories(
     buckets,
-    series_names,
+    series_name,
     condition_keys,
     replicates,
     n_timepoints,

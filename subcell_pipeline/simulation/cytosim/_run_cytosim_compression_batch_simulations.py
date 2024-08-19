@@ -60,14 +60,14 @@ from preconfig import Preconfig  # noqa: E402
 """
 ## Define simulation conditions
 
-Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each (random seeds 1, 2, 3, 4, and 5).
+Defines the `ACTIN_COMPRESSION_VELOCITY` simulation series, which compresses a
+single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150
+μm/s) with five replicates each (random seeds 1, 2, 3, 4, and 5).
 """
 
 # %%
 # Name of the simulation series
-series_name: str = "COMPRESSION_VELOCITY"
+series_name: str = "ACTIN_COMPRESSION_VELOCITY"
 
 # S3 bucket for input and output files
 bucket: str = "s3://cytosim-working-bucket"

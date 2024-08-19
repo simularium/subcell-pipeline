@@ -1,7 +1,10 @@
 """Methods for dimensionality reduction using PaCMAP."""
 
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import pandas as pd
+from io_collection.save.save_figure import save_figure
 from pacmap import PaCMAP
 
 from subcell_pipeline.analysis.dimensionality_reduction.fiber_data import reshape_fibers
@@ -39,7 +42,12 @@ def run_pacmap(data: pd.DataFrame) -> tuple[pd.DataFrame, PaCMAP]:
     return pacmap_results, pacmap
 
 
-def plot_pacmap_feature_scatter(data: pd.DataFrame, features: dict) -> None:
+def plot_pacmap_feature_scatter(
+    data: pd.DataFrame,
+    features: dict,
+    save_location: Optional[str] = None,
+    save_key: str = "pacmap_feature_scatter.png",
+) -> None:
     """
     Plot scatter of PaCMAP embedding colored by the given features.
 
@@ -49,9 +57,15 @@ def plot_pacmap_feature_scatter(data: pd.DataFrame, features: dict) -> None:
         PaCMAP results data.
     features
         Map of feature name to coloring.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
     """
 
-    _, ax = plt.subplots(1, len(features), figsize=(10, 3), sharey=True, sharex=True)
+    figure, ax = plt.subplots(
+        1, len(features), figsize=(10, 3), sharey=True, sharex=True
+    )
 
     for index, (feature, colors) in enumerate(features.items()):
         if isinstance(colors, dict):
@@ -84,3 +98,6 @@ def plot_pacmap_feature_scatter(data: pd.DataFrame, features: dict) -> None:
 
     plt.tight_layout()
     plt.show()
+
+    if save_location is not None:
+        save_figure(save_location, save_key, figure)

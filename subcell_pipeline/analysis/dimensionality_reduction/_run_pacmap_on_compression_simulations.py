@@ -36,14 +36,14 @@ from subcell_pipeline.analysis.dimensionality_reduction.pacmap_dim_reduction imp
 """
 ## Define simulation conditions
 
-Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each (random seeds 1, 2, 3, 4, and 5).
+Defines the `ACTIN_COMPRESSION_VELOCITY` simulation series, which compresses a
+single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150
+μm/s) with five replicates each (random seeds 1, 2, 3, 4, and 5).
 """
 
 # %%
 # Name of the simulation series
-series_name: str = "COMPRESSION_VELOCITY"
+series_name: str = "ACTIN_COMPRESSION_VELOCITY"
 
 # S3 bucket Cytosim for input and output files
 cytosim_bucket: str = "s3://cytosim-working-bucket"
@@ -57,6 +57,9 @@ random_seeds: list[int] = [1, 2, 3, 4, 5]
 # List of condition file keys for each velocity
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
+# Location to save analysis results (S3 bucket or local path)
+save_location: str = "s3://subcell-working-bucket"
+
 # %% [markdown]
 """
 ## Load merged data
@@ -67,9 +70,7 @@ yz-plane to the positive y axis, keeping x axis coordinates unchanged. Set
 """
 
 # %%
-readdy_data = get_merged_data(
-    readdy_bucket, f"ACTIN_{series_name}", condition_keys, random_seeds
-)
+readdy_data = get_merged_data(readdy_bucket, series_name, condition_keys, random_seeds)
 readdy_data["simulator"] = "readdy"
 
 # %%
@@ -89,7 +90,9 @@ data["velocity"] = data["key"].astype("int") / 10
 """
 
 # %%
-plot_fibers_by_key_and_seed(data)
+plot_fibers_by_key_and_seed(
+    data, save_location, "dimensionality_reduction/actin_compression_aligned_fibers.png"
+)
 
 # %% [markdown]
 """
@@ -120,4 +123,9 @@ features = {
     "REPEAT": "viridis",
 }
 
-plot_pacmap_feature_scatter(pacmap_results, features)
+plot_pacmap_feature_scatter(
+    pacmap_results,
+    features,
+    save_location,
+    "dimensionality_reduction/actin_compression_pacmap_feature_scatter.png",
+)

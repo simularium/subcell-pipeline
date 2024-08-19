@@ -64,8 +64,8 @@ metrics = [
 """
 ## Visualize compression simulations
 
-The `COMPRESSION_VELOCITY` simulation series compresses a single 500 nm actin
-fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with five
+The `ACTIN_COMPRESSION_VELOCITY` simulation series compresses a single 500 nm
+actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with five
 replicates each.
 
 Iterate through all condition keys and replicates to load simulation output
@@ -78,7 +78,7 @@ and replicate already exists and recalculate is False, visualization is skipped.
 
 # %%
 # Name of the simulation series
-compression_series_name: str = "COMPRESSION_VELOCITY"
+compression_series_name: str = "ACTIN_COMPRESSION_VELOCITY"
 
 # List of condition file keys for each velocity
 compression_condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
@@ -99,8 +99,8 @@ visualize_individual_cytosim_trajectories(
 """
 ## Visualize no compression simulations
 
-The `NO_COMPRESSION` simulation series simulates a single actin fiber with a
-free barbed end across five replicates.
+The `ACTIN_NO_COMPRESSION` simulation series simulates a single actin fiber with
+a free barbed end across five replicates.
 
 Iterate through all replicates to load simulation output files and visualize
 them. If the visualization file for a given replicate already exists and
@@ -112,7 +112,7 @@ recalculate is False, visualization is skipped.
 
 # %%
 # Name of the simulation series
-no_compression_series_name: str = "NO_COMPRESSION"
+no_compression_series_name: str = "ACTIN_NO_COMPRESSION"
 
 # %%
 visualize_individual_cytosim_trajectories(

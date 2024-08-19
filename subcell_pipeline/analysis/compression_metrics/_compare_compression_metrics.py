@@ -13,6 +13,7 @@ simulators. Currently supports comparison of Cytosim and ReaDDy simulations.
 - [Combine metrics from both simulators](#combine-metrics-from-both-simulators)
 - [Save combined compression metrics](#save-combined-compression-metrics)
 - [Plot metrics vs time](#plot-metrics-vs-time)
+- [Plot metrics histograms](#plot-metrics-histograms)
 """
 
 # %%
@@ -20,8 +21,6 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
-from pathlib import Path
-
 import pandas as pd
 
 from subcell_pipeline.analysis.compression_metrics.compression_analysis import (
@@ -38,16 +37,17 @@ from subcell_pipeline.analysis.compression_metrics.compression_metric import (
 """
 ## Define simulation conditions
 
-Defines the `COMPRESSION_VELOCITY` simulation series, which compresses a single
-500 nm actin fiber at four different velocities (4.7, 15, 47, and 150 μm/s) with
-five replicates each and the baseline `NO_COMPRESSION` simulation series, which
-simulates a single actin fiber with a free barbed end across five replicates.
+Defines the `ACTIN_COMPRESSION_VELOCITY` simulation series, which compresses a
+single 500 nm actin fiber at four different velocities (4.7, 15, 47, and 150
+μm/s) with five replicates each and the baseline `ACTIN_NO_COMPRESSION`
+simulation series, which simulates a single actin fiber with a free barbed end
+across five replicates.
 """
 
 # %%
 # Name of the simulation series
-compression_series_name: str = "COMPRESSION_VELOCITY"
-no_compression_series_name: str = "NO_COMPRESSION"
+compression_series_name: str = "ACTIN_COMPRESSION_VELOCITY"
+no_compression_series_name: str = "ACTIN_NO_COMPRESSION"
 
 # S3 bucket Cytosim for input and output files
 cytosim_bucket: str = "s3://cytosim-working-bucket"
@@ -61,13 +61,12 @@ random_seeds: list[int] = [1, 2, 3, 4, 5]
 # List of condition file keys for each velocity
 condition_keys: list[str] = ["0047", "0150", "0470", "1500"]
 
-# Location to save plot of metrics vs time (local path)
-save_location: Path = Path(__file__).parents[3] / "analysis_outputs"
-save_location.mkdir(parents=True, exist_ok=True)
+# Location to save analysis results (S3 bucket or local path)
+save_location: str = "s3://subcell-working-bucket"
 
 # Specify whether the metrics should be recalculated. Set this to true if you
 # make changes to any metric calculation functions.
-recalculate: bool = True
+recalculate: bool = False
 
 # %% [markdown]
 """
@@ -123,7 +122,7 @@ cytosim_metrics_no_compression["simulator"] = "cytosim"
 # %%
 readdy_metrics_compression = get_compression_metric_data(
     bucket=readdy_bucket,
-    series_name=f"ACTIN_{compression_series_name}",
+    series_name=compression_series_name,
     condition_keys=condition_keys,
     random_seeds=random_seeds,
     metrics=metrics,
@@ -134,7 +133,7 @@ readdy_metrics_compression["simulator"] = "readdy"
 # %%
 readdy_metrics_no_compression = get_compression_metric_data(
     bucket=readdy_bucket,
-    series_name=f"ACTIN_{no_compression_series_name}",
+    series_name=no_compression_series_name,
     condition_keys=[""],
     random_seeds=random_seeds,
     metrics=metrics,
@@ -159,7 +158,9 @@ combined_metrics["velocity"] = combined_metrics["key"].astype("int") / 10
 
 # %%
 save_compression_metrics(
-    combined_metrics, str(save_location), "actin_compression_combined_metrics.csv"
+    combined_metrics,
+    save_location,
+    "compression_metrics/actin_compression_combined_metrics.csv",
 )
 
 # %% [markdown]
@@ -171,14 +172,19 @@ save_compression_metrics(
 plot_metrics_vs_time(
     df=combined_metrics,
     metrics=metrics,
-    figure_path=save_location,
-    suffix="_subsampled",
+    save_location=save_location,
+    save_key_template="compression_metrics/actin_compression_metrics_over_time_subsampled_%s.png",
 )
+
+# %% [markdown]
+"""
+## Plot metrics histograms
+"""
 
 # %%
 plot_metric_distribution(
     df=combined_metrics,
     metrics=metrics,
-    figure_path=save_location,
-    suffix="_subsampled",
+    save_location=save_location,
+    save_key_template="compression_metrics/actin_compression_metrics_histograms_subsampled_%s.png",
 )

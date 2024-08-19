@@ -1,11 +1,13 @@
 """Methods for dimensionality reduction using PCA."""
 
 import random
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from io_collection.save.save_dataframe import save_dataframe
+from io_collection.save.save_figure import save_figure
 from io_collection.save.save_json import save_json
 from sklearn.decomposition import PCA
 
@@ -149,7 +151,13 @@ def save_pca_transforms(
     save_json(save_location, save_key, output)
 
 
-def plot_pca_feature_scatter(data: pd.DataFrame, features: dict, pca: PCA) -> None:
+def plot_pca_feature_scatter(
+    data: pd.DataFrame,
+    features: dict,
+    pca: PCA,
+    save_location: Optional[str] = None,
+    save_key: str = "pca_feature_scatter.png",
+) -> None:
     """
     Plot scatter of PCA components colored by the given features.
 
@@ -161,9 +169,15 @@ def plot_pca_feature_scatter(data: pd.DataFrame, features: dict, pca: PCA) -> No
         Map of feature name to coloring.
     pca
         PCA object.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
     """
 
-    _, ax = plt.subplots(1, len(features), figsize=(10, 3), sharey=True, sharex=True)
+    figure, ax = plt.subplots(
+        1, len(features), figsize=(10, 3), sharey=True, sharex=True
+    )
 
     for index, (feature, colors) in enumerate(features.items()):
         if isinstance(colors, dict):
@@ -197,8 +211,16 @@ def plot_pca_feature_scatter(data: pd.DataFrame, features: dict, pca: PCA) -> No
     plt.tight_layout()
     plt.show()
 
+    if save_location is not None:
+        save_figure(save_location, save_key, figure)
 
-def plot_pca_inverse_transform(pca: PCA, pca_results: pd.DataFrame) -> None:
+
+def plot_pca_inverse_transform(
+    pca: PCA,
+    pca_results: pd.DataFrame,
+    save_location: Optional[str] = None,
+    save_key: str = "pca_inverse_transform.png",
+) -> None:
     """
     Plot inverse transform of PCA.
 
@@ -208,9 +230,13 @@ def plot_pca_inverse_transform(pca: PCA, pca_results: pd.DataFrame) -> None:
         PCA object.
     pca_results
         PCA results data.
+    save_location
+        Location for output file (local path or S3 bucket).
+    save_key
+        Name key for output file.
     """
 
-    _, ax = plt.subplots(2, 3, figsize=(10, 6))
+    figure, ax = plt.subplots(2, 3, figsize=(10, 6))
 
     points = np.arange(-2, 2, 0.5)
     stdev_pc1 = pca_results["PCA1"].std(ddof=0)
@@ -244,3 +270,6 @@ def plot_pca_inverse_transform(pca: PCA, pca_results: pd.DataFrame) -> None:
 
     plt.tight_layout()
     plt.show()
+
+    if save_location is not None:
+        save_figure(save_location, save_key, figure)

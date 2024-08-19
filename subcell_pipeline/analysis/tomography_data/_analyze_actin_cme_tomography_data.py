@@ -98,7 +98,7 @@ unbranched_df = get_unbranched_tomography_data(
 
 # %%
 plot_tomography_data_by_dataset(
-    branched_df, bucket, f"{name}/{name}_plots_branched.png"
+    branched_df, bucket, f"{name}/{name}_plots_branched_%s.png"
 )
 
 # %% [markdown]
@@ -108,7 +108,7 @@ plot_tomography_data_by_dataset(
 
 # %%
 plot_tomography_data_by_dataset(
-    unbranched_df, bucket, f"{name}/{name}_plots_unbranched.png"
+    unbranched_df, bucket, f"{name}/{name}_plots_unbranched_%s.png"
 )
 
 # %% [markdown]
@@ -156,5 +156,5 @@ sampled_data = sample_tomography_data(
 
 # %%
 plot_tomography_data_by_dataset(
-    sampled_data, bucket, f"{name}/{name}_plots_all_sampled.png"
+    sampled_data, bucket, f"{name}/{name}_plots_all_sampled_%s.png"
 )
