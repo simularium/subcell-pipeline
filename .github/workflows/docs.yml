@@ -87,7 +87,7 @@ jobs:
       with:
         file: docs/_badges/license.svg
         label: license
-        value: Apache-2.0
+        value: BSD-3-Clause
         color: yellowgreen
         template: docs/_badges/template.svg
         overwrite: true
