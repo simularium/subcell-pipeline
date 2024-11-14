@@ -73,6 +73,7 @@ Each analysis type contains a README with additional information:
 
 - [analysis.compression_metrics](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/compression_metrics) -- Analysis and plotting for compression metrics on individual fiber shapes
 - [analysis.dimensionality_reduction](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/dimensionality_reduction) -- Analysis and plotting for dimensionality reduction on individual fiber shapes
+- [analysis.persistence_length](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/persistence_length) -- Analysis and plotting for persistence length on individual fiber shapes for the uncompressed series
 - [analysis.tomography_data](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/tomography_data) -- Processing and analysis of cryo-electron tomography data
 - [analysis.wall_clock_time](https://github.com/simularium/subcell-pipeline/blob/main/subcell_pipeline/analysis/wall_clock_time) -- Analysis of simulation wall clock times
 
