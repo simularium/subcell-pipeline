@@ -18,14 +18,15 @@ if __name__ != "__main__":
 
 # %%
 from subcell_pipeline.analysis.persistence_length.persistence_length import (
-    get_persistence_length_data, plot_persistence_length
+    get_persistence_length_data,
+    plot_persistence_length,
 )
 
 # %% [markdown]
 """
 ## Define parameters
 
-Calculate persistence length using the baseline `ACTIN_NO_COMPRESSION` simulation series, 
+Calculate persistence length using the `ACTIN_NO_COMPRESSION` simulation series, 
 which simulates a single actin fiber with a free barbed end across five replicates.
 """
 
