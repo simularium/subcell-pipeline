@@ -17,8 +17,11 @@ if __name__ != "__main__":
     raise ImportError("This module is a notebook and is not meant to be imported")
 
 # %%
+import numpy as np
+
 from subcell_pipeline.analysis.persistence_length.persistence_length import (
     get_persistence_length_data,
+    report_persistence_length_statistics,
     plot_persistence_length,
 )
 
@@ -72,6 +75,24 @@ pl_data_readdy = get_persistence_length_data(
     random_seeds=random_seeds,
 )
 
+# %% [markdown]
+"""
+## Calculate statistics on persistence length
+"""
+skip_fraction = 0.33  # skip first third to avoid any fibers that are still relaxing
+readdy_mean, readdy_median, readdy_std = report_persistence_length_statistics(
+    pl_data_readdy, skip_fraction
+)
+cytosim_mean, cytosim_median, cytosim_std = report_persistence_length_statistics(
+    pl_data_cytosim, skip_fraction
+)
+print(
+    "Persistence length statistics:\n"
+    f"Cytosim mean = {cytosim_mean}, median = {cytosim_median}, stddev = {cytosim_std}\n"
+    f"ReaDDy mean = {readdy_mean}, median = {readdy_median}, stddev = {readdy_std}"
+)
+
+# %%
 # %% [markdown]
 """
 ## Plot persistence length

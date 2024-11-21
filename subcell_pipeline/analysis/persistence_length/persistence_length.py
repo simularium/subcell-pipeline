@@ -97,6 +97,33 @@ def calculate_persistence_lengths(df: pd.DataFrame) -> list[float]:
     return result
 
 
+def report_persistence_length_statistics(
+    data: dict[str, list[float]],
+    skip_fraction: float = 0.33,
+) -> tuple[float, float, float]:
+    """
+    Report mean, median, and standard deviation for persistence length data.
+
+    Parameters
+    ----------
+    data
+        Persistence length results for each trajectory at each time.
+    skip_fraction
+        Fraction of the beginning of the trajectory to skip.
+    
+    Returns
+    -------
+    :
+        Tuple of floats for mean, median, and std dev.
+    """
+    start_ix = -1
+    samples = []
+    for run_name in data:
+        start_ix = round( skip_fraction * len(data[run_name]) ) if start_ix < 0 else start_ix
+        samples += data[run_name][start_ix:]
+    return np.mean(samples), np.median(samples), np.std(samples)
+
+
 def plot_persistence_length(
     data: dict[str, list[float]],
     save_location: str,
