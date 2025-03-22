@@ -71,6 +71,7 @@ def setup_parameters(args):
 
 def config_init_conditions(actin_simulation):
     actin_simulation.add_obstacles()
+    actin_simulation.add_membrane()
     actin_simulation.add_random_monomers()
     actin_simulation.add_random_linear_fibers(use_uuids=False)
     longitudinal_bonds = bool(actin_simulation.parameters.get("longitudinal_bonds", True))
@@ -126,6 +127,42 @@ def display_data(parameters) -> dict[str, DisplayData]:
             name="obstacle",
             display_type=DISPLAY_TYPE.SPHERE,
             radius=float(parameters["obstacle_radius"]),
+            color="#8460bb",
+        ),
+        "membrane#outer": DisplayData(
+            name="membrane#outer",
+            display_type=DISPLAY_TYPE.SPHERE,
+            radius=float(parameters["membrane_particle_radius"]),
+            color="#8460bb",
+        ),
+        "membrane#inner": DisplayData(
+            name="membrane#inner",
+            display_type=DISPLAY_TYPE.SPHERE,
+            radius=float(parameters["membrane_particle_radius"]),
+            color="#8460bb",
+        ),
+        "membrane#outer_edge_4_1": DisplayData(
+            name="membrane#outer_edge_4_1",
+            display_type=DISPLAY_TYPE.SPHERE,
+            radius=float(parameters["membrane_particle_radius"]),
+            color="#8460bb",
+        ),
+        "membrane#outer_edge_2_3": DisplayData(
+            name="membrane#outer_edge_2_3",
+            display_type=DISPLAY_TYPE.SPHERE,
+            radius=float(parameters["membrane_particle_radius"]),
+            color="#8460bb",
+        ),
+        "membrane#inner_edge_4_1": DisplayData(
+            name="membrane#inner_edge_4_1",
+            display_type=DISPLAY_TYPE.SPHERE,
+            radius=float(parameters["membrane_particle_radius"]),
+            color="#8460bb",
+        ),
+        "membrane#inner_edge_2_3": DisplayData(
+            name="membrane#inner_edge_2_3",
+            display_type=DISPLAY_TYPE.SPHERE,
+            radius=float(parameters["membrane_particle_radius"]),
             color="#8460bb",
         ),
         "actin#free": DisplayData(
@@ -320,6 +357,21 @@ def display_data(parameters) -> dict[str, DisplayData]:
                 ),
             },
         )
+    for n in range(1, 5):
+        result.update({
+            f"membrane#outer_edge_{n}": DisplayData(
+                name=f"membrane#outer_edge_{n}",
+                display_type=DISPLAY_TYPE.SPHERE,
+                radius=float(parameters["membrane_particle_radius"]),
+                color="#8460bb",
+            ),
+            f"membrane#inner_edge_{n}": DisplayData(
+                name=f"membrane#inner_edge_{n}",
+                display_type=DISPLAY_TYPE.SPHERE,
+                radius=float(parameters["membrane_particle_radius"]),
+                color="#8460bb",
+            )
+        })
     return result
     
     
