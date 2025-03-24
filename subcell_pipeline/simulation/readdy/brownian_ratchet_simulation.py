@@ -142,25 +142,25 @@ def display_data(parameters) -> dict[str, DisplayData]:
             color="#8460bb",
         ),
         "membrane#outer_edge_4_1": DisplayData(
-            name="membrane#outer_edge_4_1",
+            name="membrane#outer_edge",
             display_type=DISPLAY_TYPE.SPHERE,
             radius=float(parameters["membrane_particle_radius"]),
             color="#8460bb",
         ),
         "membrane#outer_edge_2_3": DisplayData(
-            name="membrane#outer_edge_2_3",
+            name="membrane#outer_edge",
             display_type=DISPLAY_TYPE.SPHERE,
             radius=float(parameters["membrane_particle_radius"]),
             color="#8460bb",
         ),
         "membrane#inner_edge_4_1": DisplayData(
-            name="membrane#inner_edge_4_1",
+            name="membrane#inner_edge",
             display_type=DISPLAY_TYPE.SPHERE,
             radius=float(parameters["membrane_particle_radius"]),
             color="#8460bb",
         ),
         "membrane#inner_edge_2_3": DisplayData(
-            name="membrane#inner_edge_2_3",
+            name="membrane#inner_edge",
             display_type=DISPLAY_TYPE.SPHERE,
             radius=float(parameters["membrane_particle_radius"]),
             color="#8460bb",
@@ -360,13 +360,13 @@ def display_data(parameters) -> dict[str, DisplayData]:
     for n in range(1, 5):
         result.update({
             f"membrane#outer_edge_{n}": DisplayData(
-                name=f"membrane#outer_edge_{n}",
+                name=f"membrane#outer_edge",
                 display_type=DISPLAY_TYPE.SPHERE,
                 radius=float(parameters["membrane_particle_radius"]),
                 color="#8460bb",
             ),
             f"membrane#inner_edge_{n}": DisplayData(
-                name=f"membrane#inner_edge_{n}",
+                name=f"membrane#inner_edge",
                 display_type=DISPLAY_TYPE.SPHERE,
                 radius=float(parameters["membrane_particle_radius"]),
                 color="#8460bb",
