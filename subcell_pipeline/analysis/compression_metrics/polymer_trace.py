@@ -55,6 +55,24 @@ def get_end_to_end_axis_distances_and_projections(
     return perp_distances, scaled_projections, projection_positions
 
 
+def get_end_to_end_distance(polymer_trace: np.ndarray) -> float:
+    """
+    Calculate end-to-end distance of polymer trace.
+
+    Parameters
+    ----------
+    polymer_trace
+        Array containing the x,y,z positions of the polymer trace.
+
+    Returns
+    -------
+    :
+        End-to-end distance
+    """
+
+    return np.linalg.norm(polymer_trace[-1] - polymer_trace[0]).item()
+
+
 def get_average_distance_from_end_to_end_axis(
     polymer_trace: np.ndarray, **options: dict[str, Any]
 ) -> float:
