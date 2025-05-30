@@ -75,6 +75,7 @@ def config_init_conditions(actin_simulation):
     actin_simulation.add_random_monomers()
     actin_simulation.add_random_linear_fibers(use_uuids=False)
     longitudinal_bonds = bool(actin_simulation.parameters.get("longitudinal_bonds", True))
+    barbed_binding_site = bool(actin_simulation.parameters.get("barbed_binding_site", False))
     if bool(actin_simulation.parameters.get("orthogonal_seed", False)):
         print("Starting with orthogonal seed")
         monomers = ActinGenerator.get_monomers(
@@ -91,12 +92,19 @@ def config_init_conditions(actin_simulation):
             use_uuids=False, 
             start_normal=np.array([0., 1., 0.]), 
             longitudinal_bonds=longitudinal_bonds,
+            barbed_binding_site=barbed_binding_site,
         )
-        monomers = ActinGenerator.setup_fixed_monomers(monomers, actin_simulation.parameters)
-        actin_simulation.add_monomers_from_data(monomers)
+        monomers = ActinGenerator.setup_fixed_monomers(
+            monomers, 
+            actin_simulation.parameters["orthogonal_seed"],
+            int(actin_simulation.parameters["n_fixed_monomers_pointed"]),
+            int(actin_simulation.parameters["n_fixed_monomers_barbed"]),
+        )
+        ReaddyUtil.add_monomers_from_data(actin_simulation.simulation, monomers)
     if bool(actin_simulation.parameters.get("branched_seed", False)):
         print("Starting with branched seed")
-        actin_simulation.add_monomers_from_data(
+        ReaddyUtil.add_monomers_from_data(
+            actin_simulation.simulation, 
             ActinGenerator.get_monomers(
                 fibers_data=ActinTestData.simple_branched_actin_fiber(),
                 use_uuids=False,
@@ -259,6 +267,12 @@ def display_data(parameters) -> dict[str, DisplayData]:
     for i in range(1, n_polymer_numbers + 1):
         result.update(
             {
+                f"binding_site#{i}": DisplayData(
+                    name="binding_site",
+                    display_type=DISPLAY_TYPE.SPHERE,
+                    radius=0.25,
+                    color="#ffffff",
+                ),
                 f"actin#{i}": DisplayData(
                     name="actin",
                     display_type=DISPLAY_TYPE.SPHERE,
