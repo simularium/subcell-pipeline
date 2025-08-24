@@ -78,13 +78,14 @@ def config_init_conditions(actin_simulation):
     barbed_binding_site = bool(actin_simulation.parameters.get("barbed_binding_site", False))
     if bool(actin_simulation.parameters.get("orthogonal_seed", False)):
         print("Starting with orthogonal seed")
+        seed_length = float(actin_simulation.parameters.get("orthogonal_seed_length", 50.0))
         monomers = ActinGenerator.get_monomers(
             fibers_data=[
                 FiberData(
                     28,
                     [
-                        np.array([-25, 0, 0]),
-                        np.array([25, 0, 0]),
+                        np.array([-0.5 * seed_length, 0, 0]),
+                        np.array([0.5 * seed_length, 0, 0]),
                     ],
                     "Actin-Polymer",
                 )
